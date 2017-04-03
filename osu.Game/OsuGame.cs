@@ -41,6 +41,8 @@ namespace osu.Game
 
         private NotificationManager notificationManager;
 
+        private NotificationOverlay notificationOverlay;
+
         private DialogOverlay dialogOverlay;
 
         private Intro intro
@@ -158,6 +160,7 @@ namespace osu.Game
             });
 
             //overlay elements
+            (notificationOverlay = new NotificationOverlay { Depth = 1 }).LoadAsync(this, overlayContent.Add);
             (chat = new ChatOverlay { Depth = 0 }).LoadAsync(this, overlayContent.Add);
             (options = new OptionsOverlay { Depth = -1 }).LoadAsync(this, overlayContent.Add);
             (musicController = new MusicController
@@ -193,6 +196,7 @@ namespace osu.Game
             Dependencies.Cache(options);
             Dependencies.Cache(musicController);
             Dependencies.Cache(notificationManager);
+            Dependencies.Cache(notificationOverlay);
             Dependencies.Cache(dialogOverlay);
 
             (Toolbar = new Toolbar
