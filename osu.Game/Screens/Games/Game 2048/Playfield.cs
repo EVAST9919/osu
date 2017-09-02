@@ -19,7 +19,9 @@ namespace osu.Game.Screens.Games.Game_2048
         private const int fade_duration = 50;
         private const int endgame_appear_duration = 300;
 
-        private readonly FieldBox[,] fieldBox;
+        private readonly FieldPoint[,] fieldPoint;
+        private Container backgroundOverlay;
+        private Container numbersOverlay;
         private Container gameOverOverlay;
         private Random random;
 
@@ -29,37 +31,7 @@ namespace osu.Game.Screens.Games.Game_2048
             set
             {
                 gameIsOver = value;
-
-                if (gameIsOver)
-                {
-                    Add(gameOverOverlay = new Container
-                    {
-                        RelativeSizeAxes = Axes.Both,
-                        Alpha = 0,
-                        Children = new Drawable[]
-                        {
-                            new Box
-                            {
-                                RelativeSizeAxes = Axes.Both,
-                                Colour = Color4.Black.Opacity(200),
-                            },
-                            new OsuSpriteText
-                            {
-                                Anchor = Anchor.Centre,
-                                Origin = Anchor.Centre,
-                                TextSize = 50,
-                                Text = @"Game Over",
-                                Colour = Color4.White,
-                            }
-                        }
-                    });
-                    gameOverOverlay.FadeTo(1, endgame_appear_duration);
-                }
-                else
-                {
-                    if (gameOverOverlay != null && gameOverOverlay.IsAlive)
-                        gameOverOverlay.FadeTo(0, endgame_appear_duration).Finally(d => d.Expire());
-                }
+                gameOverOverlay.FadeTo(gameIsOver ? 1 : 0, endgame_appear_duration);
             }
             get { return gameIsOver; }
         }
@@ -69,30 +41,78 @@ namespace osu.Game.Screens.Games.Game_2048
             CornerRadius = 7;
             Masking = true;
             Size = new Vector2(500);
-            fieldBox = new FieldBox[4, 4];
+            fieldPoint = new FieldPoint[4, 4];
             Children = new Drawable[]
             {
-                new Box
+                backgroundOverlay = new Container
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Colour = Color4.White,
+                    Children = new Drawable[]
+                    {
+                        new Box
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            Colour = Color4.White,
+                        },
+                        new BackgroundBox { Position = new Vector2(20) },
+                        new BackgroundBox { Position = new Vector2(140,20) },
+                        new BackgroundBox { Position = new Vector2(260,20) },
+                        new BackgroundBox { Position = new Vector2(380,20) },
+                        new BackgroundBox { Position = new Vector2(20,140) },
+                        new BackgroundBox { Position = new Vector2(140) },
+                        new BackgroundBox { Position = new Vector2(260,140) },
+                        new BackgroundBox { Position = new Vector2(380,140) },
+                        new BackgroundBox { Position = new Vector2(20,260) },
+                        new BackgroundBox { Position = new Vector2(140,260) },
+                        new BackgroundBox { Position = new Vector2(260) },
+                        new BackgroundBox { Position = new Vector2(380,260) },
+                        new BackgroundBox { Position = new Vector2(20,380) },
+                        new BackgroundBox { Position = new Vector2(140,380) },
+                        new BackgroundBox { Position = new Vector2(260,380) },
+                        new BackgroundBox { Position = new Vector2(380) }
+                    }
                 },
-                fieldBox[0,0] = new FieldBox { Position = new Vector2(20) },
-                fieldBox[1,0] = new FieldBox { Position = new Vector2(140,20) },
-                fieldBox[2,0] = new FieldBox { Position = new Vector2(260,20) },
-                fieldBox[3,0] = new FieldBox { Position = new Vector2(380,20) },
-                fieldBox[0,1] = new FieldBox { Position = new Vector2(20,140) },
-                fieldBox[1,1] = new FieldBox { Position = new Vector2(140) },
-                fieldBox[2,1] = new FieldBox { Position = new Vector2(260,140) },
-                fieldBox[3,1] = new FieldBox { Position = new Vector2(380,140) },
-                fieldBox[0,2] = new FieldBox { Position = new Vector2(20,260) },
-                fieldBox[1,2] = new FieldBox { Position = new Vector2(140,260) },
-                fieldBox[2,2] = new FieldBox { Position = new Vector2(260) },
-                fieldBox[3,2] = new FieldBox { Position = new Vector2(380,260) },
-                fieldBox[0,3] = new FieldBox { Position = new Vector2(20,380) },
-                fieldBox[1,3] = new FieldBox { Position = new Vector2(140,380) },
-                fieldBox[2,3] = new FieldBox { Position = new Vector2(260,380) },
-                fieldBox[3,3] = new FieldBox { Position = new Vector2(380) },
+                fieldPoint[0,0] = new FieldPoint { Position = new Vector2(20) },
+                fieldPoint[1,0] = new FieldPoint { Position = new Vector2(140,20) },
+                fieldPoint[2,0] = new FieldPoint { Position = new Vector2(260,20) },
+                fieldPoint[3,0] = new FieldPoint { Position = new Vector2(380,20) },
+                fieldPoint[0,1] = new FieldPoint { Position = new Vector2(20,140) },
+                fieldPoint[1,1] = new FieldPoint { Position = new Vector2(140) },
+                fieldPoint[2,1] = new FieldPoint { Position = new Vector2(260,140) },
+                fieldPoint[3,1] = new FieldPoint { Position = new Vector2(380,140) },
+                fieldPoint[0,2] = new FieldPoint { Position = new Vector2(20,260) },
+                fieldPoint[1,2] = new FieldPoint { Position = new Vector2(140,260) },
+                fieldPoint[2,2] = new FieldPoint { Position = new Vector2(260) },
+                fieldPoint[3,2] = new FieldPoint { Position = new Vector2(380,260) },
+                fieldPoint[0,3] = new FieldPoint { Position = new Vector2(20,380) },
+                fieldPoint[1,3] = new FieldPoint { Position = new Vector2(140,380) },
+                fieldPoint[2,3] = new FieldPoint { Position = new Vector2(260,380) },
+                fieldPoint[3,3] = new FieldPoint { Position = new Vector2(380) },
+                numbersOverlay = new Container
+                {
+                    RelativeSizeAxes = Axes.Both,
+                },
+                gameOverOverlay = new Container
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Alpha = 0,
+                    Children = new Drawable[]
+                    {
+                        new Box
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            Colour = Color4.Black.Opacity(200),
+                        },
+                        new OsuSpriteText
+                        {
+                            Anchor = Anchor.Centre,
+                            Origin = Anchor.Centre,
+                            TextSize = 50,
+                            Text = @"Game Over",
+                            Colour = Color4.White,
+                        }
+                    }
+                }
             };
 
             random = new Random();
@@ -110,7 +130,7 @@ namespace osu.Game.Screens.Games.Game_2048
             {
                 for (int j = 0; j < 4; j++)
                 {
-                    if (fieldBox[i, j].IsEmpty)
+                    if (fieldPoint[i, j].IsEmpty)
                         return true;
                 }
             }
@@ -128,9 +148,9 @@ namespace osu.Game.Screens.Games.Game_2048
             {
                 if (playfieldHasEmptyBoxes())
                 {
-                    FieldBox box = findEmptyBox();
+                    FieldPoint box = findEmptyBox();
 
-                    Add(box.FieldNumber = new FieldNumber
+                    numbersOverlay.Add(box.FieldNumber = new FieldNumber
                     {
                         Alpha = 0,
                         Position = box.Position
@@ -145,15 +165,15 @@ namespace osu.Game.Screens.Games.Game_2048
             }
         }
 
-        private FieldBox findEmptyBox()
+        private FieldPoint findEmptyBox()
         {
             int x = random.Next(4);
             int y = random.Next(4);
 
             while (true)
             {
-                if (fieldBox[x, y].IsEmpty)
-                    return fieldBox[x, y];
+                if (fieldPoint[x, y].IsEmpty)
+                    return fieldPoint[x, y];
 
                 x = random.Next(4);
                 y = random.Next(4);
@@ -166,8 +186,8 @@ namespace osu.Game.Screens.Games.Game_2048
             {
                 for (int j = 0; j < 4; j++)
                 {
-                    if (!fieldBox[i, j].IsEmpty)
-                        fieldBox[i, j].IsEmpty = true;
+                    if (!fieldPoint[i, j].IsEmpty)
+                        fieldPoint[i, j].IsEmpty = true;
                 }
             }
 
@@ -181,7 +201,7 @@ namespace osu.Game.Screens.Games.Game_2048
 
         private IEnumerable<FieldNumber> getAllNumbers()
         {
-            foreach (Drawable d in Children)
+            foreach (Drawable d in numbersOverlay.Children)
             {
                 if (d is FieldNumber)
                     yield return d as FieldNumber;
@@ -190,17 +210,17 @@ namespace osu.Game.Screens.Games.Game_2048
 
         public void Up()
         {
-            setNewNumber();
+
         }
 
         public void Down()
         {
-            setNewNumber();
+
         }
 
         public void Left()
         {
-            setNewNumber();
+
         }
 
         public void Right()
@@ -209,37 +229,53 @@ namespace osu.Game.Screens.Games.Game_2048
             {
                 for (int j = 0; j < 4; j++)
                 {
-                    if (!fieldBox[i, j].IsEmpty)//Current box
+                    if (!fieldPoint[i, j].IsEmpty)//Current box
                     {
                         for (int k = i + 1; k < 4; k++)//looking through the whole line
                         {
-                            if (fieldBox[k, j].IsEmpty)//if next box is empty
+                            if (fieldPoint[k, j].IsEmpty)//if next box is empty
                             {
                                 if (k == 3)//if it's the last one in the line
-                                    setNewPosition(fieldBox[i, j], fieldBox[k, j]);
+                                    setNewPosition(fieldPoint[i, j], fieldPoint[k, j]);
                                 else continue;//go to the next box in the line
                             }
                             else
                             {
-                                if (fieldBox[i, j].FieldNumber.Power == fieldBox[k, j].FieldNumber.Power)
-                                    setNewPosition(fieldBox[i, j], fieldBox[k, j]);
-                                else break;
+                                if (fieldPoint[i, j].FieldNumber.Power == fieldPoint[k, j].FieldNumber.Power)
+                                    setNewPosition(fieldPoint[i, j], fieldPoint[k, j]);
+                                else
+                                {
+                                    if (k - 1 == i)
+                                        break;
+                                    setNewPosition(fieldPoint[i, j], fieldPoint[k - 1, j]);
+                                }
                             }
                         }
-                    }                        
+                    }
                 }
+            }
+        }
+
+        private void setNewPosition(FieldPoint oldPoint, FieldPoint newPoint)
+        {
+            if(newPoint.FieldNumber != null)
+            {
+                newPoint.FieldNumber.Expire();
+                newPoint.FieldNumber = oldPoint.FieldNumber;
+                oldPoint.FieldNumber = null;
+                newPoint.FieldNumber.ClearTransforms();
+                newPoint.FieldNumber.MoveTo(newPoint.Position, move_duration);
+                newPoint.FieldNumber.NextPower();
+            }
+            else
+            {
+                newPoint.FieldNumber = oldPoint.FieldNumber;
+                newPoint.FieldNumber.ClearTransforms();
+                newPoint.FieldNumber.MoveTo(newPoint.Position, move_duration);
+                oldPoint.FieldNumber = null;
             }
 
             setNewNumber();
-        }
-
-        private void setNewPosition(FieldBox oldBox, FieldBox newBox)
-        {
-            //newBox.FieldNumber?.Delay(move_duration).Expire();
-            newBox.FieldNumber = oldBox.FieldNumber;
-            newBox.FieldNumber.MoveTo(newBox.Position, move_duration);
-            //oldBox.FieldNumber = null;
-            newBox.FieldNumber.NextPower();
         }
     }
 }

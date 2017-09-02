@@ -133,7 +133,8 @@
     <Compile Include="Overlays\Toolbar\ToolbarDirectButton.cs" />
     <Compile Include="Rulesets\Mods\IApplicableToDifficulty.cs" />
     <Compile Include="Rulesets\UI\RulesetInputManager.cs" />
-    <Compile Include="Screens\Games\Game 2048\FieldBox.cs" />
+    <Compile Include="Screens\Games\Game 2048\BackgroundBox.cs" />
+    <Compile Include="Screens\Games\Game 2048\FieldPoint.cs" />
     <Compile Include="Screens\Games\Game 2048\FieldNumber.cs" />
     <Compile Include="Screens\Games\Game 2048\Player.cs" />
     <Compile Include="Screens\Games\Game 2048\Playfield.cs" />
