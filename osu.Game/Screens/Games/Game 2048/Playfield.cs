@@ -15,6 +15,10 @@ namespace osu.Game.Screens.Games.Game_2048
 {
     public class Playfield : Container
     {
+        private const int move_duration = 200;
+        private const int appear_duration = 50;
+        private const int endgame_appear_duration = 300;
+
         private readonly FieldBox[,] fieldBox;
         private Container gameOverOverlay;
         private Random random;
@@ -49,15 +53,12 @@ namespace osu.Game.Screens.Games.Game_2048
                             }
                         }
                     });
-                    gameOverOverlay.FadeTo(1, 300);
+                    gameOverOverlay.FadeTo(1, endgame_appear_duration);
                 }
                 else
                 {
                     if (gameOverOverlay != null && gameOverOverlay.IsAlive)
-                    {
-                        gameOverOverlay.FadeTo(0, 300);
-                        gameOverOverlay.Expire();
-                    }
+                        gameOverOverlay.FadeTo(0, endgame_appear_duration).Finally(d => d.Expire());
                 }
             }
             get { return gameIsOver; }
@@ -129,7 +130,13 @@ namespace osu.Game.Screens.Games.Game_2048
                 {
                     FieldBox box = findEmptyBox();
 
-                    Add(box.FieldNumber = new FieldNumber { Position = box.Position });
+                    Add(box.FieldNumber = new FieldNumber
+                    {
+                        Alpha = 0,
+                        Position = box.Position
+                    });
+
+                    box.FieldNumber.FadeTo(1, appear_duration);
                 }
                 else
                 {
@@ -163,15 +170,15 @@ namespace osu.Game.Screens.Games.Game_2048
                 }
             }
 
-            foreach (FieldNumber n in GetAllNumbers())
-                n.Expire();
+            foreach (FieldNumber n in getAllNumbers())
+                n.FadeTo(0, appear_duration).Finally(d => d.Expire());
 
             GameIsOver = false;
 
             Initialize();
         }
 
-        public IEnumerable<FieldNumber> GetAllNumbers()
+        private IEnumerable<FieldNumber> getAllNumbers()
         {
             foreach (Drawable d in Children)
             {
