@@ -30,6 +30,7 @@ namespace osu.Game.Screens.Menu
         public Action OnMulti;
         public Action OnChart;
         public Action OnTest;
+        public Action OnGames;
 
         private Toolbar toolbar;
 
@@ -108,6 +109,7 @@ namespace osu.Game.Screens.Menu
             buttonsPlay.Add(new Button(@"solo", @"select-6", FontAwesome.fa_user, new Color4(102, 68, 204, 255), () => OnSolo?.Invoke(), WEDGE_WIDTH, Key.P));
             buttonsPlay.Add(new Button(@"multi", @"select-5", FontAwesome.fa_users, new Color4(94, 63, 186, 255), () => OnMulti?.Invoke(), 0, Key.M));
             buttonsPlay.Add(new Button(@"chart", @"select-5", FontAwesome.fa_osu_charts, new Color4(80, 53, 160, 255), () => OnChart?.Invoke()));
+            buttonsPlay.Add(new Button(@"games", @"select-5", FontAwesome.fa_osu_dice, new Color4(160, 131, 185, 255), () => OnGames?.Invoke()));
 
             buttonsTopLevel.Add(new Button(@"play", @"select-1", FontAwesome.fa_osu_logo, new Color4(102, 68, 204, 255), onPlay, WEDGE_WIDTH, Key.P));
             buttonsTopLevel.Add(new Button(@"osu!editor", @"select-5", FontAwesome.fa_osu_edit_o, new Color4(238, 170, 0, 255), () => OnEdit?.Invoke(), 0, Key.E));

@@ -79,6 +79,7 @@
     <Compile Include="Visual\TestCaseDrawableRoom.cs" />
     <Compile Include="Visual\TestCaseDrawings.cs" />
     <Compile Include="Visual\TestCaseGamefield.cs" />
+    <Compile Include="Visual\TestCaseGames.cs" />
     <Compile Include="Visual\TestCaseGraph.cs" />
     <Compile Include="Visual\TestCaseHitObjects.cs" />
     <Compile Include="Visual\TestCaseKeyConfiguration.cs" />
