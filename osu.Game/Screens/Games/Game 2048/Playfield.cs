@@ -3,9 +3,11 @@
 
 using OpenTK;
 using OpenTK.Graphics;
+using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
+using osu.Game.Graphics.Sprites;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,6 +17,7 @@ namespace osu.Game.Screens.Games.Game_2048
     public class Playfield : Container
     {
         private readonly FieldBox[,] fieldBox;
+        private Container gameOverOverlay;
         private Random random;
 
         public Playfield()
@@ -57,11 +60,53 @@ namespace osu.Game.Screens.Games.Game_2048
             setNewNumber();
         }
 
+        private bool playfieldHasEmptyBoxes()
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    if (fieldBox[i, j].IsEmpty)
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
         private void setNewNumber()
         {
-            FieldBox box = findEmptyBox();
+            if (playfieldHasEmptyBoxes())
+            {
+                FieldBox box = findEmptyBox();
 
-            Add(box.FieldNumber = new FieldNumber { Position = box.Position });
+                Add(box.FieldNumber = new FieldNumber { Position = box.Position });
+            }
+            else
+            {
+                Add(gameOverOverlay = new Container
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Alpha = 0,
+                    Children = new Drawable[]
+                    {
+                        new Box
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            Colour = Color4.Black.Opacity(200),
+                        },
+                        new OsuSpriteText
+                        {
+                            Anchor = Anchor.Centre,
+                            Origin = Anchor.Centre,
+                            TextSize = 50,
+                            Text = @"Game Over",
+                            Colour = Color4.White,
+                        }
+                    }
+                });
+                gameOverOverlay.FadeTo(1, 300);
+            }
         }
 
         private FieldBox findEmptyBox()
@@ -106,22 +151,22 @@ namespace osu.Game.Screens.Games.Game_2048
 
         public void Up()
         {
-
+            setNewNumber();
         }
 
         public void Down()
         {
-
+            setNewNumber();
         }
 
         public void Left()
         {
-
+            setNewNumber();
         }
 
         public void Right()
         {
-
+            setNewNumber();
         }
     }
 }
