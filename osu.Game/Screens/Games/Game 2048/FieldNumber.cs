@@ -78,13 +78,13 @@ namespace osu.Game.Screens.Games.Game_2048
 
             while(number != 2)
             {
-                number = (int)Math.Sqrt(number);
+                number /= 2;
                 power++;
             }
 
             return power;
         }
 
-        public void NextValue() => Value++;
+        public void NextValue() => Value *= 2;
     }
 }

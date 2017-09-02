@@ -7,6 +7,8 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace osu.Game.Screens.Games.Game_2048
 {
@@ -20,7 +22,7 @@ namespace osu.Game.Screens.Games.Game_2048
             CornerRadius = 7;
             Masking = true;
             Size = new Vector2(500);
-            fieldBox = new FieldBox[4,4];
+            fieldBox = new FieldBox[4, 4];
             Children = new Drawable[]
             {
                 new Box
@@ -69,7 +71,7 @@ namespace osu.Game.Screens.Games.Game_2048
 
             while (true)
             {
-                if(fieldBox[x, y].IsEmpty)
+                if (fieldBox[x, y].IsEmpty)
                     return fieldBox[x, y];
 
                 x = random.Next(4);
@@ -79,21 +81,27 @@ namespace osu.Game.Screens.Games.Game_2048
 
         public void Reset()
         {
-            for(int i = 0; i < 4; i++)
+            for (int i = 0; i < 4; i++)
             {
-                for(int j = 0; j < 4; j++)
+                for (int j = 0; j < 4; j++)
                 {
                     fieldBox[i, j].IsEmpty = true;
                 }
             }
 
-            foreach(Drawable d in Children)
-            {
-                if (d is FieldNumber)
-                    d.Expire();
-            }
+            foreach (FieldNumber n in GetAllNumbers())
+                n.Expire();
 
             Initialize();
+        }
+
+        public IEnumerable<FieldNumber> GetAllNumbers()
+        {
+            foreach (Drawable d in Children)
+            {
+                if (d is FieldNumber)
+                    yield return d as FieldNumber;
+            }
         }
 
         public void Up()
