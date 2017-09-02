@@ -9,7 +9,6 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Game.Graphics.Sprites;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace osu.Game.Screens.Games.Game_2048
@@ -19,6 +18,50 @@ namespace osu.Game.Screens.Games.Game_2048
         private readonly FieldBox[,] fieldBox;
         private Container gameOverOverlay;
         private Random random;
+
+        private bool gameIsOver;
+        public bool GameIsOver
+        {
+            set
+            {
+                gameIsOver = value;
+
+                if (gameIsOver)
+                {
+                    Add(gameOverOverlay = new Container
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Alpha = 0,
+                        Children = new Drawable[]
+                        {
+                            new Box
+                            {
+                                RelativeSizeAxes = Axes.Both,
+                                Colour = Color4.Black.Opacity(200),
+                            },
+                            new OsuSpriteText
+                            {
+                                Anchor = Anchor.Centre,
+                                Origin = Anchor.Centre,
+                                TextSize = 50,
+                                Text = @"Game Over",
+                                Colour = Color4.White,
+                            }
+                        }
+                    });
+                    gameOverOverlay.FadeTo(1, 300);
+                }
+                else
+                {
+                    if (gameOverOverlay != null && gameOverOverlay.IsAlive)
+                    {
+                        gameOverOverlay.FadeTo(0, 300);
+                        gameOverOverlay.Expire();
+                    }
+                }
+            }
+            get { return gameIsOver; }
+        }
 
         public Playfield()
         {
@@ -76,36 +119,22 @@ namespace osu.Game.Screens.Games.Game_2048
 
         private void setNewNumber()
         {
-            if (playfieldHasEmptyBoxes())
+            if (gameIsOver)
             {
-                FieldBox box = findEmptyBox();
-
-                Add(box.FieldNumber = new FieldNumber { Position = box.Position });
+                Reset();
             }
             else
             {
-                Add(gameOverOverlay = new Container
+                if (playfieldHasEmptyBoxes())
                 {
-                    RelativeSizeAxes = Axes.Both,
-                    Alpha = 0,
-                    Children = new Drawable[]
-                    {
-                        new Box
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                            Colour = Color4.Black.Opacity(200),
-                        },
-                        new OsuSpriteText
-                        {
-                            Anchor = Anchor.Centre,
-                            Origin = Anchor.Centre,
-                            TextSize = 50,
-                            Text = @"Game Over",
-                            Colour = Color4.White,
-                        }
-                    }
-                });
-                gameOverOverlay.FadeTo(1, 300);
+                    FieldBox box = findEmptyBox();
+
+                    Add(box.FieldNumber = new FieldNumber { Position = box.Position });
+                }
+                else
+                {
+                    GameIsOver = true;
+                }
             }
         }
 
@@ -136,6 +165,8 @@ namespace osu.Game.Screens.Games.Game_2048
 
             foreach (FieldNumber n in GetAllNumbers())
                 n.Expire();
+
+            GameIsOver = false;
 
             Initialize();
         }
