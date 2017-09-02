@@ -262,7 +262,7 @@ namespace osu.Game.Screens.Games.Game_2048
             {
                 newPoint.FieldNumber.Expire();
                 newPoint.FieldNumber = oldPoint.FieldNumber;
-                oldPoint.FieldNumber = null;
+                oldPoint.IsEmpty = true;
                 newPoint.FieldNumber.ClearTransforms();
                 newPoint.FieldNumber.MoveTo(newPoint.Position, move_duration);
                 newPoint.FieldNumber.NextPower();
@@ -270,7 +270,7 @@ namespace osu.Game.Screens.Games.Game_2048
             else
             {
                 newPoint.FieldNumber = oldPoint.FieldNumber;
-                oldPoint.FieldNumber = null;
+                oldPoint.IsEmpty = true;
                 newPoint.FieldNumber.ClearTransforms();
                 newPoint.FieldNumber.MoveTo(newPoint.Position, move_duration);
             }
