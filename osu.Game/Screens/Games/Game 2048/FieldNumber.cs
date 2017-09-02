@@ -17,16 +17,16 @@ namespace osu.Game.Screens.Games.Game_2048
         private readonly Box background;
         private readonly OsuSpriteText valueText;
 
-        private int value;
-        public int Value
+        private int power;
+        public int Power
         {
             set
             {
-                this.value = value;
-                valueText.Text = value.ToString();
-                background.FadeColour(bg_colours[findPower(value)], 100);
+                power = value;
+                valueText.Text = Math.Pow(2, power).ToString();
+                background.FadeColour(bg_colours[value - 1], 100);
             }
-            get { return value; }
+            get { return power; }
         }
 
         private static readonly Color4[] bg_colours =
@@ -69,22 +69,9 @@ namespace osu.Game.Screens.Games.Game_2048
                 }
             };
 
-            Value = 2;
+            Power = 1;
         }
 
-        private int findPower(int number)
-        {
-            int power = 0;
-
-            while(number != 2)
-            {
-                number /= 2;
-                power++;
-            }
-
-            return power;
-        }
-
-        public void NextValue() => Value *= 2;
+        public void NextPower() => Power++;
     }
 }

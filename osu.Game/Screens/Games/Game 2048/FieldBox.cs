@@ -12,25 +12,24 @@ namespace osu.Game.Screens.Games.Game_2048
 {
     public class FieldBox : Container
     {
-        private bool isEmpty = true;
         public bool IsEmpty
         {
-            set { isEmpty = value; }
-            get { return isEmpty; }
+            set
+            {
+                if (value == true)
+                    FieldNumber = null;
+            }
+            get
+            {
+                return FieldNumber == null;
+            }
         }
 
         private FieldNumber fieldNumber;
         public FieldNumber FieldNumber
         {
-            set
-            {
-                fieldNumber = value;
-                isEmpty = value == null;
-            }
-            get
-            {
-                return fieldNumber;
-            }
+            set { fieldNumber = value; }
+            get { return fieldNumber; }
         }
 
         public FieldBox()

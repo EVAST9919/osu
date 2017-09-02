@@ -16,7 +16,7 @@ namespace osu.Game.Screens.Games.Game_2048
     public class Playfield : Container
     {
         private const int move_duration = 200;
-        private const int appear_duration = 50;
+        private const int fade_duration = 50;
         private const int endgame_appear_duration = 300;
 
         private readonly FieldBox[,] fieldBox;
@@ -136,7 +136,7 @@ namespace osu.Game.Screens.Games.Game_2048
                         Position = box.Position
                     });
 
-                    box.FieldNumber.FadeTo(1, appear_duration);
+                    box.FieldNumber.FadeTo(1, fade_duration);
                 }
                 else
                 {
@@ -166,12 +166,13 @@ namespace osu.Game.Screens.Games.Game_2048
             {
                 for (int j = 0; j < 4; j++)
                 {
-                    fieldBox[i, j].IsEmpty = true;
+                    if (!fieldBox[i, j].IsEmpty)
+                        fieldBox[i, j].IsEmpty = true;
                 }
             }
 
             foreach (FieldNumber n in getAllNumbers())
-                n.FadeTo(0, appear_duration).Finally(d => d.Expire());
+                n.FadeTo(0, fade_duration).Finally(d => d.Expire());
 
             GameIsOver = false;
 
@@ -204,7 +205,41 @@ namespace osu.Game.Screens.Games.Game_2048
 
         public void Right()
         {
+            for (int i = 2; i >=0; i--)
+            {
+                for (int j = 0; j < 4; j++)
+                {
+                    if (!fieldBox[i, j].IsEmpty)//Current box
+                    {
+                        for (int k = i; k < 4; k++)//looking through the whole line
+                        {
+                            if (fieldBox[k, j].IsEmpty)//if next box is empty
+                            {
+                                if (k == 3)//if it's the last one in the line
+                                    setNewPosition(fieldBox[i, j], fieldBox[k, j]);
+                                else continue;//go to the next box in the line
+                            }
+                            else
+                            {
+                                if (fieldBox[i, j].FieldNumber.Power == fieldBox[k, j].FieldNumber.Power)
+                                    setNewPosition(fieldBox[i, j], fieldBox[k, j]);
+                                else break;
+                            }
+                        }
+                    }                        
+                }
+            }
+
             setNewNumber();
+        }
+
+        private void setNewPosition(FieldBox oldBox, FieldBox newBox)
+        {
+            //newBox.FieldNumber?.Delay(move_duration).Expire();
+            newBox.FieldNumber = oldBox.FieldNumber;
+            newBox.FieldNumber.MoveTo(newBox.Position, move_duration);
+            //oldBox.FieldNumber = null;
+            newBox.FieldNumber.NextPower();
         }
     }
 }
