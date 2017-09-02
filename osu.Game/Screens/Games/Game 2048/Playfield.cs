@@ -258,7 +258,7 @@ namespace osu.Game.Screens.Games.Game_2048
 
         private void setNewPosition(FieldPoint oldPoint, FieldPoint newPoint)
         {
-            if(newPoint.FieldNumber != null)
+            if(!newPoint.IsEmpty)
             {
                 newPoint.FieldNumber.Expire();
                 newPoint.FieldNumber = oldPoint.FieldNumber;
@@ -270,9 +270,9 @@ namespace osu.Game.Screens.Games.Game_2048
             else
             {
                 newPoint.FieldNumber = oldPoint.FieldNumber;
+                oldPoint.FieldNumber = null;
                 newPoint.FieldNumber.ClearTransforms();
                 newPoint.FieldNumber.MoveTo(newPoint.Position, move_duration);
-                oldPoint.FieldNumber = null;
             }
 
             setNewNumber();
