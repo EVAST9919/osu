@@ -211,7 +211,7 @@ namespace osu.Game.Screens.Games.Game_2048
                 {
                     if (!fieldBox[i, j].IsEmpty)//Current box
                     {
-                        for (int k = i; k < 4; k++)//looking through the whole line
+                        for (int k = i + 1; k < 4; k++)//looking through the whole line
                         {
                             if (fieldBox[k, j].IsEmpty)//if next box is empty
                             {
