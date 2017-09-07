@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 15.0.26228.9
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "osu.Desktop", "osu.Desktop\osu.Desktop.csproj", "{2A66DD92-ADB1-4994-89E2-C94E04ACDA0D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{03777F48-2E4A-4645-AD5C-4170213E0262} = {03777F48-2E4A-4645-AD5C-4170213E0262}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Client", "Client", "{0D37A2AD-80A4-464F-A1DE-1560B70F1CE3}"
 EndProject
@@ -36,6 +39,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{80683232-505E-41EA-A37C-2CFCF1C88C57}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "osu.Framework.Testing", "osu-framework\osu.Framework.Testing\osu.Framework.Testing.csproj", "{007B2356-AB6F-4BD9-96D5-116FC2DCE69A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "osu.Game.Rulesets.Visual", "osu.Game.Rulesets.Visual\osu.Game.Rulesets.Visual.csproj", "{03777F48-2E4A-4645-AD5C-4170213E0262}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -119,6 +124,12 @@ Global
 		{007B2356-AB6F-4BD9-96D5-116FC2DCE69A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{007B2356-AB6F-4BD9-96D5-116FC2DCE69A}.VisualTests|Any CPU.ActiveCfg = Debug|Any CPU
 		{007B2356-AB6F-4BD9-96D5-116FC2DCE69A}.VisualTests|Any CPU.Build.0 = Debug|Any CPU
+		{03777F48-2E4A-4645-AD5C-4170213E0262}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{03777F48-2E4A-4645-AD5C-4170213E0262}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{03777F48-2E4A-4645-AD5C-4170213E0262}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{03777F48-2E4A-4645-AD5C-4170213E0262}.Release|Any CPU.Build.0 = Release|Any CPU
+		{03777F48-2E4A-4645-AD5C-4170213E0262}.VisualTests|Any CPU.ActiveCfg = Release|Any CPU
+		{03777F48-2E4A-4645-AD5C-4170213E0262}.VisualTests|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -137,6 +148,7 @@ Global
 		{230AC4F3-7783-49FB-9AEC-B83CDA3B9F3D} = {80683232-505E-41EA-A37C-2CFCF1C88C57}
 		{BAEA2F74-0315-4667-84E0-ACAC0B4BF785} = {6EAD7610-89D8-48A2-8BE0-E348297E4D8B}
 		{007B2356-AB6F-4BD9-96D5-116FC2DCE69A} = {7A75DFA2-DE65-4458-98AF-26AF96FFD6DC}
+		{03777F48-2E4A-4645-AD5C-4170213E0262} = {0D37A2AD-80A4-464F-A1DE-1560B70F1CE3}
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		Policies = $0
