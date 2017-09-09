@@ -216,7 +216,7 @@ namespace osu.Desktop.Overlays
 
         protected override void PopIn()
         {
-            this.FadeIn(1000);
+            //this.FadeIn(1000);
         }
 
         protected override void PopOut()
