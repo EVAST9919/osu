@@ -138,7 +138,9 @@
     <Compile Include="Screens\Edit\Menus\EditorMenuBarItem.cs" />
     <Compile Include="Screens\Edit\Menus\EditorMenuItem.cs" />
     <Compile Include="Screens\Edit\Menus\EditorMenuItemSpacer.cs" />
+    <Compile Include="Screens\More\ButtonSystem.cs" />
     <Compile Include="Screens\More\MoreScreen.cs" />
+    <Compile Include="Screens\More\Visualizer\VisualizerSettings.cs" />
     <Compile Include="Screens\Play\KeyCounterAction.cs" />
     <Compile Include="Users\UserCoverBackground.cs" />
     <Compile Include="Overlays\UserProfileOverlay.cs" />
