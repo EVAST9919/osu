@@ -128,7 +128,10 @@ namespace osu.Game.Screens.Select.Carousel
 
             string storagePath = storage.GetFullPath("");
 
-            string songsDirectory = storagePath + @"\saved songs";
+            //default path
+            //string songsDirectory = storagePath + @"\saved songs";
+
+            string songsDirectory = @"D:\saved osu!songs";
             if (!Directory.Exists(songsDirectory))
             {
                 Directory.CreateDirectory(songsDirectory);
