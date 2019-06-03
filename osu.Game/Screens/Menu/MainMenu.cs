@@ -65,7 +65,7 @@ namespace osu.Game.Screens.Menu
                             OnDirect = delegate { this.Push(new OnlineListing()); },
                             OnEdit = delegate { this.Push(new Editor()); },
                             OnSolo = onSolo,
-                            OnMore = delegate { this.Push(new EvastScreen()); },
+                            OnMore = delegate { this.Push(new EvastMainScreen()); },
                             OnMulti = delegate { this.Push(new Multiplayer()); },
                             OnExit = this.Exit,
                         }
