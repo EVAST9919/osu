@@ -21,6 +21,7 @@ using osu.Game.Screens.Select;
 using osu.Game.Screens.Tournament;
 using osu.Framework.Platform;
 using osu.Game.Overlays;
+using osu.Game.Screens.Evast;
 
 namespace osu.Game.Screens.Menu
 {
@@ -64,6 +65,7 @@ namespace osu.Game.Screens.Menu
                             OnDirect = delegate { this.Push(new OnlineListing()); },
                             OnEdit = delegate { this.Push(new Editor()); },
                             OnSolo = onSolo,
+                            OnMore = delegate { this.Push(new EvastScreen()); },
                             OnMulti = delegate { this.Push(new Multiplayer()); },
                             OnExit = this.Exit,
                         }
