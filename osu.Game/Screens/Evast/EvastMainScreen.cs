@@ -11,6 +11,7 @@ using osu.Framework.Allocation;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osu.Framework.Screens;
+using osu.Game.Screens.Evast.NumbersGame;
 
 namespace osu.Game.Screens.Evast
 {
@@ -31,7 +32,7 @@ namespace osu.Game.Screens.Evast
 
         private void addButtons()
         {
-            buttons.AddButton("2048", new EvastScreen());
+            buttons.AddButton("2048", new NumbersGameScreen());
         }
 
         private class ButtonSystem : OsuScrollContainer
