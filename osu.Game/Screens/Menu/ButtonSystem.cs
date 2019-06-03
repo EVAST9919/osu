@@ -43,6 +43,7 @@ namespace osu.Game.Screens.Menu
         public Action OnSettings;
         public Action OnMulti;
         public Action OnChart;
+        public Action OnMore;
 
         public const float BUTTON_WIDTH = 140f;
         public const float WEDGE_WIDTH = 20;
@@ -125,6 +126,7 @@ namespace osu.Game.Screens.Menu
             buttonsPlay.Add(new Button(@"solo", @"button-solo-select", FontAwesome.Solid.User, new Color4(102, 68, 204, 255), () => OnSolo?.Invoke(), WEDGE_WIDTH, Key.P));
             buttonsPlay.Add(new Button(@"multi", @"button-generic-select", FontAwesome.Solid.Users, new Color4(94, 63, 186, 255), onMulti, 0, Key.M));
             buttonsPlay.Add(new Button(@"chart", @"button-generic-select", OsuIcon.Charts, new Color4(80, 53, 160, 255), () => OnChart?.Invoke()));
+            buttonsPlay.Add(new Button(@"more", @"button-generic-select", OsuIcon.Dice, new Color4(138, 129, 208, 255), () => OnMore?.Invoke()));
             buttonsPlay.ForEach(b => b.VisibleState = ButtonSystemState.Play);
 
             buttonsTopLevel.Add(new Button(@"play", @"button-play-select", OsuIcon.Logo, new Color4(102, 68, 204, 255), () => State = ButtonSystemState.Play, WEDGE_WIDTH, Key.P));
@@ -148,7 +150,8 @@ namespace osu.Game.Screens.Menu
 
             isIdle.ValueChanged += idle => updateIdleState(idle.NewValue);
 
-            if (idleTracker != null) isIdle.BindTo(idleTracker.IsIdle);
+            if (idleTracker != null)
+                isIdle.BindTo(idleTracker.IsIdle);
 
             sampleBack = audio.Sample.Get(@"Menu/button-back-select");
         }
@@ -248,7 +251,8 @@ namespace osu.Game.Screens.Menu
 
             set
             {
-                if (state == value) return;
+                if (state == value)
+                    return;
 
                 ButtonSystemState lastState = state;
                 state = value;
@@ -276,7 +280,8 @@ namespace osu.Game.Screens.Menu
 
         private void updateLogoState(ButtonSystemState lastState = ButtonSystemState.Initial)
         {
-            if (logo == null) return;
+            if (logo == null)
+                return;
 
             switch (state)
             {
