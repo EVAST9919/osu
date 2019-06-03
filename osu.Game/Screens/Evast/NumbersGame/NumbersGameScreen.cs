@@ -13,8 +13,6 @@ namespace osu.Game.Screens.Evast.NumbersGame
 {
     public class NumbersGameScreen : EvastScreen
     {
-        private readonly BindableInt score = new BindableInt();
-
         private readonly NumbersPlayfield playfield;
         private readonly OsuClickableContainer resetButton;
         private readonly OsuSpriteText scoreText;
@@ -54,7 +52,8 @@ namespace osu.Game.Screens.Evast.NumbersGame
                 {
                     Anchor = Anchor.Centre,
                     Origin = Anchor.BottomCentre,
-                    AutoSizeAxes = Axes.Both,
+                    AutoSizeAxes = Axes.Y,
+                    Width = 150,
                     CornerRadius = 6,
                     Masking = true,
                     Margin = new MarginPadding { Bottom = 240 },
@@ -67,8 +66,8 @@ namespace osu.Game.Screens.Evast.NumbersGame
                         },
                         scoreText = new OsuSpriteText
                         {
-                            Anchor = Anchor.CentreLeft,
-                            Origin = Anchor.CentreLeft,
+                            Anchor = Anchor.Centre,
+                            Origin = Anchor.Centre,
                             Font = OsuFont.GetFont(size: 40, weight: FontWeight.Bold),
                             Text = "0",
                             Colour = OsuColour.FromHex(@"776E65"),
@@ -85,8 +84,7 @@ namespace osu.Game.Screens.Evast.NumbersGame
             });
 
             resetButton.Action = playfield.Reset;
-
-            score.BindValueChanged(onScoreChanged, true);
+            playfield.Score.BindValueChanged(onScoreChanged, true);
         }
 
         private void onScoreChanged(ValueChangedEvent<int> newScore)
