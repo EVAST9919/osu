@@ -33,6 +33,7 @@ namespace osu.Game.Screens.Evast
         private void addButtons()
         {
             buttons.AddButton("2048", new NumbersGameScreen());
+            buttons.AddButton("2048", new NumbersGameScreen());
         }
 
         private class ButtonSystem : OsuScrollContainer
@@ -59,7 +60,10 @@ namespace osu.Game.Screens.Evast
 
             public void AddButton(string name, OsuScreen newScreen)
             {
-                buttons.Add(new Button(name, currentScreen, newScreen));
+                buttons.Add(new Button(name)
+                {
+                    Action = () => currentScreen.Push(newScreen),
+                });
             }
 
             private class Button : OsuHoverContainer
@@ -70,7 +74,7 @@ namespace osu.Game.Screens.Evast
 
                 protected override IEnumerable<Drawable> EffectTargets => new[] { background };
 
-                public Button(string name, OsuScreen currentScreen, OsuScreen newScreen)
+                public Button(string name)
                 {
                     Height = height;
                     Width = width;
@@ -89,8 +93,6 @@ namespace osu.Game.Screens.Evast
                             Text = name,
                         }
                     };
-
-                    Action = () => currentScreen.Push(newScreen);
                 }
 
                 [BackgroundDependencyLoader]
