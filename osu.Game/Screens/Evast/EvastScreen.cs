@@ -60,7 +60,7 @@ namespace osu.Game.Screens.Evast
 
         protected override void LoadComplete()
         {
-            beatmap.BindValueChanged((b) => updateBackground(b), true);
+            beatmap.BindValueChanged(updateBackground, true);
             base.LoadComplete();
         }
 
