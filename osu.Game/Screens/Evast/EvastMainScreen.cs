@@ -10,8 +10,9 @@ using System.Collections.Generic;
 using osu.Framework.Allocation;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
-using osu.Framework.Screens;
 using osu.Game.Screens.Evast.NumbersGame;
+using System;
+using osu.Framework.Screens;
 
 namespace osu.Game.Screens.Evast
 {
@@ -21,7 +22,7 @@ namespace osu.Game.Screens.Evast
 
         public EvastMainScreen()
         {
-            AddInternal(buttons = new ButtonSystem(this)
+            AddInternal(buttons = new ButtonSystem
             {
                 Anchor = Anchor.TopCentre,
                 Origin = Anchor.TopCentre,
@@ -32,21 +33,17 @@ namespace osu.Game.Screens.Evast
 
         private void addButtons()
         {
-            buttons.AddButton("2048", new NumbersGameScreen());
-            buttons.AddButton("2048", new NumbersGameScreen());
+            buttons.AddButton("2048", () => this.Push(new NumbersGameScreen()));
         }
 
         private class ButtonSystem : OsuScrollContainer
         {
             private readonly FillFlowContainer<Button> buttons;
-            private readonly OsuScreen currentScreen;
 
             private const int spacing = 10;
 
-            public ButtonSystem(OsuScreen currentScreen)
+            public ButtonSystem()
             {
-                this.currentScreen = currentScreen;
-
                 Add(buttons = new FillFlowContainer<Button>
                 {
                     Anchor = Anchor.TopCentre,
@@ -58,11 +55,11 @@ namespace osu.Game.Screens.Evast
                 });
             }
 
-            public void AddButton(string name, OsuScreen newScreen)
+            public void AddButton(string name, Action action)
             {
                 buttons.Add(new Button(name)
                 {
-                    Action = () => currentScreen.Push(newScreen),
+                    Action = action,
                 });
             }
 
