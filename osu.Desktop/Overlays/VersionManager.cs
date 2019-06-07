@@ -72,7 +72,7 @@ namespace osu.Desktop.Overlays
                             Origin = Anchor.TopCentre,
                             Font = OsuFont.Numeric.With(size: 12),
                             Colour = colours.Yellow,
-                            Text = @"Development Build"
+                            Text = @"Evast's Build"
                         },
                         new Sprite
                         {
