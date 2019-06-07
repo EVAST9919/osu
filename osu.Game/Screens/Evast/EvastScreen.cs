@@ -53,22 +53,17 @@ namespace osu.Game.Screens.Evast
             return false;
         }
 
-        [BackgroundDependencyLoader]
-        private void load(Bindable<WorkingBeatmap> beatmap)
-        {
-        }
-
         protected override void LoadComplete()
         {
             beatmap.BindValueChanged(updateBackground, true);
             base.LoadComplete();
         }
 
-        private void updateBackground(ValueChangedEvent<WorkingBeatmap> beatmap)
+        private void updateBackground(ValueChangedEvent<WorkingBeatmap> beatmapValue)
         {
             if (Background is BackgroundScreenBeatmap backgroundModeBeatmap)
             {
-                backgroundModeBeatmap.Beatmap = beatmap.NewValue;
+                backgroundModeBeatmap.Beatmap = beatmapValue.NewValue;
                 backgroundModeBeatmap.BlurAmount.Value = background_blur;
                 backgroundModeBeatmap.FadeColour(Color4.White, 250);
             }
