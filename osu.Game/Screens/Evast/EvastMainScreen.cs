@@ -14,6 +14,7 @@ using osu.Game.Screens.Evast.NumbersGame;
 using System;
 using osu.Framework.Screens;
 using osu.Game.Screens.Evast.Pixels.Snake;
+using osu.Game.Screens.Evast.Pixels.LifeGame;
 
 namespace osu.Game.Screens.Evast
 {
@@ -36,6 +37,7 @@ namespace osu.Game.Screens.Evast
         {
             buttons.AddButton("2048", () => this.Push(new NumbersGameScreen()));
             buttons.AddButton("Snake", () => this.Push(new SnakeScreen()));
+            buttons.AddButton("The Game of Life", () => this.Push(new LifeGameScreen()));
         }
 
         private class ButtonSystem : OsuScrollContainer
