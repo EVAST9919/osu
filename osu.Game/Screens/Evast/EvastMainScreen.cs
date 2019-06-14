@@ -3,6 +3,7 @@
 
 using osu.Game.Screens.Evast.NumbersGame;
 using osu.Framework.Screens;
+using osu.Game.Screens.Evast.ExportArea;
 
 namespace osu.Game.Screens.Evast
 {
@@ -14,6 +15,7 @@ namespace osu.Game.Screens.Evast
             {
                 new Button("2048", () => this.Push(new NumbersGameScreen())),
                 new Button("Pixel Games", () => this.Push(new PixelsSelectableScreen())),
+                new Button("Export Area", () => this.Push(new ExportAreaScreen())),
             };
         }
     }
