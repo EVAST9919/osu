@@ -10,6 +10,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
         private int smoothness = 145;
         public int Smoothness
         {
+            get => smoothness;
             set
             {
                 if (smoothness == value)
@@ -21,12 +22,12 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
 
                 Restart();
             }
-            get { return smoothness; }
         }
 
         private float barWidth = 4.5f;
         public float BarWidth
         {
+            get => barWidth;
             set
             {
                 if (barWidth == value)
@@ -39,12 +40,12 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                 foreach (var bar in EqualizerBars)
                     bar.Width = barWidth;
             }
-            get { return barWidth; }
         }
 
         private int barsAmount = 200;
         public int BarsAmount
         {
+            get => barsAmount;
             set
             {
                 if (barsAmount == value)
@@ -58,7 +59,6 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                 resetBars();
                 Start();
             }
-            get { return barsAmount; }
         }
 
         public float ValueMultiplier { get; set; } = 400;

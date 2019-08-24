@@ -43,7 +43,10 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
 
         private class CircularBarVisualizer : MusicCircularVisualizer
         {
-            protected override VisualizerBar CreateNewBar() => new CircularBar() { Masking = true };
+            protected override VisualizerBar CreateNewBar() => new CircularBar
+            {
+                Masking = true
+            };
 
             private class CircularBar : DefaultBar
             {

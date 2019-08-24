@@ -13,6 +13,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
         private int updateDelay = 1;
         public int UpdateDelay
         {
+            get => updateDelay;
             set
             {
                 if (updateDelay == value)
@@ -24,7 +25,6 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
 
                 Restart();
             }
-            get { return updateDelay; }
         }
 
         protected override void LoadComplete()
@@ -33,14 +33,14 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
             Start();
         }
 
+        protected void Start() => updateAmplitudes();
+
         private void updateAmplitudes()
         {
             var frequencyAmplitudes = beatmap.Value.Track?.CurrentAmplitudes.FrequencyAmplitudes ?? new float[256];
             OnAmplitudesUpdate(frequencyAmplitudes);
             Scheduler.AddDelayed(updateAmplitudes, UpdateDelay);
         }
-
-        protected void Start() => updateAmplitudes();
 
         protected abstract void OnAmplitudesUpdate(float[] amplitudes);
 

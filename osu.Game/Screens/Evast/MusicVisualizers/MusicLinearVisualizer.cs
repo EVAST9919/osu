@@ -12,11 +12,11 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
 
         private readonly FillFlowContainer flow;
 
-        private float spacing = 2;
+        private readonly float spacing = 2;
         public float Spacing
         {
-            set { flow.Spacing = new Vector2(value); }
-            get { return flow.Spacing.X; }
+            get => flow.Spacing.X;
+            set => flow.Spacing = new Vector2(value);
         }
 
         public MusicLinearVisualizer()
