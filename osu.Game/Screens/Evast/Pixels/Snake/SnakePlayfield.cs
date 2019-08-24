@@ -11,8 +11,8 @@ namespace osu.Game.Screens.Evast.Pixels.Snake
     {
         protected override Pixel CreateNewPixel(int size) => new SnakePixel(size);
 
-        public SnakePlayfield(int xCount, int yCount, int pixelSize = 15)
-            : base(xCount, yCount, pixelSize)
+        public SnakePlayfield()
+            : base(20, 20, 25)
         {
         }
 

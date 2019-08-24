@@ -13,7 +13,7 @@ namespace osu.Game.Screens.Evast.Pixels.Snake
 
         protected override void AddTestObject(Container parent)
         {
-            parent.Child = playfield = new SnakePlayfield(20, 20, 25)
+            parent.Child = playfield = new SnakePlayfield
             {
                 Anchor = Anchor.Centre,
                 Origin = Anchor.Centre,
