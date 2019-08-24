@@ -14,7 +14,7 @@ namespace osu.Game.Screens.Evast
                 new Button("2048", () => this.Push(new NumbersGameScreen())),
                 new Button("Pixel Games", () => this.Push(new PixelsSelectableScreen())),
                 new Button("Export Area", () => this.Push(new ExportAreaScreen())),
-                new Button("Particles", () => this.Push(new ParticlesScreen())),
+                new Button("Particles", () => this.Push(new SpaceParticlesScreen())),
             };
         }
     }
