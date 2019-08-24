@@ -4,66 +4,44 @@ using osu.Framework.Graphics;
 using osu.Framework.Screens;
 using osu.Game.Beatmaps;
 using osu.Game.Screens.Backgrounds;
-using osuTK.Graphics;
 
 namespace osu.Game.Screens.Evast
 {
     public class EvastScreen : OsuScreen
     {
-        private const float background_blur = 20;
+        private const int blur = 20;
 
-        [Resolved]
-        private Bindable<WorkingBeatmap> beatmap { get; set; }
+        protected override BackgroundScreen CreateBackground() => new BackgroundScreenBeatmap();
 
-        protected override BackgroundScreen CreateBackground()
+        private readonly Bindable<WorkingBeatmap> beatmap = new Bindable<WorkingBeatmap>();
+
+        [BackgroundDependencyLoader]
+        private void load(Bindable<WorkingBeatmap> workingBeatmap)
         {
-            var background = new BackgroundScreenBeatmap();
-            return background;
-        }
-
-        public override void OnEntering(IScreen last)
-        {
-            base.OnEntering(last);
-            this.FadeInFromZero(250);
-        }
-
-        public override void OnResuming(IScreen last)
-        {
-            base.OnResuming(last);
-            this.FadeIn(250);
-            this.ScaleTo(1, 250, Easing.OutSine);
-        }
-
-        public override void OnSuspending(IScreen next)
-        {
-            this.ScaleTo(1.1f, 250, Easing.InSine);
-            this.FadeOut(250);
-            base.OnSuspending(next);
-        }
-
-        public override bool OnExiting(IScreen next)
-        {
-            if (base.OnExiting(next))
-                return true;
-
-            this.FadeOut(100);
-            return false;
+            beatmap.BindTo(workingBeatmap);
         }
 
         protected override void LoadComplete()
         {
-            beatmap.BindValueChanged(updateBackground, true);
             base.LoadComplete();
+            beatmap.BindValueChanged(onBeatmapChange, true);
         }
 
-        private void updateBackground(ValueChangedEvent<WorkingBeatmap> beatmapValue)
+        private void onBeatmapChange(ValueChangedEvent<WorkingBeatmap> beatmap)
         {
-            if (Background is BackgroundScreenBeatmap backgroundModeBeatmap)
+            var backgroundModeBeatmap = Background as BackgroundScreenBeatmap;
+            if (backgroundModeBeatmap != null)
             {
-                backgroundModeBeatmap.Beatmap = beatmapValue.NewValue;
-                backgroundModeBeatmap.BlurAmount.Value = background_blur;
-                backgroundModeBeatmap.FadeColour(Color4.White, 250);
+                backgroundModeBeatmap.Beatmap = beatmap.NewValue;
+                backgroundModeBeatmap.BlurAmount.Value = blur;
+                backgroundModeBeatmap.FadeTo(1, 250);
             }
+        }
+
+        public override void OnResuming(IScreen last)
+        {
+            beatmap.TriggerChange();
+            base.OnResuming(last);
         }
     }
 }
