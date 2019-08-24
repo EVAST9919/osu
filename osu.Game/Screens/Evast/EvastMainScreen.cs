@@ -15,6 +15,7 @@ namespace osu.Game.Screens.Evast
                 new Button("Pixel Games", () => this.Push(new PixelsSelectableScreen())),
                 new Button("Export Area", () => this.Push(new ExportAreaScreen())),
                 new Button("Particles", () => this.Push(new SpaceParticlesScreen())),
+                new Button("Music Visualizers", () => this.Push(new MusicVisualizersSelectableScreen())),
             };
         }
     }
