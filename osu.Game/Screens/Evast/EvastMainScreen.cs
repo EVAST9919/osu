@@ -2,6 +2,7 @@
 using osu.Framework.Screens;
 using osu.Game.Screens.Evast.ExportArea;
 using osu.Game.Screens.Evast.Particles;
+using osu.Game.Screens.Evast.ApiHelper;
 
 namespace osu.Game.Screens.Evast
 {
@@ -16,6 +17,7 @@ namespace osu.Game.Screens.Evast
                 new Button("Export Area", () => this.Push(new ExportAreaScreen())),
                 new Button("Particles", () => this.Push(new SpaceParticlesScreen())),
                 new Button("Music Visualizers", () => this.Push(new MusicVisualizersSelectableScreen())),
+                new Button("API Helper", () => this.Push(new ApiHelperScreen())),
             };
         }
     }
