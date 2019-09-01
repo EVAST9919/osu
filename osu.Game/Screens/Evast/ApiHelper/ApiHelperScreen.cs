@@ -110,6 +110,7 @@ namespace osu.Game.Screens.Evast.ApiHelper
 
             request.Failure += result =>
             {
+                text.Clear();
                 text.Text = result.Message;
                 loading.Hide();
             };
@@ -119,6 +120,7 @@ namespace osu.Game.Screens.Evast.ApiHelper
 
         private void format(string result)
         {
+            text.Clear();
             var parsed = JsonConvert.DeserializeObject(result);
             text.AddText(JsonConvert.SerializeObject(parsed, Formatting.Indented));
         }
