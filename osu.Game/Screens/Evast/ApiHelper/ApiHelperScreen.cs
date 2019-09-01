@@ -1,4 +1,5 @@
-﻿using osu.Framework.Allocation;
+﻿using Newtonsoft.Json;
+using osu.Framework.Allocation;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -8,7 +9,6 @@ using osu.Game.Graphics.UserInterface;
 using osu.Game.Online.API;
 using osuTK;
 using osuTK.Graphics;
-using System;
 
 namespace osu.Game.Screens.Evast.ApiHelper
 {
@@ -104,21 +104,23 @@ namespace osu.Game.Screens.Evast.ApiHelper
             request = new GetAPIDataRequest(textBox.Text);
             request.Success += result =>
             {
-                Console.Clear();
-                Console.Write(result);
-                text.Text = result;
+                format(result);
                 loading.Hide();
             };
 
             request.Failure += result =>
             {
-                Console.Clear();
-                Console.Write(result.Message);
                 text.Text = result.Message;
                 loading.Hide();
             };
 
             api.Queue(request);
+        }
+
+        private void format(string result)
+        {
+            var parsed = JsonConvert.DeserializeObject(result);
+            text.AddText(JsonConvert.SerializeObject(parsed, Formatting.Indented));
         }
     }
 }
