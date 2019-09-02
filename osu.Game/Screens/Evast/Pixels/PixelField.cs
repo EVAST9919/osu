@@ -13,12 +13,7 @@ namespace osu.Game.Screens.Evast.Pixels
 
         protected readonly Pixel[,] Pixels;
 
-        private double updateDelay;
-        public double UpdateDelay
-        {
-            set { updateDelay = value; }
-            get { return updateDelay; }
-        }
+        public double UpdateDelay { set; get; }
 
         protected readonly int XCount;
         protected readonly int YCount;
@@ -27,7 +22,7 @@ namespace osu.Game.Screens.Evast.Pixels
         {
             XCount = xCount;
             YCount = yCount;
-            updateDelay = 200;
+            UpdateDelay = 200;
 
             Pixels = new Pixel[xCount, yCount];
 
@@ -140,7 +135,7 @@ namespace osu.Game.Screens.Evast.Pixels
             OnNewUpdate();
 
             if (isGoing)
-                Scheduler.AddDelayed(NewUpdate, updateDelay);
+                Scheduler.AddDelayed(NewUpdate, UpdateDelay);
         }
 
         protected class Pixel : Container
