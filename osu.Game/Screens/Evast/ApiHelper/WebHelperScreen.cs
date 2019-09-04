@@ -9,21 +9,22 @@ using osu.Game.Graphics.UserInterface;
 using osu.Game.Online.API;
 using osuTK;
 using osuTK.Graphics;
+using System;
 
 namespace osu.Game.Screens.Evast.ApiHelper
 {
-    public class ApiHelperScreen : EvastScreen
+    public abstract class WebHelperScreen : EvastScreen
     {
         private readonly OsuTextBox textBox;
         private readonly DimmedLoadingLayer loading;
-        private readonly TextFlowContainer text;
+        protected readonly TextFlowContainer Text;
 
         private GetAPIDataRequest request;
 
         [Resolved]
         private IAPIProvider api { get; set; }
 
-        public ApiHelperScreen()
+        public WebHelperScreen()
         {
             AddRangeInternal(new Drawable[]
             {
@@ -48,7 +49,7 @@ namespace osu.Game.Screens.Evast.ApiHelper
                                 {
                                     Anchor = Anchor.CentreLeft,
                                     Origin = Anchor.CentreLeft,
-                                    Text = "https://osu.ppy.sh/api/v2/"
+                                    Text = CreateUri()
                                 },
                                 textBox = new OsuTextBox
                                 {
@@ -81,11 +82,11 @@ namespace osu.Game.Screens.Evast.ApiHelper
                                 new BasicScrollContainer
                                 {
                                     RelativeSizeAxes = Axes.Both,
-                                    Child = text = new TextFlowContainer
+                                    Child = Text = new TextFlowContainer
                                     {
                                         AutoSizeAxes = Axes.Both,
                                         Direction = FillDirection.Full,
-                                        
+
                                     }
                                 },
                                 loading = new DimmedLoadingLayer(),
@@ -96,33 +97,33 @@ namespace osu.Game.Screens.Evast.ApiHelper
             });
         }
 
+        protected abstract void OnRequestSuccess(string result);
+
+        protected virtual void OnRequestFailure(Exception e) => Text.Text = e.Message;
+
+        protected virtual string CreateUri() => "https://osu.ppy.sh/";
+
         private void getGata()
         {
             request?.Cancel();
             loading.Show();
 
-            request = new GetAPIDataRequest(textBox.Text);
+            request = new GetAPIDataRequest(textBox.Text, CreateUri());
             request.Success += result =>
             {
-                format(result);
+                Text.Clear();
+                OnRequestSuccess(result);
                 loading.Hide();
             };
 
             request.Failure += result =>
             {
-                text.Clear();
-                text.Text = result.Message;
+                Text.Clear();
+                OnRequestFailure(result);
                 loading.Hide();
             };
 
             api.Queue(request);
-        }
-
-        private void format(string result)
-        {
-            text.Clear();
-            var parsed = JsonConvert.DeserializeObject(result);
-            text.AddText(JsonConvert.SerializeObject(parsed, Formatting.Indented));
         }
     }
 }
