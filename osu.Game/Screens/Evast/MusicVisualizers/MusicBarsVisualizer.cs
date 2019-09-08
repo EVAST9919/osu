@@ -7,7 +7,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
     {
         protected abstract VisualizerBar CreateNewBar();
 
-        private int smoothness = 145;
+        private int smoothness = 100;
         public int Smoothness
         {
             get => smoothness;
