@@ -22,23 +22,30 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                 {
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
-                    BarsAmount = 30,
-                    DegreeValue = 180,
-                    BarWidth = 5,
-                    CircleSize = 150,
+                    DegreeValue = 120,
                     X = -400,
+                    BarWidth = 2,
+                    BarsAmount = 50,
                 },
                 new MusicCircularVisualizer
                 {
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
-                    DegreeValue = 180,
-                    CircleSize = 150,
-                    BarsAmount = 30,
-                    BarWidth = 5,
+                    DegreeValue = 120,
                     X = -400,
-                    Rotation = 180,
-                    IsReversed = true,
+                    Rotation = 120,
+                    BarWidth = 2,
+                    BarsAmount = 50,
+                },
+                new MusicCircularVisualizer
+                {
+                    Anchor = Anchor.Centre,
+                    Origin = Anchor.Centre,
+                    DegreeValue = 120,
+                    Rotation = 240,
+                    X = -400,
+                    BarWidth = 2,
+                    BarsAmount = 50,
                 },
                 new MusicCircularVisualizer
                 {
