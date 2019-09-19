@@ -154,7 +154,61 @@ namespace osu.Game.Screens.Select.Carousel
                 notifications?.Post(new SimpleNotification
                 {
                     Text = $@"{audioName} already exists!",
-                    Icon = FontAwesome.Solid.Cross,
+                    Icon = FontAwesome.Solid.Times,
+                });
+            }
+        }
+
+        private void saveVideo()
+        {
+            BeatmapMetadata metadata = beatmapSet.Metadata;
+
+            BeatmapSetFileInfo file = beatmapSet.Files?.Find(f => f.Filename.Equals(metadata.VideoFile));
+
+            if (file == null)
+            {
+                notifications?.Post(new SimpleNotification
+                {
+                    Text = $@"Selected beatmap has no video!",
+                    Icon = FontAwesome.Solid.Times,
+                });
+                return;
+            }
+
+            string localVideoPath = @"\files\" + file.FileInfo.StoragePath;
+            string videoName = metadata.Artist + " - " + metadata.Title + ".mp4";
+
+            //just to be sure there's no invalid symbols
+            videoName = string.Join("", videoName.Split(Path.GetInvalidFileNameChars()));
+            videoName = string.Join("", videoName.Split(Path.GetInvalidPathChars()));
+
+            string storagePath = storage.GetFullPath("");
+
+            //default path
+            //string songsDirectory = storagePath + @"\saved songs";
+
+            string songsDirectory = @"D:\saved osu!videos";
+            if (!Directory.Exists(songsDirectory))
+            {
+                Directory.CreateDirectory(songsDirectory);
+            }
+
+            string finalFilePath = songsDirectory + @"\" + videoName;
+
+            if (!File.Exists(finalFilePath))
+            {
+                File.Copy(storagePath + localVideoPath, finalFilePath);
+                notifications?.Post(new ProgressCompletionNotification
+                {
+                    Text = $@"{videoName} has been successfully exported!",
+                });
+            }
+            else
+            {
+                notifications?.Post(new SimpleNotification
+                {
+                    Text = $@"{videoName} already exists!",
+                    Icon = FontAwesome.Solid.Times,
                 });
             }
         }
@@ -186,6 +240,7 @@ namespace osu.Game.Screens.Select.Carousel
                     items.Add(new OsuMenuItem("Restore all hidden", MenuItemType.Standard, () => restoreHiddenRequested?.Invoke(beatmapSet)));
 
                 items.Add(new OsuMenuItem("Save audio as an mp3 file", MenuItemType.Standard, saveAudio));
+                items.Add(new OsuMenuItem("Save video background (if exists)", MenuItemType.Standard, saveAudio));
                 items.Add(new OsuMenuItem("Delete", MenuItemType.Destructive, () => dialogOverlay?.Push(new BeatmapDeleteDialog(beatmapSet))));
 
                 return items.ToArray();
