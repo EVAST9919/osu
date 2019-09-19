@@ -120,24 +120,21 @@ namespace osu.Game.Screens.Select.Carousel
 
         private void saveAudio()
         {
-            BeatmapMetadata metadata = beatmapSet.Metadata;
-            string localAudioPath = @"\files\" + beatmapSet.Files?.Find(f => f.Filename.Equals(metadata.AudioFile)).FileInfo.StoragePath;
-            string audioName = metadata.Artist + " - " + metadata.Title + ".mp3";
-
-            //just to be sure there's no invalid symbols
-            audioName = string.Join("", audioName.Split(Path.GetInvalidFileNameChars()));
-            audioName = string.Join("", audioName.Split(Path.GetInvalidPathChars()));
-
             string storagePath = storage.GetFullPath("");
-
-            //default path
-            //string songsDirectory = storagePath + @"\saved songs";
 
             string songsDirectory = @"D:\saved osu!songs";
             if (!Directory.Exists(songsDirectory))
             {
                 Directory.CreateDirectory(songsDirectory);
             }
+
+            BeatmapMetadata metadata = beatmapSet.Metadata;
+            string localAudioPath = @"\files\" + beatmapSet.Files?.Find(f => f.Filename.Equals(metadata.AudioFile)).FileInfo.StoragePath;
+            string audioName = metadata.Artist + " - " + metadata.Title + ".mp3";
+
+            //just to be sure there are no invalid symbols
+            audioName = string.Join("", audioName.Split(Path.GetInvalidFileNameChars()));
+            audioName = string.Join("", audioName.Split(Path.GetInvalidPathChars()));
 
             string finalFilePath = songsDirectory + @"\" + audioName;
 
@@ -175,23 +172,20 @@ namespace osu.Game.Screens.Select.Carousel
                 return;
             }
 
-            string localVideoPath = @"\files\" + file.FileInfo.StoragePath;
-            string videoName = metadata.Artist + " - " + metadata.Title + ".mp4";
-
-            //just to be sure there's no invalid symbols
-            videoName = string.Join("", videoName.Split(Path.GetInvalidFileNameChars()));
-            videoName = string.Join("", videoName.Split(Path.GetInvalidPathChars()));
-
             string storagePath = storage.GetFullPath("");
-
-            //default path
-            //string songsDirectory = storagePath + @"\saved songs";
 
             string songsDirectory = @"D:\saved osu!videos";
             if (!Directory.Exists(songsDirectory))
             {
                 Directory.CreateDirectory(songsDirectory);
             }
+
+            string localVideoPath = @"\files\" + file.FileInfo.StoragePath;
+            string videoName = metadata.Artist + " - " + metadata.Title + ".mp4";
+
+            //just to be sure there are no invalid symbols
+            videoName = string.Join("", videoName.Split(Path.GetInvalidFileNameChars()));
+            videoName = string.Join("", videoName.Split(Path.GetInvalidPathChars()));
 
             string finalFilePath = songsDirectory + @"\" + videoName;
 
