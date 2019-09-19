@@ -240,7 +240,7 @@ namespace osu.Game.Screens.Select.Carousel
                     items.Add(new OsuMenuItem("Restore all hidden", MenuItemType.Standard, () => restoreHiddenRequested?.Invoke(beatmapSet)));
 
                 items.Add(new OsuMenuItem("Save audio as an mp3 file", MenuItemType.Standard, saveAudio));
-                items.Add(new OsuMenuItem("Save video background (if exists)", MenuItemType.Standard, saveAudio));
+                items.Add(new OsuMenuItem("Save video background (if exists)", MenuItemType.Standard, saveVideo));
                 items.Add(new OsuMenuItem("Delete", MenuItemType.Destructive, () => dialogOverlay?.Push(new BeatmapDeleteDialog(beatmapSet))));
 
                 return items.ToArray();
