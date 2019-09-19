@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
@@ -118,7 +119,7 @@ namespace osu.Game.Screens.Select.Carousel
             };
         }
 
-        private void saveAudio()
+        private async void saveAudio()
         {
             string storagePath = storage.GetFullPath("");
 
@@ -138,25 +139,24 @@ namespace osu.Game.Screens.Select.Carousel
 
             string finalFilePath = directory + @"\" + audioName;
 
-            if (!File.Exists(finalFilePath))
-            {
-                File.Copy(storagePath + localAudioPath, finalFilePath);
-                notifications?.Post(new ProgressCompletionNotification
-                {
-                    Text = $@"{audioName} has been successfully exported!",
-                });
-            }
-            else
+            if (File.Exists(finalFilePath))
             {
                 notifications?.Post(new SimpleNotification
                 {
                     Text = $@"{audioName} already exists!",
                     Icon = FontAwesome.Solid.Times,
                 });
+                return;
             }
+
+            await Task.Run(() => File.Copy(storagePath + localAudioPath, finalFilePath));
+            notifications?.Post(new ProgressCompletionNotification
+            {
+                Text = $@"{audioName} has been successfully exported!",
+            });
         }
 
-        private void saveBackground()
+        private async void saveBackground()
         {
             string storagePath = storage.GetFullPath("");
 
@@ -176,25 +176,24 @@ namespace osu.Game.Screens.Select.Carousel
 
             string finalFilePath = directory + @"\" + bgName;
 
-            if (!File.Exists(finalFilePath))
-            {
-                File.Copy(storagePath + localBgPath, finalFilePath);
-                notifications?.Post(new ProgressCompletionNotification
-                {
-                    Text = $@"{bgName} has been successfully exported!",
-                });
-            }
-            else
+            if (File.Exists(finalFilePath))
             {
                 notifications?.Post(new SimpleNotification
                 {
                     Text = $@"{bgName} already exists!",
                     Icon = FontAwesome.Solid.Times,
                 });
+                return;
             }
+
+            await Task.Run(() => File.Copy(storagePath + localBgPath, finalFilePath));
+            notifications?.Post(new ProgressCompletionNotification
+            {
+                Text = $@"{bgName} has been successfully exported!",
+            });
         }
 
-        private void saveVideo()
+        private async void saveVideo()
         {
             BeatmapMetadata metadata = beatmapSet.Metadata;
 
@@ -227,22 +226,21 @@ namespace osu.Game.Screens.Select.Carousel
 
             string finalFilePath = directory + @"\" + videoName;
 
-            if (!File.Exists(finalFilePath))
-            {
-                File.Copy(storagePath + localVideoPath, finalFilePath);
-                notifications?.Post(new ProgressCompletionNotification
-                {
-                    Text = $@"{videoName} has been successfully exported!",
-                });
-            }
-            else
+            if (File.Exists(finalFilePath))
             {
                 notifications?.Post(new SimpleNotification
                 {
                     Text = $@"{videoName} already exists!",
                     Icon = FontAwesome.Solid.Times,
                 });
+                return;
             }
+
+            await Task.Run(() => File.Copy(storagePath + localVideoPath, finalFilePath));
+            notifications?.Post(new ProgressCompletionNotification
+            {
+                Text = $@"{videoName} has been successfully exported!",
+            });
         }
 
         private const int maximum_difficulty_icons = 18;
