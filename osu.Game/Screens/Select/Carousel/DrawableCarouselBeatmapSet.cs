@@ -122,10 +122,10 @@ namespace osu.Game.Screens.Select.Carousel
         {
             string storagePath = storage.GetFullPath("");
 
-            string songsDirectory = @"D:\saved osu!songs";
-            if (!Directory.Exists(songsDirectory))
+            string directory = @"D:\saved osu!songs";
+            if (!Directory.Exists(directory))
             {
-                Directory.CreateDirectory(songsDirectory);
+                Directory.CreateDirectory(directory);
             }
 
             BeatmapMetadata metadata = beatmapSet.Metadata;
@@ -136,7 +136,7 @@ namespace osu.Game.Screens.Select.Carousel
             audioName = string.Join("", audioName.Split(Path.GetInvalidFileNameChars()));
             audioName = string.Join("", audioName.Split(Path.GetInvalidPathChars()));
 
-            string finalFilePath = songsDirectory + @"\" + audioName;
+            string finalFilePath = directory + @"\" + audioName;
 
             if (!File.Exists(finalFilePath))
             {
@@ -151,6 +151,44 @@ namespace osu.Game.Screens.Select.Carousel
                 notifications?.Post(new SimpleNotification
                 {
                     Text = $@"{audioName} already exists!",
+                    Icon = FontAwesome.Solid.Times,
+                });
+            }
+        }
+
+        private void saveBackground()
+        {
+            string storagePath = storage.GetFullPath("");
+
+            string directory = @"D:\saved osu!backgrounds";
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            BeatmapMetadata metadata = beatmapSet.Metadata;
+            string localBgPath = @"\files\" + beatmapSet.Files?.Find(f => f.Filename.Equals(metadata.BackgroundFile)).FileInfo.StoragePath;
+            string bgName = metadata.Artist + " - " + metadata.Title + ".png";
+
+            //just to be sure there are no invalid symbols
+            bgName = string.Join("", bgName.Split(Path.GetInvalidFileNameChars()));
+            bgName = string.Join("", bgName.Split(Path.GetInvalidPathChars()));
+
+            string finalFilePath = directory + @"\" + bgName;
+
+            if (!File.Exists(finalFilePath))
+            {
+                File.Copy(storagePath + localBgPath, finalFilePath);
+                notifications?.Post(new ProgressCompletionNotification
+                {
+                    Text = $@"{bgName} has been successfully exported!",
+                });
+            }
+            else
+            {
+                notifications?.Post(new SimpleNotification
+                {
+                    Text = $@"{bgName} already exists!",
                     Icon = FontAwesome.Solid.Times,
                 });
             }
@@ -174,10 +212,10 @@ namespace osu.Game.Screens.Select.Carousel
 
             string storagePath = storage.GetFullPath("");
 
-            string songsDirectory = @"D:\saved osu!videos";
-            if (!Directory.Exists(songsDirectory))
+            string directory = @"D:\saved osu!videos";
+            if (!Directory.Exists(directory))
             {
-                Directory.CreateDirectory(songsDirectory);
+                Directory.CreateDirectory(directory);
             }
 
             string localVideoPath = @"\files\" + file.FileInfo.StoragePath;
@@ -187,7 +225,7 @@ namespace osu.Game.Screens.Select.Carousel
             videoName = string.Join("", videoName.Split(Path.GetInvalidFileNameChars()));
             videoName = string.Join("", videoName.Split(Path.GetInvalidPathChars()));
 
-            string finalFilePath = songsDirectory + @"\" + videoName;
+            string finalFilePath = directory + @"\" + videoName;
 
             if (!File.Exists(finalFilePath))
             {
@@ -235,6 +273,7 @@ namespace osu.Game.Screens.Select.Carousel
 
                 items.Add(new OsuMenuItem("Save audio as an mp3 file", MenuItemType.Standard, saveAudio));
                 items.Add(new OsuMenuItem("Save video background (if exists)", MenuItemType.Standard, saveVideo));
+                items.Add(new OsuMenuItem("Save background (if exists)", MenuItemType.Standard, saveBackground));
                 items.Add(new OsuMenuItem("Delete", MenuItemType.Destructive, () => dialogOverlay?.Push(new BeatmapDeleteDialog(beatmapSet))));
 
                 return items.ToArray();
