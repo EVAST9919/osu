@@ -11,6 +11,7 @@ using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using osu.Framework;
 using osu.Framework.Extensions;
+using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.IO.File;
 using osu.Framework.Logging;
 using osu.Framework.Platform;
@@ -481,12 +482,16 @@ namespace osu.Game.Database
         {
             var fileInfos = new List<TFileModel>();
 
+            string prefix = reader.Filenames.GetCommonPrefix();
+            if (!(prefix.EndsWith("/") || prefix.EndsWith("\\")))
+                prefix = string.Empty;
+
             // import files to manager
             foreach (string file in reader.Filenames)
                 using (Stream s = reader.GetStream(file))
                     fileInfos.Add(new TFileModel
                     {
-                        Filename = FileSafety.PathStandardise(file),
+                        Filename = FileSafety.PathStandardise(file.Substring(prefix.Length)),
                         FileInfo = files.Add(s)
                     });
 
@@ -585,7 +590,7 @@ namespace osu.Game.Database
         /// </summary>
         /// <param name="existing">The existing model.</param>
         /// <param name="import">The newly imported model.</param>
-        /// <returns>Whether the existing model should be restored and used. Returning false will delete the existing a force a re-import.</returns>
+        /// <returns>Whether the existing model should be restored and used. Returning false will delete the existing and force a re-import.</returns>
         protected virtual bool CanUndelete(TModel existing, TModel import) => true;
 
         private DbSet<TModel> queryModel() => ContextFactory.Get().Set<TModel>();
