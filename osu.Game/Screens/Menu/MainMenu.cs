@@ -1,18 +1,22 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using System;
 using osuTK;
 using osuTK.Graphics;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Sprites;
 using osu.Framework.Platform;
 using osu.Framework.Screens;
 using osu.Game.Beatmaps;
+using osu.Game.Configuration;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Online.API;
 using osu.Game.Overlays;
+using osu.Game.Overlays.Dialog;
 using osu.Game.Screens.Backgrounds;
 using osu.Game.Screens.Charts;
 using osu.Game.Screens.Edit;
@@ -52,15 +56,35 @@ namespace osu.Game.Screens.Menu
         [Resolved]
         private IAPIProvider api { get; set; }
 
+        [Resolved(canBeNull: true)]
+        private DialogOverlay dialogOverlay { get; set; }
+
         private BackgroundScreenDefault background;
 
         protected override BackgroundScreen CreateBackground() => background;
 
+        private Bindable<int> holdDelay;
+
+        private ExitConfirmOverlay exitConfirmOverlay;
+
         [BackgroundDependencyLoader(true)]
-        private void load(DirectOverlay direct, SettingsOverlay settings)
+        private void load(DirectOverlay direct, SettingsOverlay settings, OsuConfigManager config)
         {
+            holdDelay = config.GetBindable<int>(OsuSetting.UIHoldActivationDelay);
+
             if (host.CanExit)
-                AddInternal(new ExitConfirmOverlay { Action = this.Exit });
+            {
+                AddInternal(exitConfirmOverlay = new ExitConfirmOverlay
+                {
+                    Action = () =>
+                    {
+                        if (holdDelay.Value > 0)
+                            confirmAndExit();
+                        else
+                            this.Exit();
+                    }
+                });
+            }
 
             AddRangeInternal(new Drawable[]
             {
@@ -76,7 +100,7 @@ namespace osu.Game.Screens.Menu
                             OnSolo = onSolo,
                             OnMore = delegate { this.Push(new EvastMainScreen()); },
                             OnMulti = delegate { this.Push(new Multiplayer()); },
-                            OnExit = this.Exit,
+                            OnExit = confirmAndExit,
                         }
                     }
                 },
@@ -103,6 +127,12 @@ namespace osu.Game.Screens.Menu
 
             LoadComponentAsync(background = new BackgroundScreenDefault());
             preloadSongSelect();
+        }
+
+        private void confirmAndExit()
+        {
+            exitConfirmed = true;
+            this.Exit();
         }
 
         private void preloadSongSelect()
@@ -143,6 +173,7 @@ namespace osu.Game.Screens.Menu
         }
 
         private bool loginDisplayed;
+        private bool exitConfirmed;
 
         protected override void LogoArriving(OsuLogo logo, bool resuming)
         {
@@ -223,9 +254,40 @@ namespace osu.Game.Screens.Menu
 
         public override bool OnExiting(IScreen next)
         {
+            if (!exitConfirmed && dialogOverlay != null && !(dialogOverlay.CurrentDialog is ConfirmExitDialog))
+            {
+                dialogOverlay.Push(new ConfirmExitDialog(confirmAndExit, () => exitConfirmOverlay.Abort()));
+                return true;
+            }
+
             buttons.State = ButtonSystemState.Exit;
             this.FadeOut(3000);
             return base.OnExiting(next);
+        }
+
+        private class ConfirmExitDialog : PopupDialog
+        {
+            public ConfirmExitDialog(Action confirm, Action cancel)
+            {
+                HeaderText = "Are you sure you want to exit?";
+                BodyText = "Last chance to back out.";
+
+                Icon = FontAwesome.Solid.ExclamationTriangle;
+
+                Buttons = new PopupDialogButton[]
+                {
+                    new PopupDialogOkButton
+                    {
+                        Text = @"Good bye",
+                        Action = confirm
+                    },
+                    new PopupDialogCancelButton
+                    {
+                        Text = @"Just a little more",
+                        Action = cancel
+                    },
+                };
+            }
         }
     }
 }
