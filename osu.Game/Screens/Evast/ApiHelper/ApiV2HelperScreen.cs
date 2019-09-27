@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System;
 
 namespace osu.Game.Screens.Evast.ApiHelper
 {
@@ -8,8 +9,17 @@ namespace osu.Game.Screens.Evast.ApiHelper
 
         protected override void OnRequestSuccess(string result)
         {
-            var parsed = JsonConvert.DeserializeObject(result);
-            Text.AddText(JsonConvert.SerializeObject(parsed, Formatting.Indented));
+            try
+            {
+                var parsed = JsonConvert.DeserializeObject(result);
+                Text.AddText(JsonConvert.SerializeObject(parsed, Formatting.Indented));
+            }
+            catch
+            {
+                Text.AddText(result);
+                Console.WriteLine();
+                Console.Write(result);
+            }
         }
     }
 }
