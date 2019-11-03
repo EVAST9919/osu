@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using osu.Framework.Allocation;
+﻿using osu.Framework.Allocation;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -17,6 +16,7 @@ namespace osu.Game.Screens.Evast.ApiHelper
     {
         private readonly OsuTextBox textBox;
         private readonly DimmedLoadingLayer loading;
+        private readonly OsuButton commitButton;
         protected readonly TextFlowContainer Text;
 
         private GetAPIDataRequest request;
@@ -57,13 +57,13 @@ namespace osu.Game.Screens.Evast.ApiHelper
                                     Origin = Anchor.CentreLeft,
                                     Size = new Vector2(400, 30),
                                 },
-                                new OsuButton
+                                commitButton = new OsuButton
                                 {
                                     Anchor = Anchor.CentreLeft,
                                     Origin = Anchor.CentreLeft,
                                     Size = new Vector2(100, 30),
                                     Text = "Get Data",
-                                    Action = () => getGata(),
+                                    Action = getData,
                                 }
                             }
                         },
@@ -95,6 +95,8 @@ namespace osu.Game.Screens.Evast.ApiHelper
                     }
                 },
             });
+
+            textBox.OnCommit += (u, v) => commitButton.Click();
         }
 
         protected abstract void OnRequestSuccess(string result);
@@ -103,7 +105,7 @@ namespace osu.Game.Screens.Evast.ApiHelper
 
         protected virtual string CreateUri() => "https://osu.ppy.sh/";
 
-        private void getGata()
+        private void getData()
         {
             request?.Cancel();
             loading.Show();
@@ -113,6 +115,7 @@ namespace osu.Game.Screens.Evast.ApiHelper
             {
                 Text.Clear();
                 OnRequestSuccess(result);
+                Console.WriteLine(result);
                 loading.Hide();
             };
 
@@ -120,6 +123,7 @@ namespace osu.Game.Screens.Evast.ApiHelper
             {
                 Text.Clear();
                 OnRequestFailure(result);
+                Console.WriteLine(result);
                 loading.Hide();
             };
 
