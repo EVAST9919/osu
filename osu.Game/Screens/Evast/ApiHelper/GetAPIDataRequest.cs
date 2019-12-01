@@ -7,7 +7,7 @@ namespace osu.Game.Screens.Evast.ApiHelper
         private readonly string target;
         private readonly string uri;
 
-        public string Result => WebRequest.ResponseString;
+        public string Result => WebRequest.GetResponseString();
 
         public GetAPIDataRequest(string target, string uri)
         {
