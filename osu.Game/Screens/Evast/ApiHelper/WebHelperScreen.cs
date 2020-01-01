@@ -49,7 +49,7 @@ namespace osu.Game.Screens.Evast.ApiHelper
                                 {
                                     Anchor = Anchor.CentreLeft,
                                     Origin = Anchor.CentreLeft,
-                                    Text = CreateUri()
+                                    Text = CreateUri().ToString()
                                 },
                                 textBox = new OsuTextBox
                                 {
@@ -103,7 +103,7 @@ namespace osu.Game.Screens.Evast.ApiHelper
 
         protected virtual void OnRequestFailure(Exception e) => Text.Text = e.Message;
 
-        protected virtual string CreateUri() => "https://osu.ppy.sh/";
+        protected virtual Uri CreateUri() => new Uri("https://osu.ppy.sh/");
 
         private void getData()
         {

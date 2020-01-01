@@ -1,15 +1,16 @@
-﻿using osu.Game.Online.API;
+﻿using System;
+using osu.Game.Online.API;
 
 namespace osu.Game.Screens.Evast.ApiHelper
 {
     public class GetAPIDataRequest : APIRequest
     {
         private readonly string target;
-        private readonly string uri;
+        private readonly Uri uri;
 
         public string Result => WebRequest.GetResponseString();
 
-        public GetAPIDataRequest(string target, string uri)
+        public GetAPIDataRequest(string target, Uri uri)
         {
             this.target = target;
             this.uri = uri;

@@ -5,7 +5,7 @@ namespace osu.Game.Screens.Evast.ApiHelper
 {
     public class ApiV2HelperScreen : WebHelperScreen
     {
-        protected override string CreateUri() => "https://osu.ppy.sh/api/v2/";
+        protected override Uri CreateUri() => new Uri("https://osu.ppy.sh/api/v2/");
 
         protected override void OnRequestSuccess(string result)
         {
@@ -17,7 +17,7 @@ namespace osu.Game.Screens.Evast.ApiHelper
             catch
             {
                 Text.AddText(result);
-                Console.WriteLine();
+                Console.Clear();
                 Console.Write(result);
             }
         }

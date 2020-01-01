@@ -130,7 +130,7 @@ namespace osu.Game.Screens.Select.Carousel
             }
 
             BeatmapMetadata metadata = beatmapSet.Metadata;
-            string localAudioPath = @"\files\" + beatmapSet.Files?.Find(f => f.Filename.Equals(metadata.AudioFile)).FileInfo.StoragePath;
+            string localAudioPath = @"\files\" + beatmapSet.Files?.Find(f => f.Filename == metadata.AudioFile).FileInfo.StoragePath;
             string audioName = metadata.Artist + " - " + metadata.Title + ".mp3";
 
             //just to be sure there are no invalid symbols
@@ -167,7 +167,7 @@ namespace osu.Game.Screens.Select.Carousel
             }
 
             BeatmapMetadata metadata = beatmapSet.Metadata;
-            string localBgPath = @"\files\" + beatmapSet.Files?.Find(f => f.Filename.Equals(metadata.BackgroundFile)).FileInfo.StoragePath;
+            string localBgPath = @"\files\" + beatmapSet.Files?.Find(f => f.Filename == metadata.BackgroundFile).FileInfo.StoragePath;
             string bgName = metadata.Artist + " - " + metadata.Title + ".png";
 
             //just to be sure there are no invalid symbols
@@ -197,7 +197,7 @@ namespace osu.Game.Screens.Select.Carousel
         {
             BeatmapMetadata metadata = beatmapSet.Metadata;
 
-            BeatmapSetFileInfo file = beatmapSet.Files?.Find(f => f.Filename.Equals(metadata.VideoFile));
+            BeatmapSetFileInfo file = beatmapSet.Files?.Find(f => f.Filename == metadata.VideoFile);
 
             if (file == null)
             {
