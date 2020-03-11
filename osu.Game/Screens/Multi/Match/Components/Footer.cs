@@ -4,11 +4,11 @@
 using System;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Game.Graphics;
-using osu.Game.Graphics.UserInterface;
 using osu.Game.Online.Multiplayer;
 using osuTK;
 
@@ -22,7 +22,6 @@ namespace osu.Game.Screens.Multi.Match.Components
         public readonly Bindable<PlaylistItem> SelectedItem = new Bindable<PlaylistItem>();
 
         private readonly Drawable background;
-        private readonly OsuButton startButton;
 
         public Footer()
         {
@@ -32,7 +31,7 @@ namespace osu.Game.Screens.Multi.Match.Components
             InternalChildren = new[]
             {
                 background = new Box { RelativeSizeAxes = Axes.Both },
-                startButton = new ReadyButton
+                new ReadyButton
                 {
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
@@ -46,8 +45,7 @@ namespace osu.Game.Screens.Multi.Match.Components
         [BackgroundDependencyLoader]
         private void load(OsuColour colours)
         {
-            background.Colour = OsuColour.FromHex(@"28242d");
-            startButton.BackgroundColour = colours.Green;
+            background.Colour = Color4Extensions.FromHex(@"28242d");
         }
     }
 }
