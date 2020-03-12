@@ -21,6 +21,8 @@ using osu.Game.Rulesets.Difficulty;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Scoring;
 using System;
+using osu.Game.Rulesets.Catch.Skinning;
+using osu.Game.Skinning;
 
 namespace osu.Game.Rulesets.Catch
 {
@@ -135,9 +137,13 @@ namespace osu.Game.Rulesets.Catch
 
         public override string ShortName => SHORT_NAME;
 
+        public override string PlayingVerb => "Catching fruit";
+
         public override Drawable CreateIcon() => new SpriteIcon { Icon = OsuIcon.RulesetCatch };
 
         public override DifficultyCalculator CreateDifficultyCalculator(WorkingBeatmap beatmap) => new CatchDifficultyCalculator(this, beatmap);
+
+        public override ISkin CreateLegacySkinProvider(ISkinSource source) => new CatchLegacySkinTransformer(source);
 
         public override PerformanceCalculator CreatePerformanceCalculator(WorkingBeatmap beatmap, ScoreInfo score) => new CatchPerformanceCalculator(this, beatmap, score);
 

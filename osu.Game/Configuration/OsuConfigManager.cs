@@ -1,6 +1,7 @@
 ﻿// Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
+using osu.Framework.Bindables;
 using osu.Framework.Configuration;
 using osu.Framework.Configuration.Tracking;
 using osu.Framework.Extensions;
@@ -20,11 +21,11 @@ namespace osu.Game.Configuration
             Set(OsuSetting.Ruleset, 0, 0, int.MaxValue);
             Set(OsuSetting.Skin, 0, -1, int.MaxValue);
 
-            Set(OsuSetting.BeatmapDetailTab, BeatmapDetailTab.Details);
+            Set(OsuSetting.BeatmapDetailTab, PlayBeatmapDetailArea.TabType.Details);
 
             Set(OsuSetting.ShowConvertedBeatmaps, true);
             Set(OsuSetting.DisplayStarsMinimum, 0.0, 0, 10, 0.1);
-            Set(OsuSetting.DisplayStarsMaximum, 10.0, 0, 10, 0.1);
+            Set(OsuSetting.DisplayStarsMaximum, 10.1, 0, 10.1, 0.1);
 
             Set(OsuSetting.SongSelectGroupingMode, GroupMode.All);
             Set(OsuSetting.SongSelectSortingMode, SortMode.Title);
@@ -78,13 +79,14 @@ namespace osu.Game.Configuration
             Set(OsuSetting.MenuParallax, true);
 
             // Gameplay
-            Set(OsuSetting.DimLevel, 0.3, 0, 1, 0.01);
+            Set(OsuSetting.DimLevel, 0.8, 0, 1, 0.01);
             Set(OsuSetting.BlurLevel, 0, 0, 1, 0.01);
             Set(OsuSetting.LightenDuringBreaks, true);
 
             Set(OsuSetting.HitLighting, true);
 
             Set(OsuSetting.ShowInterface, true);
+            Set(OsuSetting.ShowProgressGraph, true);
             Set(OsuSetting.ShowHealthDisplayWhenCantFail, true);
             Set(OsuSetting.KeyOverlay, false);
             Set(OsuSetting.ScoreMeter, ScoreMeterType.HitErrorBoth);
@@ -125,6 +127,35 @@ namespace osu.Game.Configuration
         public OsuConfigManager(Storage storage)
             : base(storage)
         {
+            Migrate();
+        }
+
+        public void Migrate()
+        {
+            // arrives as 2020.123.0
+            var rawVersion = Get<string>(OsuSetting.Version);
+
+            if (rawVersion.Length < 6)
+                return;
+
+            var pieces = rawVersion.Split('.');
+
+            // on a fresh install or when coming from a non-release build, execution will end here.
+            // we don't want to run migrations in such cases.
+            if (!int.TryParse(pieces[0], out int year)) return;
+            if (!int.TryParse(pieces[1], out int monthDay)) return;
+
+            int combined = (year * 10000) + monthDay;
+
+            if (combined < 20200305)
+            {
+                // the maximum value of this setting was changed.
+                // if we don't manually increase this, it causes song select to filter out beatmaps the user expects to see.
+                var maxStars = (BindableDouble)GetOriginalBindable<double>(OsuSetting.DisplayStarsMaximum);
+
+                if (maxStars.Value == 10)
+                    maxStars.Value = maxStars.MaxValue;
+            }
         }
 
         public override TrackedSettings CreateTrackedSettings() => new TrackedSettings
@@ -150,6 +181,7 @@ namespace osu.Game.Configuration
         ScoreMeter,
         FloatingComments,
         ShowInterface,
+        ShowProgressGraph,
         ShowHealthDisplayWhenCantFail,
         MouseDisableButtons,
         MouseDisableWheel,

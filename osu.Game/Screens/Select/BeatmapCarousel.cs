@@ -9,22 +9,24 @@ using System.Collections.Generic;
 using System.Linq;
 using osu.Game.Configuration;
 using osuTK.Input;
-using osu.Framework.MathUtils;
+using osu.Framework.Utils;
 using System.Diagnostics;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Caching;
 using osu.Framework.Threading;
 using osu.Framework.Extensions.IEnumerableExtensions;
+using osu.Framework.Input.Bindings;
 using osu.Framework.Input.Events;
 using osu.Game.Beatmaps;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Cursor;
+using osu.Game.Input.Bindings;
 using osu.Game.Screens.Select.Carousel;
 
 namespace osu.Game.Screens.Select
 {
-    public class BeatmapCarousel : CompositeDrawable
+    public class BeatmapCarousel : CompositeDrawable, IKeyBindingHandler<GlobalAction>
     {
         private const float bleed_top = FilterControl.HEIGHT;
         private const float bleed_bottom = Footer.HEIGHT;
@@ -56,6 +58,9 @@ namespace osu.Game.Screens.Select
         public override bool HandleNonPositionalInput => AllowSelection;
         public override bool HandlePositionalInput => AllowSelection;
 
+        public override bool PropagatePositionalInputSubTree => AllowSelection;
+        public override bool PropagateNonPositionalInputSubTree => AllowSelection;
+
         /// <summary>
         /// Whether carousel items have completed asynchronously loaded.
         /// </summary>
@@ -65,6 +70,7 @@ namespace osu.Game.Screens.Select
 
         private IEnumerable<CarouselBeatmapSet> beatmapSets => root.Children.OfType<CarouselBeatmapSet>();
 
+        // todo: only used for testing, maybe remove.
         public IEnumerable<BeatmapSetInfo> BeatmapSets
         {
             get => beatmapSets.Select(g => g.BeatmapSet);
@@ -130,8 +136,11 @@ namespace osu.Game.Screens.Select
             };
         }
 
+        [Resolved]
+        private BeatmapManager beatmaps { get; set; }
+
         [BackgroundDependencyLoader(permitNulls: true)]
-        private void load(OsuConfigManager config, BeatmapManager beatmaps)
+        private void load(OsuConfigManager config)
         {
             config.BindWith(OsuSetting.RandomSelectAlgorithm, RandomAlgorithm);
             config.BindWith(OsuSetting.SongSelectRightMouseScroll, RightClickScrollingEnabled);
@@ -139,8 +148,15 @@ namespace osu.Game.Screens.Select
             RightClickScrollingEnabled.ValueChanged += enabled => scroll.RightMouseScrollbar = enabled.NewValue;
             RightClickScrollingEnabled.TriggerChange();
 
-            loadBeatmapSets(beatmaps.GetAllUsableBeatmapSetsEnumerable());
+            beatmaps.ItemAdded += beatmapAdded;
+            beatmaps.ItemRemoved += beatmapRemoved;
+            beatmaps.BeatmapHidden += beatmapHidden;
+            beatmaps.BeatmapRestored += beatmapRestored;
+
+            loadBeatmapSets(GetLoadableBeatmaps());
         }
+
+        protected virtual IEnumerable<BeatmapSetInfo> GetLoadableBeatmaps() => beatmaps.GetAllUsableBeatmapSetsEnumerable();
 
         public void RemoveBeatmapSet(BeatmapSetInfo beatmapSet) => Schedule(() =>
         {
@@ -175,7 +191,7 @@ namespace osu.Game.Screens.Select
 
             root.AddChild(newSet);
 
-            applyActiveCriteria(false, false);
+            applyActiveCriteria(false);
 
             //check if we can/need to maintain our current selection.
             if (previouslySelectedID != null)
@@ -217,6 +233,17 @@ namespace osu.Game.Screens.Select
                 if (item != null)
                 {
                     select(item);
+
+                    // if we got here and the set is filtered, it means we were bypassing filters.
+                    // in this case, reapplying the filter is necessary to ensure the panel is in the correct place
+                    // (since it is forcefully being included in the carousel).
+                    if (set.Filtered.Value)
+                    {
+                        Debug.Assert(bypassFilters);
+
+                        applyActiveCriteria(false);
+                    }
+
                     return true;
                 }
             }
@@ -371,7 +398,7 @@ namespace osu.Game.Screens.Select
         {
             if (PendingFilter?.Completed == false)
             {
-                applyActiveCriteria(false, false);
+                applyActiveCriteria(false);
                 Update();
             }
         }
@@ -381,10 +408,10 @@ namespace osu.Game.Screens.Select
             if (newCriteria != null)
                 activeCriteria = newCriteria;
 
-            applyActiveCriteria(debounce, true);
+            applyActiveCriteria(debounce);
         }
 
-        private void applyActiveCriteria(bool debounce, bool scroll)
+        private void applyActiveCriteria(bool debounce)
         {
             if (root.Children.Any() != true) return;
 
@@ -394,7 +421,7 @@ namespace osu.Game.Screens.Select
 
                 root.Filter(activeCriteria);
                 itemsCache.Invalidate();
-                if (scroll) scrollPositionCache.Invalidate();
+                scrollPositionCache.Invalidate();
             }
 
             PendingFilter?.Cancel();
@@ -412,38 +439,39 @@ namespace osu.Game.Screens.Select
 
         protected override bool OnKeyDown(KeyDownEvent e)
         {
-            int direction = 0;
-            bool skipDifficulties = false;
-
             switch (e.Key)
             {
-                case Key.Up:
-                    direction = -1;
-                    break;
-
-                case Key.Down:
-                    direction = 1;
-                    break;
-
                 case Key.Left:
-                    direction = -1;
-                    skipDifficulties = true;
-                    break;
+                    SelectNext(-1, true);
+                    return true;
 
                 case Key.Right:
-                    direction = 1;
-                    skipDifficulties = true;
-                    break;
+                    SelectNext(1, true);
+                    return true;
             }
 
-            if (direction == 0)
-                return base.OnKeyDown(e);
-
-            SelectNext(direction, skipDifficulties);
-            return true;
+            return false;
         }
 
-        protected override bool ReceivePositionalInputAtSubTree(Vector2 screenSpacePos) => ReceivePositionalInputAt(screenSpacePos);
+        public bool OnPressed(GlobalAction action)
+        {
+            switch (action)
+            {
+                case GlobalAction.SelectNext:
+                    SelectNext(1, false);
+                    return true;
+
+                case GlobalAction.SelectPrevious:
+                    SelectNext(-1, false);
+                    return true;
+            }
+
+            return false;
+        }
+
+        public void OnReleased(GlobalAction action)
+        {
+        }
 
         protected override void Update()
         {
@@ -528,10 +556,26 @@ namespace osu.Game.Screens.Select
         {
             base.Dispose(isDisposing);
 
+            if (beatmaps != null)
+            {
+                beatmaps.ItemAdded -= beatmapAdded;
+                beatmaps.ItemRemoved -= beatmapRemoved;
+                beatmaps.BeatmapHidden -= beatmapHidden;
+                beatmaps.BeatmapRestored -= beatmapRestored;
+            }
+
             // aggressively dispose "off-screen" items to reduce GC pressure.
             foreach (var i in Items)
                 i.Dispose();
         }
+
+        private void beatmapRemoved(BeatmapSetInfo item) => RemoveBeatmapSet(item);
+
+        private void beatmapAdded(BeatmapSetInfo item) => UpdateBeatmapSet(item);
+
+        private void beatmapRestored(BeatmapInfo b) => UpdateBeatmapSet(beatmaps.QueryBeatmapSet(s => s.ID == b.BeatmapSetInfoID));
+
+        private void beatmapHidden(BeatmapInfo b) => UpdateBeatmapSet(beatmaps.QueryBeatmapSet(s => s.ID == b.BeatmapSetInfoID));
 
         private CarouselBeatmapSet createCarouselSet(BeatmapSetInfo beatmapSet)
         {

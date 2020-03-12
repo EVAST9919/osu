@@ -18,7 +18,6 @@ using osu.Game.Online.API;
 using osu.Game.Overlays;
 using osu.Game.Overlays.Dialog;
 using osu.Game.Screens.Backgrounds;
-using osu.Game.Screens.Charts;
 using osu.Game.Screens.Edit;
 using osu.Game.Screens.Multi;
 using osu.Game.Screens.Select;
@@ -70,8 +69,11 @@ namespace osu.Game.Screens.Menu
 
         private ExitConfirmOverlay exitConfirmOverlay;
 
+        private ParallaxContainer buttonsContainer;
+        private SongTicker songTicker;
+
         [BackgroundDependencyLoader(true)]
-        private void load(DirectOverlay direct, SettingsOverlay settings, OsuConfigManager config, SessionStatics statics)
+        private void load(DirectOverlay direct, SettingsOverlay settings, RankingsOverlay rankings, OsuConfigManager config, SessionStatics statics)
         {
             holdDelay = config.GetBindable<float>(OsuSetting.UIHoldActivationDelay);
             loginDisplayed = statics.GetBindable<bool>(Static.LoginOverlayDisplayed);
@@ -90,16 +92,15 @@ namespace osu.Game.Screens.Menu
                 });
             }
 
-            AddRangeInternal(new Drawable[]
+            AddRangeInternal(new[]
             {
-                new ParallaxContainer
+                buttonsContainer = new ParallaxContainer
                 {
                     ParallaxAmount = 0.01f,
                     Children = new Drawable[]
                     {
                         buttons = new ButtonSystem
                         {
-                            OnChart = delegate { this.Push(new ChartListing()); },
                             OnEdit = delegate { this.Push(new Editor()); },
                             OnSolo = onSolo,
                             OnMore = delegate { this.Push(new EvastMainScreen()); },
@@ -109,6 +110,13 @@ namespace osu.Game.Screens.Menu
                     }
                 },
                 sideFlashes = new MenuSideFlashes(),
+                songTicker = new SongTicker
+                {
+                    Anchor = Anchor.TopRight,
+                    Origin = Anchor.TopRight,
+                    Margin = new MarginPadding { Right = 15, Top = 5 }
+                },
+                exitConfirmOverlay?.CreateProxy() ?? Drawable.Empty()
             });
 
             buttons.StateChanged += state =>
@@ -128,17 +136,21 @@ namespace osu.Game.Screens.Menu
 
             buttons.OnSettings = () => settings?.ToggleVisibility();
             buttons.OnDirect = () => direct?.ToggleVisibility();
+            buttons.OnChart = () => rankings?.ShowSpotlights();
 
             LoadComponentAsync(background = new BackgroundScreenDefault());
             preloadSongSelect();
         }
+
+        [Resolved]
+        private OsuGame game { get; set; }
 
         private void confirmAndExit()
         {
             if (exitConfirmed) return;
 
             exitConfirmed = true;
-            this.Exit();
+            game.PerformFromScreen(menu => menu.Exit());
         }
 
         private void preloadSongSelect()
@@ -192,7 +204,7 @@ namespace osu.Game.Screens.Menu
                 buttons.State = ButtonSystemState.TopLevel;
 
                 this.FadeIn(FADE_IN_DURATION, Easing.OutQuint);
-                this.MoveTo(new Vector2(0, 0), FADE_IN_DURATION, Easing.OutQuint);
+                buttonsContainer.MoveTo(new Vector2(0, 0), FADE_IN_DURATION, Easing.OutQuint);
 
                 sideFlashes.Delay(FADE_IN_DURATION).FadeIn(64, Easing.InQuint);
             }
@@ -229,7 +241,7 @@ namespace osu.Game.Screens.Menu
             buttons.State = ButtonSystemState.EnteringMode;
 
             this.FadeOut(FADE_OUT_DURATION, Easing.InSine);
-            this.MoveTo(new Vector2(-800, 0), FADE_OUT_DURATION, Easing.InSine);
+            buttonsContainer.MoveTo(new Vector2(-800, 0), FADE_OUT_DURATION, Easing.InSine);
 
             sideFlashes.FadeOut(64, Easing.OutQuint);
         }
@@ -264,6 +276,9 @@ namespace osu.Game.Screens.Menu
             }
 
             buttons.State = ButtonSystemState.Exit;
+
+            songTicker.Hide();
+
             this.FadeOut(3000);
             return base.OnExiting(next);
         }

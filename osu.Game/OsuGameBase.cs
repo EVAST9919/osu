@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using ManagedBass;
 using osu.Framework.Allocation;
 using osu.Framework.Audio;
 using osu.Framework.Bindables;
@@ -30,6 +29,7 @@ using osu.Game.Database;
 using osu.Game.Input;
 using osu.Game.Input.Bindings;
 using osu.Game.IO;
+using osu.Game.Resources;
 using osu.Game.Rulesets;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Scoring;
@@ -97,7 +97,7 @@ namespace osu.Game
 
         public bool IsDeployedBuild => AssemblyVersion.Major > 0;
 
-        public string Version
+        public virtual string Version
         {
             get
             {
@@ -126,10 +126,7 @@ namespace osu.Game
         [BackgroundDependencyLoader]
         private void load()
         {
-            Bass.Configure(ManagedBass.Configuration.DeviceBufferLength, 2);
-            Bass.Configure(ManagedBass.Configuration.DevicePeriod, -512);
-
-            Resources.AddStore(new DllResourceStore(@"osu.Game.Resources.dll"));
+            Resources.AddStore(new DllResourceStore(OsuResources.ResourceAssembly));
 
             dependencies.Cache(contextFactory = new DatabaseContextFactory(Storage));
 
@@ -160,9 +157,14 @@ namespace osu.Game
             AddFont(Resources, @"Fonts/Exo2.0-Black");
             AddFont(Resources, @"Fonts/Exo2.0-BlackItalic");
 
-            AddFont(Resources, @"Fonts/Venera");
+            AddFont(Resources, @"Fonts/Torus-SemiBold");
+            AddFont(Resources, @"Fonts/Torus-Bold");
+            AddFont(Resources, @"Fonts/Torus-Regular");
+            AddFont(Resources, @"Fonts/Torus-Light");
+
             AddFont(Resources, @"Fonts/Venera-Light");
-            AddFont(Resources, @"Fonts/Venera-Medium");
+            AddFont(Resources, @"Fonts/Venera-Bold");
+            AddFont(Resources, @"Fonts/Venera-Black");
 
             runMigrations();
 
@@ -209,6 +211,10 @@ namespace osu.Game
             Audio.Tracks.AddAdjustment(AdjustableProperty.Volume, new BindableDouble(0.8));
 
             Beatmap = new NonNullableBindable<WorkingBeatmap>(defaultBeatmap);
+
+            // ScheduleAfterChildren is safety against something in the current frame accessing the previous beatmap's track
+            // and potentially causing a reload of it after just unloading.
+            // Note that the reason for this being added *has* been resolved, so it may be feasible to removed this if required.
             Beatmap.BindValueChanged(b => ScheduleAfterChildren(() =>
             {
                 // compare to last beatmap as sometimes the two may share a track representation (optimisation, see WorkingBeatmap.TransferTo)
@@ -333,7 +339,7 @@ namespace osu.Game
 
         private class OsuUserInputManager : UserInputManager
         {
-            protected override MouseButtonEventManager CreateButtonManagerFor(MouseButton button)
+            protected override MouseButtonEventManager CreateButtonEventManagerFor(MouseButton button)
             {
                 switch (button)
                 {
@@ -341,7 +347,7 @@ namespace osu.Game
                         return new RightMouseManager(button);
                 }
 
-                return base.CreateButtonManagerFor(button);
+                return base.CreateButtonEventManagerFor(button);
             }
 
             private class RightMouseManager : MouseButtonEventManager
