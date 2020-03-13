@@ -96,7 +96,8 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
 
         private void tryAddNumber()
         {
-            if (hasFailed.Value)
+            // Do we have empty space?
+            if (numbersLayer.Count == rowCount * columnCount)
                 return;
 
             int x = RNG.Next(columnCount);
@@ -114,6 +115,9 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
         private DrawableNumber getNumberAt(int x, int y)
         {
             if (!numbersLayer.Any())
+                return null;
+
+            if (x < 0 || y < 0)
                 return null;
 
             DrawableNumber number = null;
@@ -145,8 +149,47 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
 
         private void checkFailCondition()
         {
-            if (numbersLayer.Count == rowCount * columnCount)
-                hasFailed.Value = true;
+            if (numbersLayer.Count < rowCount * columnCount)
+                return;
+
+            // Field is full, checking for possible moves
+
+            foreach (var n in numbersLayer)
+            {
+                var topNumber = getNumberAt(n.XIndex, n.YIndex - 1);
+
+                if (topNumber != null)
+                {
+                    if (topNumber.Power == n.Power)
+                        return;
+                }
+
+                var bottomNumber = getNumberAt(n.XIndex, n.YIndex + 1);
+
+                if (bottomNumber != null)
+                {
+                    if (bottomNumber.Power == n.Power)
+                        return;
+                }
+
+                var leftNumber = getNumberAt(n.XIndex - 1, n.YIndex);
+
+                if (leftNumber != null)
+                {
+                    if (leftNumber.Power == n.Power)
+                        return;
+                }
+
+                var rightNumber = getNumberAt(n.XIndex + 1, n.YIndex);
+
+                if (rightNumber != null)
+                {
+                    if (rightNumber.Power == n.Power)
+                        return;
+                }
+            }
+
+            hasFailed.Value = true;
         }
 
         #region Move logic
@@ -179,7 +222,7 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
 
         private void tryMove(MoveDirection direction)
         {
-            if (inputIsBlocked)
+            if (inputIsBlocked || hasFailed.Value)
                 return;
 
             inputIsBlocked = true;
