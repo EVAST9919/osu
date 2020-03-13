@@ -20,6 +20,7 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
     public class NumbersPlayfield : CompositeDrawable
     {
         private const int spacing = 10;
+        private const int move_duration = 200;
 
         private readonly int rowCount;
         private readonly int columnCount;
@@ -79,33 +80,10 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
             reset();
         }
 
-        protected override bool OnKeyDown(KeyDownEvent e)
-        {
-            if (!e.Repeat)
-            {
-                switch (e.Key)
-                {
-                    case Key.Right:
-                        moveRight();
-                        return true;
-                    case Key.Left:
-                        moveLeft();
-                        return true;
-                    case Key.Up:
-                        moveUp();
-                        return true;
-                    case Key.Down:
-                        moveDown();
-                        return true;
-                }
-            }
-
-            return base.OnKeyDown(e);
-        }
-
         private void onFailChanged(ValueChangedEvent<bool> failed)
         {
             failOverlay.FadeTo(failed.NewValue ? 1 : 0, 500, Easing.OutQuint);
+            inputIsBlocked = failed.NewValue;
         }
 
         private void reset()
@@ -171,6 +149,59 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
                 hasFailed.Value = true;
         }
 
+        #region Move logic
+
+        protected override bool OnKeyDown(KeyDownEvent e)
+        {
+            if (!e.Repeat)
+            {
+                switch (e.Key)
+                {
+                    case Key.Right:
+                        tryMove(MoveDirection.Right);
+                        return true;
+                    case Key.Left:
+                        tryMove(MoveDirection.Left);
+                        return true;
+                    case Key.Up:
+                        tryMove(MoveDirection.Up);
+                        return true;
+                    case Key.Down:
+                        tryMove(MoveDirection.Down);
+                        return true;
+                }
+            }
+
+            return base.OnKeyDown(e);
+        }
+
+        private bool inputIsBlocked;
+
+        private void tryMove(MoveDirection direction)
+        {
+            if (inputIsBlocked)
+                return;
+
+            switch (direction)
+            {
+                case MoveDirection.Up:
+                    moveUp();
+                    return;
+
+                case MoveDirection.Down:
+                    moveDown();
+                    return;
+
+                case MoveDirection.Left:
+                    moveLeft();
+                    return;
+
+                case MoveDirection.Right:
+                    moveRight();
+                    return;
+            }
+        }
+
         private void moveUp()
         {
             tryAddNumber();
@@ -193,6 +224,16 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
         {
             tryAddNumber();
             checkFailCondition();
+        }
+
+        #endregion
+
+        private enum MoveDirection
+        {
+            Up,
+            Down,
+            Left,
+            Right
         }
 
         private class PlayfieldBackground : CompositeDrawable
