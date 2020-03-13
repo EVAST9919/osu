@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using osu.Framework.Bindables;
+using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -20,7 +22,10 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
         private readonly int rowCount;
         private readonly int columnCount;
 
+        private readonly BindableBool hasFailed = new BindableBool();
+
         private readonly Container<DrawableNumber> numbersLayer;
+        private readonly Container failOverlay;
 
         public NumbersPlayfield(int rowCount = 4, int columnCount = 4)
         {
@@ -31,12 +36,24 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
             this.columnCount = columnCount;
 
             Size = new Vector2(columnCount * DrawableNumber.SIZE + spacing * (columnCount + 1), rowCount * DrawableNumber.SIZE + spacing * (rowCount + 1));
+            Masking = true;
+            CornerRadius = 4;
             InternalChildren = new Drawable[]
             {
                 new PlayfieldBackground(rowCount, columnCount),
                 numbersLayer = new Container<DrawableNumber>
                 {
                     RelativeSizeAxes = Axes.Both
+                },
+                failOverlay = new Container
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Alpha = 0,
+                    Child = new Box
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Colour = Color4.White.Opacity(0.5f),
+                    }
                 }
             };
         }
@@ -44,6 +61,7 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
         protected override void LoadComplete()
         {
             base.LoadComplete();
+            hasFailed.BindValueChanged(onFailChanged);
             reset();
         }
 
@@ -71,16 +89,22 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
             return base.OnKeyDown(e);
         }
 
-        private void reset()
+        private void onFailChanged(ValueChangedEvent<bool> failed)
         {
-            numbersLayer.Clear(true);
-            addNumber();
-            addNumber();
+            failOverlay.FadeTo(failed.NewValue ? 1 : 0, 500, Easing.OutQuint);
         }
 
-        private void addNumber()
+        private void reset()
         {
-            if (numbersLayer.Count == rowCount * columnCount)
+            hasFailed.Value = false;
+            numbersLayer.Clear(true);
+            tryAddNumber();
+            tryAddNumber();
+        }
+
+        private void tryAddNumber()
+        {
+            if (hasFailed.Value)
                 return;
 
             int x = RNG.Next(columnCount);
@@ -88,7 +112,7 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
 
             if (getNumberAt(x, y) != null)
             {
-                addNumber();
+                tryAddNumber();
                 return;
             }
 
@@ -127,24 +151,34 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
 
         private int getPosition(int axisValue) => axisValue * DrawableNumber.SIZE + spacing * (axisValue + 1) + DrawableNumber.SIZE / 2;
 
+        private void checkFailCondition()
+        {
+            if (numbersLayer.Count == rowCount * columnCount)
+                hasFailed.Value = true;
+        }
+
         private void moveUp()
         {
-            addNumber();
+            tryAddNumber();
+            checkFailCondition();
         }
 
         private void moveDown()
         {
-            addNumber();
+            tryAddNumber();
+            checkFailCondition();
         }
 
         private void moveLeft()
         {
-            addNumber();
+            tryAddNumber();
+            checkFailCondition();
         }
 
         private void moveRight()
         {
-            addNumber();
+            tryAddNumber();
+            checkFailCondition();
         }
 
         private class PlayfieldBackground : CompositeDrawable
@@ -154,8 +188,6 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
                 Container mainLayout;
 
                 RelativeSizeAxes = Axes.Both;
-                Masking = true;
-                CornerRadius = 4;
                 InternalChildren = new Drawable[]
                 {
                     new Box
