@@ -14,7 +14,7 @@ namespace osu.Game.Screens.Evast.Particles
         /// <summary>
         /// Number of milliseconds between addition of a new particle.
         /// </summary>
-        private const float time_between_updates = 10;
+        private const float time_between_updates = 100;
 
         /// <summary>
         /// Adjusts the speed of all the particles.
@@ -56,20 +56,13 @@ namespace osu.Game.Screens.Evast.Particles
             if (currentParticlesCount < max_particles_count)
             {
                 for (int i = 0; i < max_particles_count - currentParticlesCount; i++)
-                    createNewParticle();
+                    Add(new Particle());
             }
 
             Scheduler.AddDelayed(generateParticles, time_between_updates);
         }
 
-        private void createNewParticle() => Add(new Particle
-        {
-            Position = new Vector2(RNG.NextSingle(-0.5f, 0.5f), RNG.NextSingle(-0.5f, 0.5f)),
-            Depth = RNG.NextSingle(0.25f, 1),
-            Size = new Vector2(particle_size),
-        });
-
-        private class Particle : CircularContainer
+        private class Particle : Circle
         {
             private Vector2 finalPosition;
             private double lifeTime;
@@ -80,12 +73,11 @@ namespace osu.Game.Screens.Evast.Particles
                 Anchor = Anchor.Centre;
                 Origin = Anchor.Centre;
                 RelativePositionAxes = Axes.Both;
-                Masking = true;
-                Child = new Box
-                {
-                    RelativeSizeAxes = Axes.Both,
-                    Colour = Color4.White.Opacity(200),
-                };
+                Colour = Color4.White.Opacity(200);
+                Position = new Vector2(RNG.NextSingle(-0.5f, 0.5f), RNG.NextSingle(-0.5f, 0.5f));
+                Depth = RNG.NextSingle(0.25f, 1);
+                Size = new Vector2(particle_size);
+                Alpha = 0;
             }
 
             protected override void LoadComplete()
@@ -94,6 +86,7 @@ namespace osu.Game.Screens.Evast.Particles
 
                 calculateValues();
 
+                this.FadeIn(500);
                 this.MoveTo(finalPosition, lifeTime);
                 this.ScaleTo(finalScale, lifeTime);
                 Expire();

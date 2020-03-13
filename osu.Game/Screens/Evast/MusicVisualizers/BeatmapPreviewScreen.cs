@@ -4,7 +4,7 @@ using osu.Game.Screens.Evast.Particles;
 
 namespace osu.Game.Screens.Evast.MusicVisualizers
 {
-    public class BeatmapPreviewScreen : EvastScreen
+    public class BeatmapPreviewScreen : EvastNoBackButtonScreen
     {
         public BeatmapPreviewScreen()
         {
