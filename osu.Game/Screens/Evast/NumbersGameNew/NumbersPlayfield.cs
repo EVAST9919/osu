@@ -224,7 +224,70 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
 
         private bool moveUp()
         {
-            return false;
+            bool moveHasBeenMade = false;
+
+            for (int x = 0; x < columnCount; x++)
+            {
+                for (int y = 1; y < rowCount; y++)
+                {
+                    var currentNumber = getNumberAt(x, y);
+                    if (currentNumber == null)
+                        continue;
+
+                    DrawableNumber closest = null;
+
+                    for (int k = y - 1; k >= 0 ; k--)
+                    {
+                        var possibleClosest = getNumberAt(x, k);
+
+                        if (possibleClosest != null)
+                        {
+                            closest = possibleClosest;
+                            break;
+                        }
+                    }
+
+                    int newYIndex;
+
+                    if (closest == null)
+                    {
+                        newYIndex = 0;
+
+                        if (newYIndex == currentNumber.YIndex)
+                            continue;
+
+                        currentNumber.YIndex = newYIndex;
+                        currentNumber.MoveToY(getPosition(newYIndex), move_duration, Easing.OutQuint);
+                    }
+                    else
+                    {
+                        if (closest.IsBlocked || closest.Power != currentNumber.Power)
+                        {
+                            newYIndex = closest.YIndex + 1;
+
+                            if (newYIndex == currentNumber.YIndex)
+                                continue;
+
+                            currentNumber.YIndex = newYIndex;
+                            currentNumber.MoveToY(getPosition(newYIndex), move_duration, Easing.OutQuint);
+                        }
+                        else
+                        {
+                            newYIndex = closest.YIndex;
+
+                            currentNumber.YIndex = newYIndex;
+                            currentNumber.MoveToY(getPosition(newYIndex), move_duration, Easing.OutQuint).Expire();
+
+                            closest.IsBlocked = true;
+                            closest.IncreaseValue(move_duration);
+                        }
+                    }
+
+                    moveHasBeenMade = true;
+                }
+            }
+
+            return moveHasBeenMade;
         }
 
         private bool moveDown()
