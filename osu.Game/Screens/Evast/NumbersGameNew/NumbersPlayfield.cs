@@ -275,6 +275,7 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
                         {
                             newYIndex = closest.YIndex;
 
+                            currentNumber.IsBlocked = true;
                             currentNumber.YIndex = newYIndex;
                             currentNumber.MoveToY(getPosition(newYIndex), move_duration, Easing.OutQuint).Expire();
 
@@ -343,6 +344,7 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
                         {
                             newYIndex = closest.YIndex;
 
+                            currentNumber.IsBlocked = true;
                             currentNumber.YIndex = newYIndex;
                             currentNumber.MoveToY(getPosition(newYIndex), move_duration, Easing.OutQuint).Expire();
 
@@ -411,6 +413,7 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
                         {
                             newXIndex = closest.XIndex;
 
+                            currentNumber.IsBlocked = true;
                             currentNumber.XIndex = newXIndex;
                             currentNumber.MoveToX(getPosition(newXIndex), move_duration, Easing.OutQuint).Expire();
 
@@ -479,6 +482,7 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
                         {
                             newXIndex = closest.XIndex;
 
+                            currentNumber.IsBlocked = true;
                             currentNumber.XIndex = newXIndex;
                             currentNumber.MoveToX(getPosition(newXIndex), move_duration, Easing.OutQuint).Expire();
 
