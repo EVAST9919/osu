@@ -22,6 +22,8 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
         private const int spacing = 10;
         private const int move_duration = 200;
 
+        public BindableInt Score = new BindableInt();
+
         private readonly int rowCount;
         private readonly int columnCount;
 
@@ -29,6 +31,7 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
 
         private readonly Container<DrawableNumber> numbersLayer;
         private readonly Container failOverlay;
+        private readonly OsuSpriteText scoreText;
 
         public NumbersPlayfield(int rowCount = 4, int columnCount = 4)
         {
@@ -62,9 +65,17 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
                         new OsuSpriteText
                         {
                             Anchor = Anchor.Centre,
-                            Origin = Anchor.Centre,
+                            Origin = Anchor.BottomCentre,
                             Text = "Game Over",
                             Font = OsuFont.GetFont(size: 50, weight: FontWeight.Bold),
+                            Colour = new Color4(119, 110, 101, 255),
+                            Shadow = false,
+                        },
+                        scoreText = new OsuSpriteText
+                        {
+                            Anchor = Anchor.Centre,
+                            Origin = Anchor.TopCentre,
+                            Font = OsuFont.GetFont(size: 20, weight: FontWeight.Bold),
                             Colour = new Color4(119, 110, 101, 255),
                             Shadow = false,
                         }
@@ -77,6 +88,7 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
         {
             base.LoadComplete();
             hasFailed.BindValueChanged(onFailChanged);
+            Score.BindValueChanged(score => scoreText.Text = $@"score: {score.NewValue}", true);
             Restart();
         }
 
@@ -88,6 +100,7 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
 
         public void Restart()
         {
+            Score.Value = 0;
             hasFailed.Value = false;
             numbersLayer.Clear(true);
             tryAddNumber();
@@ -324,6 +337,8 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
 
                             closest.IsBlocked = true;
                             closest.IncreaseValue(move_duration);
+
+                            Score.Value += closest.GetValue();
                         }
                     }
 
@@ -393,6 +408,8 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
 
                             closest.IsBlocked = true;
                             closest.IncreaseValue(move_duration);
+
+                            Score.Value += closest.GetValue();
                         }
                     }
 
@@ -462,6 +479,8 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
 
                             closest.IsBlocked = true;
                             closest.IncreaseValue(move_duration);
+
+                            Score.Value += closest.GetValue();
                         }
                     }
 
@@ -531,6 +550,8 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
 
                             closest.IsBlocked = true;
                             closest.IncreaseValue(move_duration);
+
+                            Score.Value += closest.GetValue();
                         }
                     }
 

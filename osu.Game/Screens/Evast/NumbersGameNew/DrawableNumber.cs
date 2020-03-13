@@ -82,6 +82,8 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
             Scheduler.AddDelayed(animate, animationDelay);
         }
 
+        public int GetValue() => (int)Math.Round(Math.Pow(2, Power));
+
         private void animate()
         {
             this.ScaleTo(1.2f, 40, Easing.OutQuint).Then().ScaleTo(1, 160, Easing.OutQuint);
@@ -92,7 +94,7 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
                 text.Colour = Color4.White;
         }
 
-        private string getPoweredString() => Math.Round(Math.Pow(2, Power)).ToString();
+        private string getPoweredString() => GetValue().ToString();
 
         private Color4 getPowerColour(int newPower)
         {
