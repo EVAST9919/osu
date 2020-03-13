@@ -9,6 +9,8 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Input.Events;
 using osu.Framework.Utils;
+using osu.Game.Graphics;
+using osu.Game.Graphics.Sprites;
 using osuTK;
 using osuTK.Graphics;
 using osuTK.Input;
@@ -49,10 +51,22 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
                 {
                     RelativeSizeAxes = Axes.Both,
                     Alpha = 0,
-                    Child = new Box
+                    Children = new Drawable[]
                     {
-                        RelativeSizeAxes = Axes.Both,
-                        Colour = Color4.White.Opacity(0.5f),
+                        new Box
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            Colour = Color4.White.Opacity(0.5f),
+                        },
+                        new OsuSpriteText
+                        {
+                            Anchor = Anchor.Centre,
+                            Origin = Anchor.Centre,
+                            Text = "Game Over",
+                            Font = OsuFont.GetFont(size: 50, weight: FontWeight.Bold),
+                            Colour = new Color4(119, 110, 101, 255),
+                            Shadow = false,
+                        }
                     }
                 }
             };
