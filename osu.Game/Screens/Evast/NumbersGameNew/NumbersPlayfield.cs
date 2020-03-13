@@ -75,7 +75,7 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
 
             numbersLayer.Children.ForEach(c =>
             {
-                if (c.Position == getPositionForAxes(x, y))
+                if (c.IndexedPosition == new Vector2(x, y))
                 {
                     number = c;
                     return;
@@ -87,7 +87,7 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
 
         private void setNumberAt(int x, int y)
         {
-            numbersLayer.Add(new DrawableNumber(RNG.NextBool(0.9) ? 1 : 2)
+            numbersLayer.Add(new DrawableNumber(x, y, RNG.NextBool(0.9) ? 1 : 2)
             {
                 Origin = Anchor.Centre,
                 Position = getPositionForAxes(x, y)

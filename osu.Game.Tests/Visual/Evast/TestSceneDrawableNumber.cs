@@ -16,7 +16,7 @@ namespace osu.Game.Tests.Visual.Evast
         {
             DrawableNumber number;
 
-            Add(number = new DrawableNumber()
+            Add(number = new DrawableNumber(1, 1)
             {
                 Anchor = Anchor.Centre,
                 Origin = Anchor.Centre,

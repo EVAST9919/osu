@@ -14,13 +14,16 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
     {
         public const int SIZE = 100;
 
+        public Vector2 IndexedPosition;
+
         private readonly BindableInt power = new BindableInt();
         private readonly Box background;
         private readonly Container content;
         private readonly OsuSpriteText text;
 
-        public DrawableNumber(int startPower = 1)
+        public DrawableNumber(int xIndex, int yIndex, int startPower = 1)
         {
+            IndexedPosition = new Vector2(xIndex, yIndex);
             power.Value = startPower;
 
             Size = new Vector2(SIZE);
