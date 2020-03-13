@@ -1,9 +1,12 @@
 ﻿using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Shapes;
 using osu.Framework.Screens;
 using osu.Game.Beatmaps;
 using osu.Game.Screens.Backgrounds;
+using osuTK.Graphics;
 
 namespace osu.Game.Screens.Evast
 {
@@ -14,6 +17,15 @@ namespace osu.Game.Screens.Evast
         protected override BackgroundScreen CreateBackground() => new BackgroundScreenBeatmap();
 
         private readonly Bindable<WorkingBeatmap> beatmap = new Bindable<WorkingBeatmap>();
+
+        public EvastScreen()
+        {
+            AddInternal(new Box
+            {
+                RelativeSizeAxes = Axes.Both,
+                Colour = Color4.Black.Opacity(0.5f)
+            });
+        }
 
         [BackgroundDependencyLoader]
         private void load(Bindable<WorkingBeatmap> workingBeatmap)
@@ -29,8 +41,7 @@ namespace osu.Game.Screens.Evast
 
         private void onBeatmapChange(ValueChangedEvent<WorkingBeatmap> beatmap)
         {
-            var backgroundModeBeatmap = Background as BackgroundScreenBeatmap;
-            if (backgroundModeBeatmap != null)
+            if (Background is BackgroundScreenBeatmap backgroundModeBeatmap)
             {
                 backgroundModeBeatmap.Beatmap = beatmap.NewValue;
                 backgroundModeBeatmap.BlurAmount.Value = blur;
@@ -38,10 +49,16 @@ namespace osu.Game.Screens.Evast
             }
         }
 
+        public override void OnEntering(IScreen last)
+        {
+            base.OnEntering(last);
+            beatmap.TriggerChange();
+        }
+
         public override void OnResuming(IScreen last)
         {
-            beatmap.TriggerChange();
             base.OnResuming(last);
+            beatmap.TriggerChange();
         }
     }
 }
