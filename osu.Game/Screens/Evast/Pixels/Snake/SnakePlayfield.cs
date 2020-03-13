@@ -2,8 +2,8 @@
 using osuTK.Input;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
-using osu.Framework.MathUtils;
 using osu.Framework.Input.Events;
+using osu.Framework.Utils;
 
 namespace osu.Game.Screens.Evast.Pixels.Snake
 {
@@ -199,25 +199,25 @@ namespace osu.Game.Screens.Evast.Pixels.Snake
             private bool isFood;
             public bool IsFood
             {
+                get => isFood;
                 set
                 {
                     isFood = value;
 
                     Background.Colour = isFood ? Color4.Green : Color4.Black.Opacity(170);
                 }
-                get { return isFood; }
             }
 
             private int steps;
             public int Steps
             {
+                get => steps;
                 set
                 {
                     steps = value;
 
                     IsActive &= steps != 0;
                 }
-                get { return steps; }
             }
 
             public void SetActive(int steps)

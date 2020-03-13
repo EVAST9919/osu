@@ -1,11 +1,11 @@
 ﻿using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Shapes;
-using osu.Framework.MathUtils;
 using osuTK;
 using osuTK.Graphics;
 using System;
 using osu.Framework.Extensions.Color4Extensions;
+using osu.Framework.Utils;
 
 namespace osu.Game.Screens.Evast.Particles
 {

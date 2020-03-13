@@ -15,7 +15,7 @@ namespace osu.Game.Screens.Evast.ApiHelper
     public abstract class WebHelperScreen : EvastScreen
     {
         private readonly OsuTextBox textBox;
-        private readonly DimmedLoadingLayer loading;
+        private readonly LoadingLayer loading;
         private readonly OsuButton commitButton;
         protected readonly TextFlowContainer Text;
 
@@ -89,7 +89,7 @@ namespace osu.Game.Screens.Evast.ApiHelper
 
                                     }
                                 },
-                                loading = new DimmedLoadingLayer(),
+                                loading = new LoadingLayer(),
                             }
                         }
                     }

@@ -5,6 +5,7 @@ using osu.Framework.Graphics.Shapes;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
+using osuTK.Graphics;
 
 namespace osu.Game.Screens.Evast.NumbersGame
 {
@@ -31,7 +32,7 @@ namespace osu.Game.Screens.Evast.NumbersGame
                         new Box
                         {
                             RelativeSizeAxes = Axes.Both,
-                            Colour = OsuColour.FromHex(@"BBADA0"),
+                            Colour = new Color4(187, 173, 160, 255)
                         },
                         new OsuSpriteText
                         {
@@ -39,7 +40,7 @@ namespace osu.Game.Screens.Evast.NumbersGame
                             Origin = Anchor.Centre,
                             Text = @"Restart".ToUpper(),
                             Font = OsuFont.GetFont(size: 25, weight: FontWeight.Bold),
-                            Colour = OsuColour.FromHex(@"776E65"),
+                            Colour = new Color4(119, 110, 101, 255),
                             Shadow = false,
                             Margin = new MarginPadding { Horizontal = 10, Top = 20, Bottom = 10 },
                         }
@@ -59,7 +60,7 @@ namespace osu.Game.Screens.Evast.NumbersGame
                         new Box
                         {
                             RelativeSizeAxes = Axes.Both,
-                            Colour = OsuColour.FromHex(@"BBADA0"),
+                            Colour = new Color4(187, 173, 160, 255)
                         },
                         scoreText = new OsuSpriteText
                         {
@@ -67,7 +68,7 @@ namespace osu.Game.Screens.Evast.NumbersGame
                             Origin = Anchor.Centre,
                             Font = OsuFont.GetFont(size: 40, weight: FontWeight.Bold),
                             Text = "0",
-                            Colour = OsuColour.FromHex(@"776E65"),
+                            Colour = new Color4(119, 110, 101, 255),
                             Shadow = false,
                             Margin = new MarginPadding { Horizontal = 10, Bottom = 20, Top = 10 },
                         }

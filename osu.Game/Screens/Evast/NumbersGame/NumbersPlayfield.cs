@@ -4,7 +4,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Input.Events;
-using osu.Framework.MathUtils;
+using osu.Framework.Utils;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
 using osuTK;
@@ -25,15 +25,12 @@ namespace osu.Game.Screens.Evast.NumbersGame
         private bool failed;
         private bool hasFailed
         {
+            get => failed;
             set
             {
                 failed = value;
 
                 failedOverlay.FadeTo(value ? 1 : 0, 200);
-            }
-            get
-            {
-                return failed;
             }
         }
 
@@ -52,7 +49,7 @@ namespace osu.Game.Screens.Evast.NumbersGame
                         new Box
                         {
                             RelativeSizeAxes = Axes.Both,
-                            Colour = OsuColour.FromHex(@"BBADA0"),
+                            Colour = new Color4(187, 173, 160, 255)
                         },
                         new BackgroundPanel(20,20),
                         new BackgroundPanel(140,20),
@@ -93,7 +90,7 @@ namespace osu.Game.Screens.Evast.NumbersGame
                             Origin = Anchor.BottomCentre,
                             Text = @"Game Over",
                             Font = OsuFont.GetFont(size: 70, weight: FontWeight.Bold),
-                            Colour = OsuColour.FromHex(@"776E65"),
+                            Colour = new Color4(119, 110, 101, 255),
                             Shadow = false,
                         },
                     }
@@ -550,7 +547,7 @@ namespace osu.Game.Screens.Evast.NumbersGame
                 Child = new Box
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Colour = OsuColour.FromHex(@"CDC0B3"),
+                    Colour = new Color4(205, 192, 179, 255)
                 };
             }
         }

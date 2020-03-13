@@ -1,5 +1,5 @@
 ﻿using osu.Framework.Input.Events;
-using osu.Framework.MathUtils;
+using osu.Framework.Utils;
 
 namespace osu.Game.Screens.Evast.Pixels.LifeGame
 {
