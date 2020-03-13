@@ -120,7 +120,7 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
 
             numbersLayer.Children.ForEach(c =>
             {
-                if (c.IndexedPosition == new Vector2(x, y))
+                if (c.XIndex == x && c.YIndex == y)
                 {
                     number = c;
                     return;
@@ -182,48 +182,126 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
             if (inputIsBlocked)
                 return;
 
+            inputIsBlocked = true;
+
+            bool moveHasBeenMade = false;
+
             switch (direction)
             {
                 case MoveDirection.Up:
-                    moveUp();
-                    return;
+                    moveHasBeenMade = moveUp();
+                    break;
 
                 case MoveDirection.Down:
-                    moveDown();
-                    return;
+                    moveHasBeenMade = moveDown();
+                    break;
 
                 case MoveDirection.Left:
-                    moveLeft();
-                    return;
+                    moveHasBeenMade = moveLeft();
+                    break;
 
                 case MoveDirection.Right:
-                    moveRight();
-                    return;
+                    moveHasBeenMade = moveRight();
+                    break;
             }
+
+            finishMove(moveHasBeenMade);
         }
 
-        private void moveUp()
+        private void finishMove(bool add)
         {
-            tryAddNumber();
-            checkFailCondition();
+            Scheduler.AddDelayed(() =>
+            {
+                numbersLayer.ForEach(n => n.IsBlocked = false);
+                inputIsBlocked = false;
+
+                if (add)
+                    tryAddNumber();
+
+                checkFailCondition();
+            }, move_duration + 10);
         }
 
-        private void moveDown()
+        private bool moveUp()
         {
-            tryAddNumber();
-            checkFailCondition();
+            return false;
         }
 
-        private void moveLeft()
+        private bool moveDown()
         {
-            tryAddNumber();
-            checkFailCondition();
+            return false;
         }
 
-        private void moveRight()
+        private bool moveLeft()
         {
-            tryAddNumber();
-            checkFailCondition();
+            return false;
+        }
+
+        private bool moveRight()
+        {
+            bool moveHasBeenMade = false;
+
+            for (int j = 0; j < rowCount; j++)
+            {
+                for (int i = columnCount - 1; i >= 0; i--)
+                {
+                    var currentNumber = getNumberAt(i, j);
+                    if (currentNumber == null)
+                        continue;
+
+                    DrawableNumber closest = null;
+
+                    for (int k = i + 1; k < columnCount; k++)
+                    {
+                        var possibleClosest = getNumberAt(k, j);
+                        if (possibleClosest == null)
+                            continue;
+
+                        closest = possibleClosest;
+                        break;
+                    }
+
+                    int newXIndex;
+
+                    if (closest == null)
+                    {
+                        newXIndex = columnCount - 1;
+
+                        if (newXIndex == currentNumber.XIndex)
+                            continue;
+
+                        currentNumber.XIndex = newXIndex;
+                        currentNumber.MoveToX(getPosition(newXIndex), move_duration, Easing.OutQuint);
+                    }
+                    else
+                    {
+                        if (closest.IsBlocked || closest.Power != currentNumber.Power)
+                        {
+                            newXIndex = closest.XIndex - 1;
+
+                            if (newXIndex == currentNumber.XIndex)
+                                continue;
+
+                            currentNumber.XIndex = newXIndex;
+                            currentNumber.MoveToX(getPosition(newXIndex), move_duration, Easing.OutQuint);
+                        }
+                        else
+                        {
+                            newXIndex = closest.XIndex;
+
+                            currentNumber.XIndex = newXIndex;
+                            currentNumber.MoveToX(getPosition(newXIndex), move_duration, Easing.OutQuint).Expire();
+
+                            closest.IsBlocked = true;
+                            closest.IncreaseValue();
+                        }
+                    }
+
+                    moveHasBeenMade = true;
+                }
+            }
+
+            return moveHasBeenMade;
         }
 
         #endregion

@@ -14,7 +14,11 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
     {
         public const int SIZE = 100;
 
-        public Vector2 IndexedPosition;
+        public int XIndex;
+        public int YIndex;
+        public int Power => power.Value;
+
+        public bool IsBlocked;
 
         private readonly BindableInt power = new BindableInt();
         private readonly Box background;
@@ -23,7 +27,8 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
 
         public DrawableNumber(int xIndex, int yIndex, int startPower = 1)
         {
-            IndexedPosition = new Vector2(xIndex, yIndex);
+            XIndex = xIndex;
+            YIndex = yIndex;
             power.Value = startPower;
 
             Size = new Vector2(SIZE);
