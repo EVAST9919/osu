@@ -22,6 +22,8 @@ namespace osu.Game.Screens.Evast.NumbersGame
 
         public NumbersGameScreen()
         {
+            DimValue = 0.2f;
+
             AddRangeInternal(new Drawable[]
             {
                 new SpaceParticlesContainer(),

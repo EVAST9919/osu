@@ -21,14 +21,22 @@ namespace osu.Game.Screens.Evast
 
         protected override BackgroundScreen CreateBackground() => new BackgroundScreenBeatmap();
 
+        protected float DimValue
+        {
+            set => dim.Alpha = 1 - value;
+        }
+
         private readonly Bindable<WorkingBeatmap> beatmap = new Bindable<WorkingBeatmap>();
+
+        private readonly Box dim;
 
         public EvastScreen()
         {
-            AddInternal(new Box
+            AddInternal(dim = new Box
             {
                 RelativeSizeAxes = Axes.Both,
-                Colour = Color4.Black.Opacity(0.5f)
+                Colour = Color4.Black,
+                Alpha = 0.5f,
             });
         }
 
