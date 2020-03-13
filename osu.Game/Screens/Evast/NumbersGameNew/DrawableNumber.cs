@@ -12,6 +12,8 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
 {
     public class DrawableNumber : CompositeDrawable
     {
+        public const int SIZE = 100;
+
         private readonly BindableInt power = new BindableInt();
         private readonly Box background;
         private readonly Container content;
@@ -21,9 +23,7 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
         {
             power.Value = startPower;
 
-            Anchor = Anchor.Centre;
-            Origin = Anchor.Centre;
-            Size = new Vector2(100);
+            Size = new Vector2(SIZE);
             InternalChild = content = new Container
             {
                 Anchor = Anchor.Centre,

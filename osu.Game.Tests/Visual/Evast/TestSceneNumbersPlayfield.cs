@@ -5,24 +5,21 @@ using osu.Framework.Graphics;
 
 namespace osu.Game.Tests.Visual.Evast
 {
-    public class TestSceneDrawableNumber : OsuTestScene
+    public class TestSceneNumbersPlayfield : OsuTestScene
     {
         public override IReadOnlyList<Type> RequiredTypes => new[]
         {
             typeof(DrawableNumber),
+            typeof(NumbersPlayfield),
         };
 
-        public TestSceneDrawableNumber()
+        public TestSceneNumbersPlayfield()
         {
-            DrawableNumber number;
-
-            Add(number = new DrawableNumber()
+            Add(new NumbersPlayfield(2, 5)
             {
                 Anchor = Anchor.Centre,
                 Origin = Anchor.Centre,
             });
-
-            AddStep("Increase value", number.IncreaseValue);
         }
     }
 }
