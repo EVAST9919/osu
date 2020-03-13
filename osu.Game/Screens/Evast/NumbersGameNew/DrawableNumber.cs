@@ -51,7 +51,7 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
                         Origin = Anchor.Centre,
                         Font = OsuFont.GetFont(size: 40, weight: FontWeight.Bold),
                         Text = getPoweredString(),
-                        Colour = new Color4(119, 110, 101, 255),
+                        Colour = startPower == 3 ? Color4.White : new Color4(119, 110, 101, 255),
                         Shadow = false,
                     }
                 }
@@ -87,6 +87,9 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
             this.ScaleTo(1.2f, 40, Easing.OutQuint).Then().ScaleTo(1, 160, Easing.OutQuint);
             background.FadeColour(getPowerColour(Power), 200, Easing.OutQuint);
             text.Text = getPoweredString();
+
+            if (Power == 3)
+                text.Colour = Color4.White;
         }
 
         private string getPoweredString() => Math.Round(Math.Pow(2, Power)).ToString();
