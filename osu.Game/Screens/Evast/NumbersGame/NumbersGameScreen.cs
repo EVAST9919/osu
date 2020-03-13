@@ -42,7 +42,7 @@ namespace osu.Game.Screens.Evast.NumbersGame
                             Font = OsuFont.GetFont(size: 25, weight: FontWeight.Bold),
                             Colour = new Color4(119, 110, 101, 255),
                             Shadow = false,
-                            Margin = new MarginPadding { Horizontal = 10, Top = 20, Bottom = 10 },
+                            Margin = new MarginPadding { Horizontal = 10, Vertical = 10 },
                         }
                     }
                 },
@@ -70,7 +70,7 @@ namespace osu.Game.Screens.Evast.NumbersGame
                             Text = "0",
                             Colour = new Color4(119, 110, 101, 255),
                             Shadow = false,
-                            Margin = new MarginPadding { Horizontal = 10, Bottom = 20, Top = 10 },
+                            Margin = new MarginPadding { Horizontal = 10, Vertical = 10 },
                         }
                     }
                 },
@@ -81,7 +81,7 @@ namespace osu.Game.Screens.Evast.NumbersGame
                 },
             });
 
-            resetButton.Action = playfield.Reset;
+            resetButton.Action = playfield.Restart;
             playfield.Score.BindValueChanged(onScoreChanged, true);
         }
 

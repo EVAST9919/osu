@@ -1,95 +1,139 @@
-﻿using osu.Framework.Graphics;
-using osu.Framework.Graphics.Containers;
+﻿using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics;
 using osu.Framework.Graphics.Shapes;
-using osu.Framework.Utils;
-using osu.Game.Graphics;
-using osu.Game.Graphics.Sprites;
-using osuTK;
 using osuTK.Graphics;
+using osuTK;
+using osu.Game.Graphics.Sprites;
+using osu.Game.Graphics;
+using System;
 
 namespace osu.Game.Screens.Evast.NumbersGame
 {
-    public class DrawableNumber : Container
+    public class DrawableNumber : CompositeDrawable
     {
-        private int colourPointer;
-        public int Value { get; private set; }
+        public const int SIZE = 100;
 
-        public bool IsLocked;
-        public void Lock() => IsLocked = true;
-        public Vector2 Coordinates { set; get; }
+        public int XIndex;
+        public int YIndex;
 
-        private readonly OsuSpriteText numberText;
+        public int Power { get; private set; }
+
+        public bool IsBlocked;
+
         private readonly Box background;
+        private readonly Container content;
+        private readonly OsuSpriteText text;
 
-        public DrawableNumber()
+        public DrawableNumber(int xIndex, int yIndex, int startPower = 1)
         {
-            Value = RNG.NextBool(0.9) ? 2 : 4;
-            if (Value == 4)
-                colourPointer++;
+            XIndex = xIndex;
+            YIndex = yIndex;
+            Power = startPower;
 
-            Anchor = Anchor.TopLeft;
-            Origin = Anchor.Centre;
-            Size = new Vector2(100);
-            Scale = new Vector2(0);
-            Alpha = 0;
-            CornerRadius = 6;
-            Masking = true;
-            Children = new Drawable[]
+            Size = new Vector2(SIZE);
+            InternalChild = content = new Container
             {
-                background = new Box
+                Anchor = Anchor.Centre,
+                Origin = Anchor.Centre,
+                RelativeSizeAxes = Axes.Both,
+                Scale = new Vector2(0),
+                Masking = true,
+                CornerRadius = 4,
+                Children = new Drawable[]
                 {
-                    RelativeSizeAxes = Axes.Both,
-                    Colour = colours[colourPointer],
-                },
-                numberText = new OsuSpriteText
-                {
-                    Anchor = Anchor.Centre,
-                    Origin = Anchor.Centre,
-                    Font = OsuFont.GetFont(size: 50, weight: FontWeight.Bold),
-                    Text = Value.ToString(),
-                    Colour = new Color4(119, 110, 101, 255),
-                    Shadow = false,
+                    background = new Box
+                    {
+                        RelativeSizeAxes = Axes.Both
+                    },
+                    text = new OsuSpriteText
+                    {
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        Font = OsuFont.GetFont(size: 40, weight: FontWeight.Bold),
+                        Text = getPoweredString(),
+                        Colour = startPower == 3 ? Color4.White : new Color4(119, 110, 101, 255),
+                        Shadow = false,
+                    }
                 }
             };
+
+            if (startPower != 1)
+                background.Colour = getPowerColour(Power);
         }
 
         protected override void LoadComplete()
         {
             base.LoadComplete();
-            this.ScaleTo(1, 120);
-            this.FadeTo(1, 120);
+            content.ScaleTo(1, 200, Easing.OutQuint);
         }
 
-        public void IncreaseValue() => Value *= 2;
-
-        public void IncreaseValueAnimation()
+        public void IncreaseValue(int animationDelay = 0)
         {
-            numberText.Text = Value.ToString();
+            Scheduler.Update();
 
-            if (Value == 8)
-                numberText.Colour = Color4.White;
+            Power++;
 
-            colourPointer++;
-            background.Colour = colours[colourPointer];
+            if (animationDelay == 0)
+            {
+                animate();
+                return;
+            }
 
+            Scheduler.AddDelayed(animate, animationDelay);
+        }
+
+        public int GetValue() => (int)Math.Round(Math.Pow(2, Power));
+
+        private void animate()
+        {
             this.ScaleTo(1.2f, 40, Easing.OutQuint).Then().ScaleTo(1, 160, Easing.OutQuint);
+            background.FadeColour(getPowerColour(Power), 200, Easing.OutQuint);
+            text.Text = getPoweredString();
+
+            if (Power == 3)
+                text.Colour = Color4.White;
         }
 
-        private static readonly Color4[] colours =
+        private string getPoweredString() => GetValue().ToString();
+
+        private Color4 getPowerColour(int newPower)
         {
-            Color4.White,
-            new Color4(237, 224, 200, 255),//4
-            new Color4(243, 177, 121, 255),//8
-            new Color4(245, 150, 99, 255),//16
-            new Color4(247, 124, 95, 255),//32
-            new Color4(246, 94, 60, 255),//64
-            new Color4(237, 207, 114, 255),//128
-            new Color4(236, 204, 97, 255),//256
-            new Color4(237, 199, 80, 255),//512
-            new Color4(238, 197, 63, 255),//1024
-            new Color4(236, 194, 45, 255),//2048
-            new Color4(236, 194, 45, 255),//4096
-            new Color4(0, 17, 255, 255),//8192
-        };
+            switch (newPower)
+            {
+                case 1:
+                    return Color4.White;
+
+                case 2:
+                    return new Color4(237, 224, 200, 255);
+
+                case 3:
+                    return new Color4(243, 177, 121, 255);
+
+                case 4:
+                    return new Color4(245, 150, 99, 255);
+
+                case 5:
+                    return new Color4(247, 124, 95, 255);
+
+                case 6:
+                    return new Color4(246, 94, 60, 255);
+
+                case 7:
+                    return new Color4(237, 207, 114, 255);
+
+                case 8:
+                    return new Color4(236, 204, 97, 255);
+
+                case 9:
+                    return new Color4(237, 199, 80, 255);
+
+                case 10:
+                    return new Color4(238, 197, 63, 255);
+
+                default:
+                case 11:
+                    return new Color4(236, 194, 45, 255);
+            }
+        }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using osu.Game.Screens.Evast.NumbersGameNew;
+using osu.Game.Screens.Evast.NumbersGame;
 using osu.Framework.Graphics;
 
 namespace osu.Game.Tests.Visual.Evast

@@ -1,5 +1,9 @@
-﻿using osu.Framework.Bindables;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using osu.Framework.Bindables;
 using osu.Framework.Extensions.Color4Extensions;
+using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
@@ -13,67 +17,41 @@ using osuTK.Input;
 
 namespace osu.Game.Screens.Evast.NumbersGame
 {
-    public class NumbersPlayfield : Container
+    public class NumbersPlayfield : CompositeDrawable
     {
-        private const int move_duration = 120;
+        private const int spacing = 10;
+        private const int move_duration = 200;
 
         public BindableInt Score = new BindableInt();
 
+        private readonly int rowCount;
+        private readonly int columnCount;
+
+        private readonly BindableBool hasFailed = new BindableBool();
+
         private readonly Container<DrawableNumber> numbersLayer;
-        private readonly Container failedOverlay;
+        private readonly Container failOverlay;
+        private readonly OsuSpriteText scoreText;
 
-        private bool failed;
-        private bool hasFailed
+        public NumbersPlayfield(int rowCount = 4, int columnCount = 4)
         {
-            get => failed;
-            set
-            {
-                failed = value;
+            if (rowCount < 2 || columnCount < 2)
+                throw new ArgumentException("Rows and columns count can't be less that 2");
 
-                failedOverlay.FadeTo(value ? 1 : 0, 200);
-            }
-        }
+            this.rowCount = rowCount;
+            this.columnCount = columnCount;
 
-        public NumbersPlayfield()
-        {
-            Size = new Vector2(500);
-            CornerRadius = 6;
+            Size = new Vector2(columnCount * DrawableNumber.SIZE + spacing * (columnCount + 1), rowCount * DrawableNumber.SIZE + spacing * (rowCount + 1));
             Masking = true;
-            Children = new Drawable[]
+            CornerRadius = 4;
+            InternalChildren = new Drawable[]
             {
-                new Container //Background layer
-                {
-                    RelativeSizeAxes = Axes.Both,
-                    Children = new Drawable[]
-                    {
-                        new Box
-                        {
-                            RelativeSizeAxes = Axes.Both,
-                            Colour = new Color4(187, 173, 160, 255)
-                        },
-                        new BackgroundPanel(20,20),
-                        new BackgroundPanel(140,20),
-                        new BackgroundPanel(260,20),
-                        new BackgroundPanel(380,20),
-                        new BackgroundPanel(20,140),
-                        new BackgroundPanel(140,140),
-                        new BackgroundPanel(260,140),
-                        new BackgroundPanel(380,140),
-                        new BackgroundPanel(20,260),
-                        new BackgroundPanel(140,260),
-                        new BackgroundPanel(260,260),
-                        new BackgroundPanel(380,260),
-                        new BackgroundPanel(20,380),
-                        new BackgroundPanel(140,380),
-                        new BackgroundPanel(260,380),
-                        new BackgroundPanel(380,380),
-                    }
-                },
+                new PlayfieldBackground(rowCount, columnCount),
                 numbersLayer = new Container<DrawableNumber>
                 {
-                    RelativeSizeAxes = Axes.Both,
+                    RelativeSizeAxes = Axes.Both
                 },
-                failedOverlay = new Container
+                failOverlay = new Container
                 {
                     RelativeSizeAxes = Axes.Both,
                     Alpha = 0,
@@ -82,17 +60,25 @@ namespace osu.Game.Screens.Evast.NumbersGame
                         new Box
                         {
                             RelativeSizeAxes = Axes.Both,
-                            Colour = Color4.White.Opacity(220),
+                            Colour = Color4.White.Opacity(0.5f),
                         },
                         new OsuSpriteText
                         {
                             Anchor = Anchor.Centre,
                             Origin = Anchor.BottomCentre,
-                            Text = @"Game Over",
-                            Font = OsuFont.GetFont(size: 70, weight: FontWeight.Bold),
+                            Text = "Game Over",
+                            Font = OsuFont.GetFont(size: 50, weight: FontWeight.Bold),
                             Colour = new Color4(119, 110, 101, 255),
                             Shadow = false,
                         },
+                        scoreText = new OsuSpriteText
+                        {
+                            Anchor = Anchor.Centre,
+                            Origin = Anchor.TopCentre,
+                            Font = OsuFont.GetFont(size: 20, weight: FontWeight.Bold),
+                            Colour = new Color4(119, 110, 101, 255),
+                            Shadow = false,
+                        }
                     }
                 }
             };
@@ -101,454 +87,548 @@ namespace osu.Game.Screens.Evast.NumbersGame
         protected override void LoadComplete()
         {
             base.LoadComplete();
-
-            setNumber();
-            setNumber();
+            hasFailed.BindValueChanged(onFailChanged);
+            Score.BindValueChanged(score => scoreText.Text = $@"score: {score.NewValue}", true);
+            Restart();
         }
 
-        public void Reset()
+        private void onFailChanged(ValueChangedEvent<bool> failed)
         {
-            numbersLayer.Clear(true);
+            failOverlay.FadeTo(failed.NewValue ? 1 : 0, 500, Easing.OutQuint);
+            inputIsBlocked = failed.NewValue;
+        }
 
-            if (hasFailed)
-                hasFailed = false;
-
+        public void Restart()
+        {
             Score.Value = 0;
-
-            setNumber();
-            setNumber();
+            hasFailed.Value = false;
+            numbersLayer.Clear(true);
+            tryAddNumber();
+            tryAddNumber();
         }
 
-        private void setNumber()
+        private void tryAddNumber()
         {
-            int x = RNG.Next(4);
-            int y = RNG.Next(4);
+            // Do we have empty space?
+            if (numbersLayer.Count == rowCount * columnCount)
+                return;
+
+            int x = RNG.Next(columnCount);
+            int y = RNG.Next(rowCount);
 
             if (getNumberAt(x, y) != null)
             {
-                setNumber();
+                tryAddNumber();
                 return;
             }
 
-            numbersLayer.Add(new DrawableNumber
+            setNumberAt(x, y);
+        }
+
+        private DrawableNumber getNumberAt(int x, int y)
+        {
+            if (!numbersLayer.Any())
+                return null;
+
+            if (x < 0 || y < 0)
+                return null;
+
+            DrawableNumber number = null;
+
+            numbersLayer.Children.ForEach(c =>
             {
-                Position = new Vector2(70 + (x * 120), 70 + (y * 120)),
-                Coordinates = new Vector2(70 + (x * 120), 70 + (y * 120))
+                if (c.XIndex == x && c.YIndex == y)
+                {
+                    number = c;
+                    return;
+                }
+            });
+
+            return number;
+        }
+
+        private void setNumberAt(int x, int y)
+        {
+            numbersLayer.Add(new DrawableNumber(x, y, RNG.NextBool(0.9) ? 1 : 2)
+            {
+                Origin = Anchor.Centre,
+                Position = getPositionForAxes(x, y)
             });
         }
 
-        private void unlockAll()
+        private Vector2 getPositionForAxes(int x, int y) => new Vector2(getPosition(x), getPosition(y));
+
+        private int getPosition(int axisValue) => axisValue * DrawableNumber.SIZE + spacing * (axisValue + 1) + DrawableNumber.SIZE / 2;
+
+        private void checkFailCondition()
         {
+            if (numbersLayer.Count < rowCount * columnCount)
+                return;
+
+            // Field is full, checking for possible moves
+
             foreach (var n in numbersLayer)
-                n.IsLocked = false;
-        }
-
-        private void finishAllTransforms()
-        {
-            FinishTransforms(true);
-            Scheduler.Update();
-        }
-
-        private void checkMoveAbility()
-        {
-            hasFailed |= !canMove();
-        }
-
-        private bool canMove()
-        {
-            for (int y = 0; y < 4; y++)
             {
-                for (int x = 1; x <= 3; x++)
-                {
-                    var currentNumber = getNumberAt(x, y);
-                    if (currentNumber != null)
-                    {
-                        var possibleSwap = getNumberAt(x - 1, y);
-                        if (possibleSwap == null)
-                            return true;
+                var topNumber = getNumberAt(n.XIndex, n.YIndex - 1);
 
-                        if (possibleSwap.Value == currentNumber.Value)
-                            return true;
-                    }
+                if (topNumber != null)
+                {
+                    if (topNumber.Power == n.Power)
+                        return;
+                }
+
+                var bottomNumber = getNumberAt(n.XIndex, n.YIndex + 1);
+
+                if (bottomNumber != null)
+                {
+                    if (bottomNumber.Power == n.Power)
+                        return;
+                }
+
+                var leftNumber = getNumberAt(n.XIndex - 1, n.YIndex);
+
+                if (leftNumber != null)
+                {
+                    if (leftNumber.Power == n.Power)
+                        return;
+                }
+
+                var rightNumber = getNumberAt(n.XIndex + 1, n.YIndex);
+
+                if (rightNumber != null)
+                {
+                    if (rightNumber.Power == n.Power)
+                        return;
                 }
             }
 
-            for (int y = 0; y < 4; y++)
-            {
-                for (int x = 2; x >= 0; x--)
-                {
-                    var currentNumber = getNumberAt(x, y);
-                    if (currentNumber != null)
-                    {
-                        var possibleSwap = getNumberAt(x + 1, y);
-                        if (possibleSwap == null)
-                            return true;
-
-                        if (possibleSwap.Value == currentNumber.Value)
-                            return true;
-                    }
-                }
-            }
-
-            for (int x = 0; x < 4; x++)
-            {
-                for (int y = 2; y >= 0; y--)
-                {
-                    var currentNumber = getNumberAt(x, y);
-                    if (currentNumber != null)
-                    {
-                        var possibleSwap = getNumberAt(x, y + 1);
-                        if (possibleSwap == null)
-                            return true;
-
-                        if (possibleSwap.Value == currentNumber.Value)
-                            return true;
-                    }
-                }
-            }
-
-            for (int x = 0; x < 4; x++)
-            {
-                for (int y = 1; y <= 3; y++)
-                {
-                    var currentNumber = getNumberAt(x, y);
-                    if (currentNumber != null)
-                    {
-                        var possibleSwap = getNumberAt(x, y - 1);
-                        if (possibleSwap == null)
-                            return true;
-
-                        if (possibleSwap.Value == currentNumber.Value)
-                            return true;
-                    }
-                }
-            }
-
-            return false;
+            hasFailed.Value = true;
         }
 
         #region Move logic
 
-        private void moveRight()
-        {
-            finishAllTransforms();
-
-            int moveCount = 0;
-
-            for (int y = 0; y < 4; y++)
-            {
-                for (int x = 2; x >= 0; x--)
-                {
-                    var currentNumber = getNumberAt(x, y);
-                    if (currentNumber != null)
-                    {
-                        for (int k = x + 1; k <= 3; k++)
-                        {
-                            var possibleSwap = getNumberAt(k, y);
-                            if (possibleSwap == null)
-                            {
-                                if (k == 3)
-                                {
-                                    currentNumber.Coordinates = new Vector2(430, currentNumber.Coordinates.Y);
-                                    currentNumber.MoveToX(430, move_duration);
-                                    moveCount++;
-                                    break;
-                                }
-
-                                continue; // go check the next field
-                            }
-
-                            if (!possibleSwap.IsLocked && possibleSwap.Value == currentNumber.Value)
-                            {
-                                currentNumber.Coordinates = new Vector2(70 + (k * 120), currentNumber.Coordinates.Y);
-                                currentNumber.MoveToX(70 + (k * 120), move_duration).Finally((d) => d.Expire());
-                                possibleSwap.Lock();
-                                possibleSwap.IncreaseValue();
-                                Score.Value += possibleSwap.Value;
-
-                                Scheduler.AddDelayed(possibleSwap.IncreaseValueAnimation, move_duration);
-
-                                moveCount++;
-                                break;
-                            }
-
-                            var possibleNewX = 70 + ((k - 1) * 120);
-                            if (currentNumber.X != possibleNewX)
-                            {
-                                currentNumber.Coordinates = new Vector2(possibleNewX, currentNumber.Coordinates.Y);
-                                currentNumber.MoveToX(possibleNewX, move_duration);
-                                moveCount++;
-                                break;
-                            }
-
-                            break;
-                        }
-                    }
-                }
-            }
-
-            unlockAll();
-
-            if (moveCount > 0)
-                setNumber();
-
-            checkMoveAbility();
-        }
-
-        private void moveDown()
-        {
-            finishAllTransforms();
-
-            int moveCount = 0;
-
-            for (int x = 0; x < 4; x++)
-            {
-                for (int y = 2; y >= 0; y--)
-                {
-                    var currentNumber = getNumberAt(x, y);
-                    if (currentNumber != null)
-                    {
-                        for (int k = y + 1; k <= 3; k++)
-                        {
-                            var possibleSwap = getNumberAt(x, k);
-                            if (possibleSwap == null)
-                            {
-                                if (k == 3)
-                                {
-                                    currentNumber.Coordinates = new Vector2(currentNumber.Coordinates.X, 430);
-                                    currentNumber.MoveToY(430, move_duration);
-                                    moveCount++;
-                                    break;
-                                }
-
-                                continue; // go check the next field
-                            }
-
-                            if (!possibleSwap.IsLocked && possibleSwap.Value == currentNumber.Value)
-                            {
-                                currentNumber.Coordinates = new Vector2(currentNumber.Coordinates.X, 70 + (k * 120));
-                                currentNumber.MoveToY(70 + (k * 120), move_duration).Finally((d) => d.Expire());
-                                possibleSwap.Lock();
-                                possibleSwap.IncreaseValue();
-                                Score.Value += possibleSwap.Value;
-
-                                Scheduler.AddDelayed(possibleSwap.IncreaseValueAnimation, move_duration);
-
-                                moveCount++;
-                                break;
-                            }
-
-                            var possibleNewY = 70 + ((k - 1) * 120);
-                            if (currentNumber.Y != possibleNewY)
-                            {
-                                currentNumber.Coordinates = new Vector2(currentNumber.Coordinates.X, possibleNewY);
-                                currentNumber.MoveToY(possibleNewY, move_duration);
-                                moveCount++;
-                                break;
-                            }
-
-                            break;
-                        }
-                    }
-                }
-            }
-
-            unlockAll();
-
-            if (moveCount > 0)
-                setNumber();
-
-            checkMoveAbility();
-        }
-
-        private void moveLeft()
-        {
-            finishAllTransforms();
-
-            int moveCount = 0;
-
-            for (int y = 0; y < 4; y++)
-            {
-                for (int x = 1; x <= 3; x++)
-                {
-                    var currentNumber = getNumberAt(x, y);
-                    if (currentNumber != null)
-                    {
-                        for (int k = x - 1; k >= 0; k--)
-                        {
-                            var possibleSwap = getNumberAt(k, y);
-                            if (possibleSwap == null)
-                            {
-                                if (k == 0)
-                                {
-                                    currentNumber.Coordinates = new Vector2(70, currentNumber.Coordinates.Y);
-                                    currentNumber.MoveToX(70, move_duration);
-                                    moveCount++;
-                                    break;
-                                }
-
-                                continue; // go check the next field
-                            }
-
-                            if (!possibleSwap.IsLocked && possibleSwap.Value == currentNumber.Value)
-                            {
-                                currentNumber.Coordinates = new Vector2(70 + (k * 120), currentNumber.Coordinates.Y);
-                                currentNumber.MoveToX(70 + (k * 120), move_duration).Finally((d) => d.Expire());
-                                possibleSwap.Lock();
-                                possibleSwap.IncreaseValue();
-                                Score.Value += possibleSwap.Value;
-
-                                Scheduler.AddDelayed(possibleSwap.IncreaseValueAnimation, move_duration);
-
-                                moveCount++;
-                                break;
-                            }
-
-                            var possibleNewX = 70 + ((k + 1) * 120);
-                            if (currentNumber.X != possibleNewX)
-                            {
-                                currentNumber.Coordinates = new Vector2(possibleNewX, currentNumber.Coordinates.Y);
-                                currentNumber.MoveToX(possibleNewX, move_duration);
-                                moveCount++;
-                                break;
-                            }
-
-                            break;
-                        }
-                    }
-                }
-            }
-
-            unlockAll();
-
-            if (moveCount > 0)
-                setNumber();
-
-            checkMoveAbility();
-        }
-
-        private void moveUp()
-        {
-            finishAllTransforms();
-
-            int moveCount = 0;
-
-            for (int x = 0; x < 4; x++)
-            {
-                for (int y = 1; y <= 3; y++)
-                {
-                    var currentNumber = getNumberAt(x, y);
-                    if (currentNumber != null)
-                    {
-                        for (int k = y - 1; k >= 0; k--)
-                        {
-                            var possibleSwap = getNumberAt(x, k);
-                            if (possibleSwap == null)
-                            {
-                                if (k == 0)
-                                {
-                                    currentNumber.Coordinates = new Vector2(currentNumber.Coordinates.X, 70);
-                                    currentNumber.MoveToY(70, move_duration);
-                                    moveCount++;
-                                    break;
-                                }
-
-                                continue; // go check the next field
-                            }
-
-                            if (!possibleSwap.IsLocked && possibleSwap.Value == currentNumber.Value)
-                            {
-                                currentNumber.Coordinates = new Vector2(currentNumber.Coordinates.X, 70 + (k * 120));
-                                currentNumber.MoveToY(70 + (k * 120), move_duration).Finally((d) => d.Expire());
-                                possibleSwap.Lock();
-                                possibleSwap.IncreaseValue();
-                                Score.Value += possibleSwap.Value;
-
-                                Scheduler.AddDelayed(possibleSwap.IncreaseValueAnimation, move_duration);
-
-                                moveCount++;
-                                break;
-                            }
-
-                            var possibleNewY = 70 + ((k + 1) * 120);
-                            if (currentNumber.Y != possibleNewY)
-                            {
-                                currentNumber.Coordinates = new Vector2(currentNumber.Coordinates.X, possibleNewY);
-                                currentNumber.MoveToY(possibleNewY, move_duration);
-                                moveCount++;
-                                break;
-                            }
-
-                            break;
-                        }
-                    }
-                }
-            }
-
-            unlockAll();
-
-            if (moveCount > 0)
-                setNumber();
-
-            checkMoveAbility();
-        }
-
-        #endregion
-
-        private DrawableNumber getNumberAt(int x, int y)
-        {
-            if (numbersLayer.Children.Count > 0)
-            {
-                foreach (var n in numbersLayer.Children)
-                {
-                    if (n.Coordinates == new Vector2(70 + (x * 120), 70 + (y * 120)))
-                        return n;
-                }
-            }
-
-            return null;
-        }
-
         protected override bool OnKeyDown(KeyDownEvent e)
         {
-            if (!hasFailed)
+            if (!e.Repeat)
             {
-                if (!e.Repeat)
+                switch (e.Key)
                 {
-                    switch (e.Key)
-                    {
-                        case Key.Right:
-                            moveRight();
-                            return true;
-                        case Key.Left:
-                            moveLeft();
-                            return true;
-                        case Key.Up:
-                            moveUp();
-                            return true;
-                        case Key.Down:
-                            moveDown();
-                            return true;
-                    }
+                    case Key.Right:
+                        tryMove(MoveDirection.Right);
+                        return true;
+                    case Key.Left:
+                        tryMove(MoveDirection.Left);
+                        return true;
+                    case Key.Up:
+                        tryMove(MoveDirection.Up);
+                        return true;
+                    case Key.Down:
+                        tryMove(MoveDirection.Down);
+                        return true;
                 }
             }
 
             return base.OnKeyDown(e);
         }
 
-        private class BackgroundPanel : Container
+        private bool inputIsBlocked;
+
+        private void tryMove(MoveDirection direction)
         {
-            public BackgroundPanel(int x, int y)
+            if (inputIsBlocked || hasFailed.Value)
+                return;
+
+            inputIsBlocked = true;
+
+            bool moveHasBeenMade = false;
+
+            switch (direction)
             {
-                Position = new Vector2(x, y);
-                Size = new Vector2(100);
-                CornerRadius = 6;
-                Masking = true;
-                Child = new Box
+                case MoveDirection.Up:
+                    moveHasBeenMade = moveUp();
+                    break;
+
+                case MoveDirection.Down:
+                    moveHasBeenMade = moveDown();
+                    break;
+
+                case MoveDirection.Left:
+                    moveHasBeenMade = moveLeft();
+                    break;
+
+                case MoveDirection.Right:
+                    moveHasBeenMade = moveRight();
+                    break;
+            }
+
+            finishMove(moveHasBeenMade);
+        }
+
+        private void finishMove(bool add)
+        {
+            Scheduler.AddDelayed(() =>
+            {
+                numbersLayer.ForEach(n => n.IsBlocked = false);
+                inputIsBlocked = false;
+
+                if (add)
+                    tryAddNumber();
+
+                checkFailCondition();
+            }, move_duration + 10);
+        }
+
+        private bool moveUp()
+        {
+            bool moveHasBeenMade = false;
+
+            for (int x = 0; x < columnCount; x++)
+            {
+                for (int y = 1; y < rowCount; y++)
                 {
-                    RelativeSizeAxes = Axes.Both,
-                    Colour = new Color4(205, 192, 179, 255)
+                    var currentNumber = getNumberAt(x, y);
+                    if (currentNumber == null)
+                        continue;
+
+                    DrawableNumber closest = null;
+
+                    for (int k = y - 1; k >= 0; k--)
+                    {
+                        var possibleClosest = getNumberAt(x, k);
+
+                        if (possibleClosest != null)
+                        {
+                            closest = possibleClosest;
+                            break;
+                        }
+                    }
+
+                    int newYIndex;
+
+                    if (closest == null)
+                    {
+                        newYIndex = 0;
+
+                        if (newYIndex == currentNumber.YIndex)
+                            continue;
+
+                        currentNumber.YIndex = newYIndex;
+                        currentNumber.MoveToY(getPosition(newYIndex), move_duration, Easing.OutQuint);
+                    }
+                    else
+                    {
+                        if (closest.IsBlocked || closest.Power != currentNumber.Power)
+                        {
+                            newYIndex = closest.YIndex + 1;
+
+                            if (newYIndex == currentNumber.YIndex)
+                                continue;
+
+                            currentNumber.YIndex = newYIndex;
+                            currentNumber.MoveToY(getPosition(newYIndex), move_duration, Easing.OutQuint);
+                        }
+                        else
+                        {
+                            newYIndex = closest.YIndex;
+
+                            currentNumber.IsBlocked = true;
+                            currentNumber.YIndex = newYIndex;
+                            currentNumber.MoveToY(getPosition(newYIndex), move_duration, Easing.OutQuint).Expire();
+
+                            closest.IsBlocked = true;
+                            closest.IncreaseValue(move_duration);
+
+                            Score.Value += closest.GetValue();
+                        }
+                    }
+
+                    moveHasBeenMade = true;
+                }
+            }
+
+            return moveHasBeenMade;
+        }
+
+        private bool moveDown()
+        {
+            bool moveHasBeenMade = false;
+
+            for (int x = 0; x < columnCount; x++)
+            {
+                for (int y = rowCount - 1; y >= 0; y--)
+                {
+                    var currentNumber = getNumberAt(x, y);
+                    if (currentNumber == null)
+                        continue;
+
+                    DrawableNumber closest = null;
+
+                    for (int k = y + 1; k < rowCount; k++)
+                    {
+                        var possibleClosest = getNumberAt(x, k);
+
+                        if (possibleClosest != null)
+                        {
+                            closest = possibleClosest;
+                            break;
+                        }
+                    }
+
+                    int newYIndex;
+
+                    if (closest == null)
+                    {
+                        newYIndex = rowCount - 1;
+
+                        if (newYIndex == currentNumber.YIndex)
+                            continue;
+
+                        currentNumber.YIndex = newYIndex;
+                        currentNumber.MoveToY(getPosition(newYIndex), move_duration, Easing.OutQuint);
+                    }
+                    else
+                    {
+                        if (closest.IsBlocked || closest.Power != currentNumber.Power)
+                        {
+                            newYIndex = closest.YIndex - 1;
+
+                            if (newYIndex == currentNumber.YIndex)
+                                continue;
+
+                            currentNumber.YIndex = newYIndex;
+                            currentNumber.MoveToY(getPosition(newYIndex), move_duration, Easing.OutQuint);
+                        }
+                        else
+                        {
+                            newYIndex = closest.YIndex;
+
+                            currentNumber.IsBlocked = true;
+                            currentNumber.YIndex = newYIndex;
+                            currentNumber.MoveToY(getPosition(newYIndex), move_duration, Easing.OutQuint).Expire();
+
+                            closest.IsBlocked = true;
+                            closest.IncreaseValue(move_duration);
+
+                            Score.Value += closest.GetValue();
+                        }
+                    }
+
+                    moveHasBeenMade = true;
+                }
+            }
+
+            return moveHasBeenMade;
+        }
+
+        private bool moveLeft()
+        {
+            bool moveHasBeenMade = false;
+
+            for (int y = 0; y < rowCount; y++)
+            {
+                for (int x = 1; x < columnCount; x++)
+                {
+                    var currentNumber = getNumberAt(x, y);
+                    if (currentNumber == null)
+                        continue;
+
+                    DrawableNumber closest = null;
+
+                    for (int k = x - 1; k >= 0; k--)
+                    {
+                        var possibleClosest = getNumberAt(k, y);
+
+                        if (possibleClosest != null)
+                        {
+                            closest = possibleClosest;
+                            break;
+                        }
+                    }
+
+                    int newXIndex;
+
+                    if (closest == null)
+                    {
+                        newXIndex = 0;
+
+                        if (newXIndex == currentNumber.XIndex)
+                            continue;
+
+                        currentNumber.XIndex = newXIndex;
+                        currentNumber.MoveToX(getPosition(newXIndex), move_duration, Easing.OutQuint);
+                    }
+                    else
+                    {
+                        if (closest.IsBlocked || closest.Power != currentNumber.Power)
+                        {
+                            newXIndex = closest.XIndex + 1;
+
+                            if (newXIndex == currentNumber.XIndex)
+                                continue;
+
+                            currentNumber.XIndex = newXIndex;
+                            currentNumber.MoveToX(getPosition(newXIndex), move_duration, Easing.OutQuint);
+                        }
+                        else
+                        {
+                            newXIndex = closest.XIndex;
+
+                            currentNumber.IsBlocked = true;
+                            currentNumber.XIndex = newXIndex;
+                            currentNumber.MoveToX(getPosition(newXIndex), move_duration, Easing.OutQuint).Expire();
+
+                            closest.IsBlocked = true;
+                            closest.IncreaseValue(move_duration);
+
+                            Score.Value += closest.GetValue();
+                        }
+                    }
+
+                    moveHasBeenMade = true;
+                }
+            }
+
+            return moveHasBeenMade;
+        }
+
+        private bool moveRight()
+        {
+            bool moveHasBeenMade = false;
+
+            for (int y = 0; y < rowCount; y++)
+            {
+                for (int x = columnCount - 1; x >= 0; x--)
+                {
+                    var currentNumber = getNumberAt(x, y);
+                    if (currentNumber == null)
+                        continue;
+
+                    DrawableNumber closest = null;
+
+                    for (int k = x + 1; k < columnCount; k++)
+                    {
+                        var possibleClosest = getNumberAt(k, y);
+
+                        if (possibleClosest != null)
+                        {
+                            closest = possibleClosest;
+                            break;
+                        }
+                    }
+
+                    int newXIndex;
+
+                    if (closest == null)
+                    {
+                        newXIndex = columnCount - 1;
+
+                        if (newXIndex == currentNumber.XIndex)
+                            continue;
+
+                        currentNumber.XIndex = newXIndex;
+                        currentNumber.MoveToX(getPosition(newXIndex), move_duration, Easing.OutQuint);
+                    }
+                    else
+                    {
+                        if (closest.IsBlocked || closest.Power != currentNumber.Power)
+                        {
+                            newXIndex = closest.XIndex - 1;
+
+                            if (newXIndex == currentNumber.XIndex)
+                                continue;
+
+                            currentNumber.XIndex = newXIndex;
+                            currentNumber.MoveToX(getPosition(newXIndex), move_duration, Easing.OutQuint);
+                        }
+                        else
+                        {
+                            newXIndex = closest.XIndex;
+
+                            currentNumber.IsBlocked = true;
+                            currentNumber.XIndex = newXIndex;
+                            currentNumber.MoveToX(getPosition(newXIndex), move_duration, Easing.OutQuint).Expire();
+
+                            closest.IsBlocked = true;
+                            closest.IncreaseValue(move_duration);
+
+                            Score.Value += closest.GetValue();
+                        }
+                    }
+
+                    moveHasBeenMade = true;
+                }
+            }
+
+            return moveHasBeenMade;
+        }
+
+        #endregion
+
+        private enum MoveDirection
+        {
+            Up,
+            Down,
+            Left,
+            Right
+        }
+
+        private class PlayfieldBackground : CompositeDrawable
+        {
+            public PlayfieldBackground(int rowCount, int columnCount)
+            {
+                Container mainLayout;
+
+                RelativeSizeAxes = Axes.Both;
+                InternalChildren = new Drawable[]
+                {
+                    new Box
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Colour = new Color4(187, 173, 160, 255)
+                    },
+                    mainLayout = new Container
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Padding = new MarginPadding(spacing),
+                    }
                 };
+
+                var rows = new List<FillFlowContainer>();
+
+                for (int i = 0; i < rowCount; i++)
+                {
+                    var row = new FillFlowContainer
+                    {
+                        AutoSizeAxes = Axes.Both,
+                        Direction = FillDirection.Horizontal,
+                        Spacing = new Vector2(spacing, 0)
+                    };
+
+                    for (int y = 0; y < columnCount; y++)
+                    {
+                        row.Add(new Container
+                        {
+                            Size = new Vector2(DrawableNumber.SIZE),
+                            Masking = true,
+                            CornerRadius = 4,
+                            Child = new Box
+                            {
+                                RelativeSizeAxes = Axes.Both,
+                                Colour = new Color4(205, 192, 179, 255)
+                            }
+                        });
+                    }
+
+                    rows.Add(row);
+                }
+
+                mainLayout.Add(new FillFlowContainer
+                {
+                    AutoSizeAxes = Axes.Both,
+                    Direction = FillDirection.Vertical,
+                    Spacing = new Vector2(0, spacing),
+                    Children = rows
+                });
             }
         }
     }
