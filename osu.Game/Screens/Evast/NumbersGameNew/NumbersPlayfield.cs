@@ -77,7 +77,7 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
         {
             base.LoadComplete();
             hasFailed.BindValueChanged(onFailChanged);
-            reset();
+            Restart();
         }
 
         private void onFailChanged(ValueChangedEvent<bool> failed)
@@ -86,7 +86,7 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
             inputIsBlocked = failed.NewValue;
         }
 
-        private void reset()
+        public void Restart()
         {
             hasFailed.Value = false;
             numbersLayer.Clear(true);
