@@ -5,12 +5,17 @@ using osu.Framework.Graphics.Shapes;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Screens.Evast.MusicVisualizers;
+using osu.Game.Screens.Evast.Particles;
 using osuTK.Graphics;
 
 namespace osu.Game.Screens.Evast.NumbersGame
 {
     public class NumbersGameScreen : EvastScreen
     {
+        private const int music_visualizer_radius = 1000;
+        private const int music_visualizer_bars_count = 150;
+
         private readonly NumbersPlayfield playfield;
         private readonly OsuClickableContainer resetButton;
         private readonly OsuSpriteText scoreText;
@@ -19,6 +24,76 @@ namespace osu.Game.Screens.Evast.NumbersGame
         {
             AddRangeInternal(new Drawable[]
             {
+                new SpaceParticlesContainer(),
+                new Container
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Children = new Drawable[]
+                    {
+                        new Container
+                        {
+                            Anchor = Anchor.Centre,
+                            Origin = Anchor.Centre,
+                            X = -50,
+                            RelativeSizeAxes = Axes.Both,
+                            Children = new Drawable[]
+                            {
+                                new MusicCircularVisualizer
+                                {
+                                    IsReversed = true,
+                                    Anchor = Anchor.Centre,
+                                    Origin = Anchor.Centre,
+                                    DegreeValue = 40,
+                                    Rotation = 45,
+                                    BarWidth = 1.5f,
+                                    BarsAmount = music_visualizer_bars_count,
+                                    CircleSize = music_visualizer_radius,
+                                },
+                                new MusicCircularVisualizer
+                                {
+                                    Anchor = Anchor.Centre,
+                                    Origin = Anchor.Centre,
+                                    DegreeValue = 40,
+                                    Rotation = 95,
+                                    BarWidth = 1.5f,
+                                    BarsAmount = music_visualizer_bars_count,
+                                    CircleSize = music_visualizer_radius,
+                                }
+                            }
+                        },
+                        new Container
+                        {
+                            Anchor = Anchor.Centre,
+                            Origin = Anchor.Centre,
+                            X = 50,
+                            RelativeSizeAxes = Axes.Both,
+                            Children = new Drawable[]
+                            {
+                                new MusicCircularVisualizer
+                                {
+                                    IsReversed = true,
+                                    Anchor = Anchor.Centre,
+                                    Origin = Anchor.Centre,
+                                    DegreeValue = 40,
+                                    Rotation = 225,
+                                    BarWidth = 1.5f,
+                                    BarsAmount = music_visualizer_bars_count,
+                                    CircleSize = music_visualizer_radius,
+                                },
+                                new MusicCircularVisualizer
+                                {
+                                    Anchor = Anchor.Centre,
+                                    Origin = Anchor.Centre,
+                                    DegreeValue = 40,
+                                    Rotation = 275,
+                                    BarWidth = 1.5f,
+                                    BarsAmount = music_visualizer_bars_count,
+                                    CircleSize = music_visualizer_radius,
+                                }
+                            }
+                        }
+                    }
+                },
                 resetButton = new OsuClickableContainer
                 {
                     Anchor = Anchor.Centre,
