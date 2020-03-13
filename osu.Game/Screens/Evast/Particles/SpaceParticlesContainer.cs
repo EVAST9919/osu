@@ -24,7 +24,7 @@ namespace osu.Game.Screens.Evast.Particles
         /// <summary>
         /// Maximum allowed amount of particles which can be shown at once.
         /// </summary>
-        private const int max_particles_amount = 350;
+        private const int max_particles_count = 350;
 
         /// <summary>
         /// The size of a single particle.
@@ -51,20 +51,23 @@ namespace osu.Game.Screens.Evast.Particles
 
         private void generateParticles()
         {
-            if (Children.Count < max_particles_amount)
-            {
-                Add(new Particle
-                {
-                    Position = new Vector2(RNG.NextSingle(-0.5f, 0.5f), RNG.NextSingle(-0.5f, 0.5f)),
-                    Depth = RNG.NextSingle(0.25f, 1),
-                    Size = new Vector2(particle_size),
-                });
+            var currentParticlesCount = Children.Count;
 
-                Scheduler.AddDelayed(generateParticles, time_between_updates);
+            if (currentParticlesCount < max_particles_count)
+            {
+                for (int i = 0; i < max_particles_count - currentParticlesCount; i++)
+                    createNewParticle();
             }
-            else
-                Scheduler.AddDelayed(generateParticles, time_between_updates * 2);
+
+            Scheduler.AddDelayed(generateParticles, time_between_updates);
         }
+
+        private void createNewParticle() => Add(new Particle
+        {
+            Position = new Vector2(RNG.NextSingle(-0.5f, 0.5f), RNG.NextSingle(-0.5f, 0.5f)),
+            Depth = RNG.NextSingle(0.25f, 1),
+            Size = new Vector2(particle_size),
+        });
 
         private class Particle : CircularContainer
         {
