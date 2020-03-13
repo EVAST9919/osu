@@ -1,7 +1,6 @@
 ﻿using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Shapes;
-using osu.Framework.Bindables;
 using osuTK.Graphics;
 using osuTK;
 using osu.Game.Graphics.Sprites;
@@ -16,11 +15,11 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
 
         public int XIndex;
         public int YIndex;
-        public int Power => power.Value;
+
+        public int Power { get; private set; }
 
         public bool IsBlocked;
 
-        private readonly BindableInt power = new BindableInt();
         private readonly Box background;
         private readonly Container content;
         private readonly OsuSpriteText text;
@@ -29,7 +28,7 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
         {
             XIndex = xIndex;
             YIndex = yIndex;
-            power.Value = startPower;
+            Power = startPower;
 
             Size = new Vector2(SIZE);
             InternalChild = content = new Container
@@ -59,27 +58,38 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
             };
 
             if (startPower != 1)
-                background.Colour = getPowerColour(power.Value);
+                background.Colour = getPowerColour(Power);
         }
 
         protected override void LoadComplete()
         {
             base.LoadComplete();
-            power.BindValueChanged(onPowerChanged);
-
             content.ScaleTo(1, 200, Easing.OutQuint);
         }
 
-        public void IncreaseValue() => power.Value++;
+        public void IncreaseValue(int animationDelay = 0)
+        {
+            Scheduler.Update();
 
-        private void onPowerChanged(ValueChangedEvent<int> powerChangedEvent)
+            Power++;
+
+            if (animationDelay == 0)
+            {
+                animate();
+                return;
+            }
+
+            Scheduler.AddDelayed(animate, animationDelay);
+        }
+
+        private void animate()
         {
             this.ScaleTo(1.2f, 40, Easing.OutQuint).Then().ScaleTo(1, 160, Easing.OutQuint);
-            background.FadeColour(getPowerColour(powerChangedEvent.NewValue), 200, Easing.OutQuint);
+            background.FadeColour(getPowerColour(Power), 200, Easing.OutQuint);
             text.Text = getPoweredString();
         }
 
-        private string getPoweredString() => Math.Round(Math.Pow(2, power.Value)).ToString();
+        private string getPoweredString() => Math.Round(Math.Pow(2, Power)).ToString();
 
         private Color4 getPowerColour(int newPower)
         {

@@ -22,7 +22,7 @@ namespace osu.Game.Tests.Visual.Evast
                 Origin = Anchor.Centre,
             });
 
-            AddStep("Increase value", number.IncreaseValue);
+            AddStep("Increase value", () => number.IncreaseValue());
         }
     }
 }

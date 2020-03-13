@@ -293,7 +293,7 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
                             currentNumber.MoveToX(getPosition(newXIndex), move_duration, Easing.OutQuint).Expire();
 
                             closest.IsBlocked = true;
-                            closest.IncreaseValue();
+                            closest.IncreaseValue(move_duration);
                         }
                     }
 
