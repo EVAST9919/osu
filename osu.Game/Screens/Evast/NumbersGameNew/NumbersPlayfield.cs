@@ -234,7 +234,69 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
 
         private bool moveLeft()
         {
-            return false;
+            bool moveHasBeenMade = false;
+
+            for (int j = 0; j < rowCount; j++)
+            {
+                for (int i = 1; i < columnCount; i++)
+                {
+                    var currentNumber = getNumberAt(i, j);
+                    if (currentNumber == null)
+                        continue;
+
+                    DrawableNumber closest = null;
+
+                    for (int k = i - 1; k >= 0; k--)
+                    {
+                        var possibleClosest = getNumberAt(k, j);
+                        if (possibleClosest == null)
+                            continue;
+
+                        closest = possibleClosest;
+                        break;
+                    }
+
+                    int newXIndex;
+
+                    if (closest == null)
+                    {
+                        newXIndex = 0;
+
+                        if (newXIndex == currentNumber.XIndex)
+                            continue;
+
+                        currentNumber.XIndex = newXIndex;
+                        currentNumber.MoveToX(getPosition(newXIndex), move_duration, Easing.OutQuint);
+                    }
+                    else
+                    {
+                        if (closest.IsBlocked || closest.Power != currentNumber.Power)
+                        {
+                            newXIndex = closest.XIndex + 1;
+
+                            if (newXIndex == currentNumber.XIndex)
+                                continue;
+
+                            currentNumber.XIndex = newXIndex;
+                            currentNumber.MoveToX(getPosition(newXIndex), move_duration, Easing.OutQuint);
+                        }
+                        else
+                        {
+                            newXIndex = closest.XIndex;
+
+                            currentNumber.XIndex = newXIndex;
+                            currentNumber.MoveToX(getPosition(newXIndex), move_duration, Easing.OutQuint).Expire();
+
+                            closest.IsBlocked = true;
+                            closest.IncreaseValue(move_duration);
+                        }
+                    }
+
+                    moveHasBeenMade = true;
+                }
+            }
+
+            return moveHasBeenMade;
         }
 
         private bool moveRight()
