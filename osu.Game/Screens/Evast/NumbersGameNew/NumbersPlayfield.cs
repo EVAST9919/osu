@@ -229,31 +229,95 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
 
         private bool moveDown()
         {
-            return false;
+            bool moveHasBeenMade = false;
+
+            for (int x = 0; x < columnCount; x++)
+            {
+                for (int y = rowCount - 1; y >= 0; y--)
+                {
+                    var currentNumber = getNumberAt(x, y);
+                    if (currentNumber == null)
+                        continue;
+
+                    DrawableNumber closest = null;
+
+                    for (int k = y + 1; k < rowCount; k++)
+                    {
+                        var possibleClosest = getNumberAt(x, k);
+
+                        if (possibleClosest != null)
+                        {
+                            closest = possibleClosest;
+                            break;
+                        }
+                    }
+
+                    int newYIndex;
+
+                    if (closest == null)
+                    {
+                        newYIndex = rowCount - 1;
+
+                        if (newYIndex == currentNumber.YIndex)
+                            continue;
+
+                        currentNumber.YIndex = newYIndex;
+                        currentNumber.MoveToY(getPosition(newYIndex), move_duration, Easing.OutQuint);
+                    }
+                    else
+                    {
+                        if (closest.IsBlocked || closest.Power != currentNumber.Power)
+                        {
+                            newYIndex = closest.YIndex - 1;
+
+                            if (newYIndex == currentNumber.YIndex)
+                                continue;
+
+                            currentNumber.YIndex = newYIndex;
+                            currentNumber.MoveToY(getPosition(newYIndex), move_duration, Easing.OutQuint);
+                        }
+                        else
+                        {
+                            newYIndex = closest.YIndex;
+
+                            currentNumber.YIndex = newYIndex;
+                            currentNumber.MoveToY(getPosition(newYIndex), move_duration, Easing.OutQuint).Expire();
+
+                            closest.IsBlocked = true;
+                            closest.IncreaseValue(move_duration);
+                        }
+                    }
+
+                    moveHasBeenMade = true;
+                }
+            }
+
+            return moveHasBeenMade;
         }
 
         private bool moveLeft()
         {
             bool moveHasBeenMade = false;
 
-            for (int j = 0; j < rowCount; j++)
+            for (int y = 0; y < rowCount; y++)
             {
-                for (int i = 1; i < columnCount; i++)
+                for (int x = 1; x < columnCount; x++)
                 {
-                    var currentNumber = getNumberAt(i, j);
+                    var currentNumber = getNumberAt(x, y);
                     if (currentNumber == null)
                         continue;
 
                     DrawableNumber closest = null;
 
-                    for (int k = i - 1; k >= 0; k--)
+                    for (int k = x - 1; k >= 0; k--)
                     {
-                        var possibleClosest = getNumberAt(k, j);
-                        if (possibleClosest == null)
-                            continue;
+                        var possibleClosest = getNumberAt(k, y);
 
-                        closest = possibleClosest;
-                        break;
+                        if (possibleClosest != null)
+                        {
+                            closest = possibleClosest;
+                            break;
+                        }
                     }
 
                     int newXIndex;
@@ -303,24 +367,25 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
         {
             bool moveHasBeenMade = false;
 
-            for (int j = 0; j < rowCount; j++)
+            for (int y = 0; y < rowCount; y++)
             {
-                for (int i = columnCount - 1; i >= 0; i--)
+                for (int x = columnCount - 1; x >= 0; x--)
                 {
-                    var currentNumber = getNumberAt(i, j);
+                    var currentNumber = getNumberAt(x, y);
                     if (currentNumber == null)
                         continue;
 
                     DrawableNumber closest = null;
 
-                    for (int k = i + 1; k < columnCount; k++)
+                    for (int k = x + 1; k < columnCount; k++)
                     {
-                        var possibleClosest = getNumberAt(k, j);
-                        if (possibleClosest == null)
-                            continue;
+                        var possibleClosest = getNumberAt(k, y);
 
-                        closest = possibleClosest;
-                        break;
+                        if (possibleClosest != null)
+                        {
+                            closest = possibleClosest;
+                            break;
+                        }
                     }
 
                     int newXIndex;

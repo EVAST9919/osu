@@ -15,7 +15,7 @@ namespace osu.Game.Tests.Visual.Evast
 
         public TestSceneNumbersPlayfield()
         {
-            Add(new NumbersPlayfield(2, 5)
+            Add(new NumbersPlayfield(4, 4)
             {
                 Anchor = Anchor.Centre,
                 Origin = Anchor.Centre,
