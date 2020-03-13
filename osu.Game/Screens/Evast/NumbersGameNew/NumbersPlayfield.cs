@@ -5,9 +5,11 @@ using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Input.Events;
 using osu.Framework.Utils;
 using osuTK;
 using osuTK.Graphics;
+using osuTK.Input;
 
 namespace osu.Game.Screens.Evast.NumbersGameNew
 {
@@ -45,6 +47,30 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
             reset();
         }
 
+        protected override bool OnKeyDown(KeyDownEvent e)
+        {
+            if (!e.Repeat)
+            {
+                switch (e.Key)
+                {
+                    case Key.Right:
+                        moveRight();
+                        return true;
+                    case Key.Left:
+                        moveLeft();
+                        return true;
+                    case Key.Up:
+                        moveUp();
+                        return true;
+                    case Key.Down:
+                        moveDown();
+                        return true;
+                }
+            }
+
+            return base.OnKeyDown(e);
+        }
+
         private void reset()
         {
             numbersLayer.Clear(true);
@@ -54,6 +80,9 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
 
         private void addNumber()
         {
+            if (numbersLayer.Count == rowCount * columnCount)
+                return;
+
             int x = RNG.Next(columnCount);
             int y = RNG.Next(rowCount);
 
@@ -97,6 +126,26 @@ namespace osu.Game.Screens.Evast.NumbersGameNew
         private Vector2 getPositionForAxes(int x, int y) => new Vector2(getPosition(x), getPosition(y));
 
         private int getPosition(int axisValue) => axisValue * DrawableNumber.SIZE + spacing * (axisValue + 1) + DrawableNumber.SIZE / 2;
+
+        private void moveUp()
+        {
+            addNumber();
+        }
+
+        private void moveDown()
+        {
+            addNumber();
+        }
+
+        private void moveLeft()
+        {
+            addNumber();
+        }
+
+        private void moveRight()
+        {
+            addNumber();
+        }
 
         private class PlayfieldBackground : CompositeDrawable
         {
