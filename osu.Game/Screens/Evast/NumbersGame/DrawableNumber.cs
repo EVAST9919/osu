@@ -109,8 +109,8 @@ namespace osu.Game.Screens.Evast.NumbersGame
 
         private void animate()
         {
-            this.ScaleTo(1.2f, 40, Easing.OutQuint).Then().ScaleTo(1, 160, Easing.OutQuint);
-            background.FadeColour(getPowerColour(Power), 200, Easing.OutQuint);
+            this.ScaleTo(1.2f, 20, Easing.OutQuint).Then().ScaleTo(1, 160, Easing.OutQuint);
+            background.FadeColour(getPowerColour(Power), 180, Easing.OutQuint);
             text.Text = getPoweredString();
 
             if (Power == 3)

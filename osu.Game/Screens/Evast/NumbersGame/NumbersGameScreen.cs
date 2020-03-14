@@ -14,7 +14,7 @@ namespace osu.Game.Screens.Evast.NumbersGame
     public class NumbersGameScreen : EvastNoBackButtonScreen
     {
         private const int music_visualizer_radius = 1000;
-        private const int music_visualizer_bars_count = 100;
+        private const int music_visualizer_bars_count = 70;
 
         private readonly NumbersPlayfield playfield;
         private readonly OsuClickableContainer resetButton;
@@ -22,7 +22,7 @@ namespace osu.Game.Screens.Evast.NumbersGame
 
         public NumbersGameScreen()
         {
-            DimValue = 0.2f;
+            DimValue = 0.35f;
 
             AddRangeInternal(new Drawable[]
             {
@@ -45,8 +45,8 @@ namespace osu.Game.Screens.Evast.NumbersGame
                                     IsReversed = true,
                                     Anchor = Anchor.Centre,
                                     Origin = Anchor.Centre,
-                                    DegreeValue = 40,
-                                    Rotation = 45,
+                                    DegreeValue = 45,
+                                    Rotation = 40,
                                     BarWidth = 1.5f,
                                     BarsAmount = music_visualizer_bars_count,
                                     CircleSize = music_visualizer_radius,
@@ -55,7 +55,7 @@ namespace osu.Game.Screens.Evast.NumbersGame
                                 {
                                     Anchor = Anchor.Centre,
                                     Origin = Anchor.Centre,
-                                    DegreeValue = 40,
+                                    DegreeValue = 45,
                                     Rotation = 95,
                                     BarWidth = 1.5f,
                                     BarsAmount = music_visualizer_bars_count,
@@ -76,8 +76,8 @@ namespace osu.Game.Screens.Evast.NumbersGame
                                     IsReversed = true,
                                     Anchor = Anchor.Centre,
                                     Origin = Anchor.Centre,
-                                    DegreeValue = 40,
-                                    Rotation = 225,
+                                    DegreeValue = 45,
+                                    Rotation = 220,
                                     BarWidth = 1.5f,
                                     BarsAmount = music_visualizer_bars_count,
                                     CircleSize = music_visualizer_radius,
@@ -86,7 +86,7 @@ namespace osu.Game.Screens.Evast.NumbersGame
                                 {
                                     Anchor = Anchor.Centre,
                                     Origin = Anchor.Centre,
-                                    DegreeValue = 40,
+                                    DegreeValue = 45,
                                     Rotation = 275,
                                     BarWidth = 1.5f,
                                     BarsAmount = music_visualizer_bars_count,
