@@ -20,7 +20,7 @@ namespace osu.Game.Screens.Evast.NumbersGame
     public class NumbersPlayfield : CompositeDrawable
     {
         private const int spacing = 10;
-        private const int move_duration = 200;
+        private const int move_duration = 175;
 
         public BindableInt Score = new BindableInt();
 
@@ -205,6 +205,11 @@ namespace osu.Game.Screens.Evast.NumbersGame
             hasFailed.Value = true;
         }
 
+        private void onInvalidMove()
+        {
+            this.FadeColour(new Color4(255, 150, 150, 255), 20, Easing.OutQuint).Then().FadeColour(Color4.White, 500, Easing.Out);
+        }
+
         #region Move logic
 
         protected override bool OnKeyDown(KeyDownEvent e)
@@ -240,38 +245,41 @@ namespace osu.Game.Screens.Evast.NumbersGame
 
             inputIsBlocked = true;
 
-            bool moveHasBeenMade = false;
+            bool moveIsValid = false;
 
             switch (direction)
             {
                 case MoveDirection.Up:
-                    moveHasBeenMade = moveUp();
+                    moveIsValid = moveUp();
                     break;
 
                 case MoveDirection.Down:
-                    moveHasBeenMade = moveDown();
+                    moveIsValid = moveDown();
                     break;
 
                 case MoveDirection.Left:
-                    moveHasBeenMade = moveLeft();
+                    moveIsValid = moveLeft();
                     break;
 
                 case MoveDirection.Right:
-                    moveHasBeenMade = moveRight();
+                    moveIsValid = moveRight();
                     break;
             }
 
-            finishMove(moveHasBeenMade);
+            if (!moveIsValid)
+                onInvalidMove();
+
+            finishMove(moveIsValid);
         }
 
-        private void finishMove(bool add)
+        private void finishMove(bool moveIsValid)
         {
             Scheduler.AddDelayed(() =>
             {
                 numbersLayer.ForEach(n => n.IsBlocked = false);
                 inputIsBlocked = false;
 
-                if (add)
+                if (moveIsValid)
                     tryAddNumber();
 
                 checkFailCondition();
