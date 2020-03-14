@@ -6,10 +6,13 @@ using osuTK;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics;
 using System;
+using osu.Game.Graphics.Containers;
+using osu.Game.Beatmaps.ControlPoints;
+using osu.Framework.Audio.Track;
 
 namespace osu.Game.Screens.Evast.NumbersGame
 {
-    public class DrawableNumber : CompositeDrawable
+    public class DrawableNumber : BeatSyncedContainer
     {
         public const int SIZE = 100;
 
@@ -21,6 +24,7 @@ namespace osu.Game.Screens.Evast.NumbersGame
         public bool IsBlocked;
 
         private readonly Box background;
+        private readonly Box foreground;
         private readonly Container content;
         private readonly OsuSpriteText text;
 
@@ -31,7 +35,7 @@ namespace osu.Game.Screens.Evast.NumbersGame
             Power = startPower;
 
             Size = new Vector2(SIZE);
-            InternalChild = content = new Container
+            Add(content = new Container
             {
                 Anchor = Anchor.Centre,
                 Origin = Anchor.Centre,
@@ -53,9 +57,15 @@ namespace osu.Game.Screens.Evast.NumbersGame
                         Text = getPoweredString(),
                         Colour = startPower == 3 ? Color4.White : new Color4(119, 110, 101, 255),
                         Shadow = false,
+                    },
+                    foreground = new Box
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Colour = Color4.White,
+                        Alpha = 0,
                     }
                 }
-            };
+            });
 
             if (startPower != 1)
                 background.Colour = getPowerColour(Power);
@@ -83,6 +93,19 @@ namespace osu.Game.Screens.Evast.NumbersGame
         }
 
         public int GetValue() => (int)Math.Round(Math.Pow(2, Power));
+
+        protected override void OnNewBeat(int beatIndex, TimingControlPoint timingPoint, EffectControlPoint effectPoint, TrackAmplitudes amplitudes)
+        {
+            base.OnNewBeat(beatIndex, timingPoint, effectPoint, amplitudes);
+
+            float amplitudeAdjust = Math.Min(1, 0.4f + amplitudes.Maximum);
+
+            if (beatIndex < 0) return;
+
+            foreground.FadeTo(0.15f * amplitudeAdjust, 20, Easing.Out)
+                .Then()
+                .FadeTo(0, timingPoint.BeatLength * 2, Easing.OutQuint);
+        }
 
         private void animate()
         {

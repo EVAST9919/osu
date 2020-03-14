@@ -14,7 +14,7 @@ namespace osu.Game.Screens.Evast.NumbersGame
     public class NumbersGameScreen : EvastScreen
     {
         private const int music_visualizer_radius = 1000;
-        private const int music_visualizer_bars_count = 150;
+        private const int music_visualizer_bars_count = 100;
 
         private readonly NumbersPlayfield playfield;
         private readonly OsuClickableContainer resetButton;
@@ -36,7 +36,7 @@ namespace osu.Game.Screens.Evast.NumbersGame
                         {
                             Anchor = Anchor.Centre,
                             Origin = Anchor.Centre,
-                            X = -50,
+                            X = -70,
                             RelativeSizeAxes = Axes.Both,
                             Children = new Drawable[]
                             {
@@ -67,7 +67,7 @@ namespace osu.Game.Screens.Evast.NumbersGame
                         {
                             Anchor = Anchor.Centre,
                             Origin = Anchor.Centre,
-                            X = 50,
+                            X = 70,
                             RelativeSizeAxes = Axes.Both,
                             Children = new Drawable[]
                             {
