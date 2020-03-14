@@ -11,7 +11,7 @@ using osuTK.Graphics;
 
 namespace osu.Game.Screens.Evast.NumbersGame
 {
-    public class NumbersGameScreen : EvastScreen
+    public class NumbersGameScreen : EvastNoBackButtonScreen
     {
         private const int music_visualizer_radius = 1000;
         private const int music_visualizer_bars_count = 100;
