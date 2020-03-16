@@ -10,22 +10,6 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
         [Resolved]
         private Bindable<WorkingBeatmap> beatmap { get; set; }
 
-        private int updateDelay = 1;
-
-        public int UpdateDelay
-        {
-            get => updateDelay;
-            set
-            {
-                updateDelay = value;
-
-                if (!IsLoaded)
-                    return;
-
-                Restart();
-            }
-        }
-
         protected override void LoadComplete()
         {
             base.LoadComplete();
@@ -38,7 +22,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
         {
             var frequencyAmplitudes = beatmap.Value.Track?.CurrentAmplitudes.FrequencyAmplitudes ?? new float[256];
             OnAmplitudesUpdate(frequencyAmplitudes);
-            Scheduler.AddDelayed(updateAmplitudes, UpdateDelay);
+            Scheduler.AddDelayed(updateAmplitudes, 1);
         }
 
         protected abstract void OnAmplitudesUpdate(float[] amplitudes);

@@ -30,7 +30,6 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
             {
                 settings = new Settings(
                     visualizer.ValueMultiplier,
-                    visualizer.UpdateDelay,
                     visualizer.Smoothness,
                     visualizer.BarWidth,
                     visualizer.CircleSize,
@@ -43,7 +42,6 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
         protected override void Connect()
         {
             settings.MultiplierBindable.ValueChanged += newValue => visualizer.ValueMultiplier = newValue.NewValue;
-            settings.UpdateBindable.ValueChanged += newValue => visualizer.UpdateDelay = newValue.NewValue;
             settings.SmoothnessBindable.ValueChanged += newValue => visualizer.Smoothness = newValue.NewValue;
             settings.WidthBindable.ValueChanged += newValue => visualizer.BarWidth = newValue.NewValue;
             settings.ReverseBindable.ValueChanged += newValue => visualizer.IsReversed = newValue.NewValue;
@@ -57,7 +55,6 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
             protected override string Title => @"settings";
 
             public readonly BindableFloat MultiplierBindable;
-            public readonly BindableInt UpdateBindable;
             public readonly BindableInt SmoothnessBindable;
             public readonly BindableFloat WidthBindable;
             public readonly BindableBool ReverseBindable;
@@ -65,7 +62,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
             public readonly BindableInt AmountBindable;
             public readonly BindableFloat DegreeBindable;
 
-            public Settings(float multiplier, int updateDelay, int smoothnessValue, float width, float circleSize, int barsAmount, float degreeValue, bool reverse)
+            public Settings(float multiplier, int smoothnessValue, float width, float circleSize, int barsAmount, float degreeValue, bool reverse)
             {
                 Children = new Drawable[]
                 {
@@ -77,16 +74,6 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                             Default = multiplier,
                             MinValue = 0,
                             MaxValue = 1000,
-                        }
-                    },
-                    new PlayerSliderBar<int>
-                    {
-                        LabelText = "Update Delay",
-                        Bindable = UpdateBindable = new BindableInt(updateDelay)
-                        {
-                            Default = updateDelay,
-                            MinValue = 1,
-                            MaxValue = 100,
                         }
                     },
                     new PlayerSliderBar<int>
