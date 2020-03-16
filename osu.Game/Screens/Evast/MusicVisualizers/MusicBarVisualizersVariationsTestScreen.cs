@@ -71,55 +71,34 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                 private const int spacing = 2;
                 private const int piece_height = 2;
 
-                private Container mainBar;
-                private Container fakeBar;
+                private Container piecesContainer;
 
-                private int previousValue = -1;
+                private int piecesCount = -1;
 
-                protected override Drawable CreateContent() => new Container
+                protected override Drawable CreateContent() => piecesContainer = new Container
                 {
+                    Anchor = Anchor.BottomCentre,
+                    Origin = Anchor.BottomCentre,
                     AutoSizeAxes = Axes.Y,
-                    RelativeSizeAxes = Axes.X,
-                    Children = new Drawable[]
-                    {
-                        mainBar = new Container
-                        {
-                            Origin = Anchor.BottomCentre,
-                            AutoSizeAxes = Axes.Y,
-                            RelativeSizeAxes = Axes.X
-                        },
-                        fakeBar = new Container { Origin = Anchor.BottomCentre }
-                    }
+                    RelativeSizeAxes = Axes.X
                 };
-
-                public override void SetValue(float amplitudeValue, float valueMultiplier, int smoothness)
-                {
-                    var newValue = ValueFormula(amplitudeValue, valueMultiplier);
-
-                    if (newValue <= fakeBar.Height)
-                        return;
-
-                    fakeBar.ResizeHeightTo(newValue)
-                        .Then()
-                        .ResizeHeightTo(0, smoothness);
-                }
 
                 protected override void Update()
                 {
                     base.Update();
 
-                    var currentValue = (int)(fakeBar.Height / (piece_height + spacing));
-                    if (previousValue == currentValue)
+                    var newPiecesCount = (int)(Height / (piece_height + spacing));
+
+                    if (piecesCount == newPiecesCount)
                         return;
 
-                    previousValue = currentValue;
+                    piecesCount = newPiecesCount;
 
-                    if (mainBar.Children.Count > 0)
-                        mainBar.Clear(true);
+                    piecesContainer.Clear(true);
 
-                    for (int i = 0; i < currentValue + 1; i++)
+                    for (int i = 0; i <= newPiecesCount; i++)
                     {
-                        mainBar.Add(new Container
+                        piecesContainer.Add(new Container
                         {
                             Origin = Anchor.BottomCentre,
                             RelativeSizeAxes = Axes.X,
