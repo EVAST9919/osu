@@ -1,11 +1,15 @@
-﻿using osu.Framework.Allocation;
+﻿using osu.Framework.Extensions.IEnumerableExtensions;
+using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Shapes;
+using osuTK;
+using osuTK.Graphics;
 
 namespace osu.Game.Screens.Evast.MusicVisualizers
 {
     public abstract class MusicBarsVisualizer : MusicVisualizer
     {
-        protected abstract VisualizerBar CreateNewBar();
+        protected virtual BasicBar CreateBar() => new BasicBar();
 
         private int smoothness = 150;
         public int Smoothness
@@ -13,8 +17,6 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
             get => smoothness;
             set
             {
-                if (smoothness == value)
-                    return;
                 smoothness = value;
 
                 if (!IsLoaded)
@@ -30,15 +32,13 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
             get => barWidth;
             set
             {
-                if (barWidth == value)
-                    return;
                 barWidth = value;
 
                 if (!IsLoaded)
                     return;
 
                 foreach (var bar in EqualizerBars)
-                    bar.Width = barWidth;
+                    bar.Width = value;
             }
         }
 
@@ -48,8 +48,6 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
             get => barsAmount;
             set
             {
-                if (barsAmount == value)
-                    return;
                 barsAmount = value;
 
                 if (!IsLoaded)
@@ -63,11 +61,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
 
         public float ValueMultiplier { get; set; } = 400;
 
-        protected virtual void ClearBars()
-        {
-            if (Children.Count > 0)
-                Clear(true);
-        }
+        protected virtual void ClearBars() => Clear(true);
 
         private void resetBars()
         {
@@ -78,32 +72,27 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
 
         private void rearrangeBars()
         {
-            EqualizerBars = new VisualizerBar[barsAmount];
+            EqualizerBars = new BasicBar[barsAmount];
             for (int i = 0; i < barsAmount; i++)
             {
-                EqualizerBars[i] = CreateNewBar();
+                EqualizerBars[i] = CreateBar();
                 EqualizerBars[i].Width = barWidth;
             }
         }
 
         protected int RealAmplitudeFor(int barNumber) => 200 / BarsAmount * barNumber;
 
-        protected VisualizerBar[] EqualizerBars;
+        protected BasicBar[] EqualizerBars;
 
         public bool IsReversed { get; set; }
 
-        [BackgroundDependencyLoader]
-        private void load()
+        protected override void LoadComplete()
         {
-            rearrangeBars();
-            AddBars();
+            resetBars();
+            base.LoadComplete();
         }
 
-        protected virtual void AddBars()
-        {
-            foreach (var bar in EqualizerBars)
-                Add(bar);
-        }
+        protected virtual void AddBars() => EqualizerBars.ForEach(Add);
 
         protected override void OnAmplitudesUpdate(float[] amplitudes)
         {
@@ -114,9 +103,32 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
             }
         }
 
-        protected abstract class VisualizerBar : Container
+        protected class BasicBar : Container
         {
-            public abstract void SetValue(float amplitudeValue, float valueMultiplier, int softness, int faloff);
+            public BasicBar()
+            {
+                Child = CreateContent();
+            }
+
+            protected virtual Drawable CreateContent() => new Box
+            {
+                EdgeSmoothness = Vector2.One,
+                RelativeSizeAxes = Axes.Both,
+                Colour = Color4.White,
+            };
+
+            public virtual void SetValue(float amplitudeValue, float valueMultiplier, int softness, int faloff)
+            {
+                var newHeight = ValueFormula(amplitudeValue, valueMultiplier);
+
+                // Don't allow resize if new height less than current
+                if (newHeight <= Height)
+                    return;
+
+                this.ResizeHeightTo(newHeight).Then().ResizeHeightTo(0, softness);
+            }
+
+            protected virtual float ValueFormula(float amplitudeValue, float valueMultiplier) => amplitudeValue * valueMultiplier;
         }
     }
 }

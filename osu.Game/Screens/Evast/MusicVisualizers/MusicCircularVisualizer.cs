@@ -1,22 +1,18 @@
 ﻿using osuTK;
-using osuTK.Graphics;
 using osu.Framework.Graphics;
-using osu.Framework.Graphics.Shapes;
 using System;
 
 namespace osu.Game.Screens.Evast.MusicVisualizers
 {
     public class MusicCircularVisualizer : MusicBarsVisualizer
     {
-        protected override VisualizerBar CreateNewBar() => new DefaultBar();
-
         private float circleSize = 200;
+
         public float CircleSize
         {
+            get => circleSize;
             set
             {
-                if (circleSize == value)
-                    return;
                 circleSize = value;
 
                 if (!IsLoaded)
@@ -25,16 +21,15 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                 foreach (var bar in EqualizerBars)
                     bar.Position = calculateBarPosition(bar.Rotation);
             }
-            get { return circleSize; }
         }
 
         private float degreeValue = 360;
+
         public float DegreeValue
         {
+            get => degreeValue;
             set
             {
-                if (degreeValue == value)
-                    return;
                 degreeValue = value;
 
                 if (!IsLoaded)
@@ -42,7 +37,6 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
 
                 calculateBarProperties();
             }
-            get { return degreeValue; }
         }
 
         protected override void AddBars()
@@ -57,7 +51,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
 
             for (int i = 0; i < BarsAmount; i++)
             {
-                VisualizerBar bar = EqualizerBars[i];
+                var bar = EqualizerBars[i];
                 bar.Origin = Anchor.BottomCentre;
 
                 float rotationValue = i * spacing;
@@ -73,29 +67,6 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
             float rotationCos = (float)Math.Cos(rotation);
             float rotationSin = (float)Math.Sin(rotation);
             return new Vector2(rotationSin / 2, -rotationCos / 2) * circleSize;
-        }
-
-        protected class DefaultBar : VisualizerBar
-        {
-            public DefaultBar()
-            {
-                Child = new Box
-                {
-                    EdgeSmoothness = Vector2.One,
-                    RelativeSizeAxes = Axes.Both,
-                    Colour = Color4.White,
-                };
-            }
-
-            public override void SetValue(float amplitudeValue, float valueMultiplier, int softness, int faloff)
-            {
-                var newValue = amplitudeValue * valueMultiplier;
-
-                if (newValue <= Height)
-                    return;
-
-                this.ResizeHeightTo(newValue).Then().ResizeHeightTo(0, softness);
-            }
         }
     }
 }

@@ -43,23 +43,13 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
 
         private class CircularBarVisualizer : MusicCircularVisualizer
         {
-            protected override VisualizerBar CreateNewBar() => new CircularBar
-            {
-                Masking = true
-            };
+            protected override BasicBar CreateBar() => new CircularBar();
 
-            private class CircularBar : DefaultBar
+            private class CircularBar : BasicBar
             {
-                public override void SetValue(float amplitudeValue, float valueMultiplier, int smoothness, int faloff)
+                public CircularBar()
                 {
-                    var newValue = Width + amplitudeValue * valueMultiplier;
-
-                    if (newValue <= Height)
-                        return;
-
-                    this.ResizeHeightTo(newValue)
-                        .Then()
-                        .ResizeHeightTo(0, smoothness);
+                    Masking = true;
                 }
 
                 protected override void LoadComplete()
@@ -67,26 +57,29 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                     base.LoadComplete();
                     CornerRadius = Width / 2;
                 }
+
+                protected override float ValueFormula(float amplitudeValue, float valueMultiplier) => Width + base.ValueFormula(amplitudeValue, valueMultiplier);
             }
         }
 
         private class SplittedBarVisualizer : MusicCircularVisualizer
         {
-            protected override VisualizerBar CreateNewBar() => new SplittedBar();
+            protected override BasicBar CreateBar() => new SplittedBar();
 
-            private class SplittedBar : VisualizerBar
+            private class SplittedBar : BasicBar
             {
                 private const int spacing = 2;
                 private const int piece_height = 2;
 
-                private readonly Container mainBar;
-                private readonly Container fakeBar;
+                private Container mainBar;
+                private Container fakeBar;
 
                 private int previousValue = -1;
 
-                public SplittedBar()
+                protected override Drawable CreateContent() => new Container
                 {
-                    AutoSizeAxes = Axes.Y;
+                    AutoSizeAxes = Axes.Y,
+                    RelativeSizeAxes = Axes.X,
                     Children = new Drawable[]
                     {
                         mainBar = new Container
@@ -96,12 +89,12 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                             RelativeSizeAxes = Axes.X
                         },
                         fakeBar = new Container { Origin = Anchor.BottomCentre }
-                    };
-                }
+                    }
+                };
 
                 public override void SetValue(float amplitudeValue, float valueMultiplier, int smoothness, int faloff)
                 {
-                    var newValue = amplitudeValue * valueMultiplier;
+                    var newValue = ValueFormula(amplitudeValue, valueMultiplier);
 
                     if (newValue <= fakeBar.Height)
                         return;
@@ -125,6 +118,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                         mainBar.Clear(true);
 
                     for (int i = 0; i < currentValue + 1; i++)
+                    {
                         mainBar.Add(new Container
                         {
                             Origin = Anchor.BottomCentre,
@@ -138,22 +132,24 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                                 Colour = Color4.White,
                             }
                         });
+                    }
                 }
             }
         }
 
         private class FallBarVisualizer : MusicCircularVisualizer
         {
-            protected override VisualizerBar CreateNewBar() => new FallBar();
+            protected override BasicBar CreateBar() => new FallBar();
 
-            private class FallBar : VisualizerBar
+            private class FallBar : BasicBar
             {
-                private readonly Container mainBar;
-                private readonly Container fallingPiece;
+                private Container mainBar;
+                private Container fallingPiece;
 
-                public FallBar()
+                protected override Drawable CreateContent() => new Container
                 {
-                    AutoSizeAxes = Axes.Y;
+                    AutoSizeAxes = Axes.Y,
+                    RelativeSizeAxes = Axes.X,
                     Children = new Drawable[]
                     {
                         mainBar = new Container
@@ -179,12 +175,12 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                                 EdgeSmoothness = Vector2.One,
                             }
                         }
-                    };
-                }
+                    },
+                };
 
                 public override void SetValue(float amplitudeValue, float valueMultiplier, int smoothness, int faloff)
                 {
-                    var newValue = amplitudeValue * valueMultiplier;
+                    var newValue = ValueFormula(amplitudeValue, valueMultiplier);
 
                     if (newValue > mainBar.Height)
                     {

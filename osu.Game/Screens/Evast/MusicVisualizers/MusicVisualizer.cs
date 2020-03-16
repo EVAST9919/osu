@@ -11,13 +11,12 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
         private Bindable<WorkingBeatmap> beatmap { get; set; }
 
         private int updateDelay = 1;
+
         public int UpdateDelay
         {
             get => updateDelay;
             set
             {
-                if (updateDelay == value)
-                    return;
                 updateDelay = value;
 
                 if (!IsLoaded)
