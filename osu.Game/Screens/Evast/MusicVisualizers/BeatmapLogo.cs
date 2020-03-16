@@ -7,9 +7,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
 {
     public class BeatmapLogo : CompositeDrawable
     {
-        private const int circle_size = 400;
-
-        public BeatmapLogo()
+        public BeatmapLogo(int radius = 300)
         {
             Origin = Anchor.Centre;
             AutoSizeAxes = Axes.Both;
@@ -20,34 +18,44 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                 {
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
-                    DegreeValue = 120,
-                    BarWidth = 2,
+                    DegreeValue = 90,
+                    BarWidth = 1,
                     BarsAmount = 80,
-                    CircleSize = circle_size,
+                    CircleSize = radius,
                 },
                 new MusicCircularVisualizer
                 {
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
-                    DegreeValue = 120,
-                    Rotation = 120,
-                    BarWidth = 2,
+                    DegreeValue = 90,
+                    Rotation = 90,
+                    BarWidth = 1,
                     BarsAmount = 80,
-                    CircleSize = circle_size,
+                    CircleSize = radius,
                 },
                 new MusicCircularVisualizer
                 {
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
-                    DegreeValue = 120,
-                    Rotation = 240,
-                    BarWidth = 2,
+                    DegreeValue = 90,
+                    Rotation = 180,
+                    BarWidth = 1,
                     BarsAmount = 80,
-                    CircleSize = circle_size,
+                    CircleSize = radius,
+                },
+                new MusicCircularVisualizer
+                {
+                    Anchor = Anchor.Centre,
+                    Origin = Anchor.Centre,
+                    DegreeValue = 90,
+                    Rotation = 270,
+                    BarWidth = 1,
+                    BarsAmount = 80,
+                    CircleSize = radius,
                 },
                 new BeatmapCircleCard
                 {
-                    Size = new Vector2(circle_size),
+                    Size = new Vector2(radius),
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
                 }

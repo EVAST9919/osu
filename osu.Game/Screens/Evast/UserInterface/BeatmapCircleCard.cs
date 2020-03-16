@@ -1,12 +1,8 @@
 ﻿using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics;
-using osu.Framework.Graphics.Effects;
 using osu.Framework.Bindables;
 using osu.Game.Beatmaps;
 using osu.Framework.Allocation;
-using osuTK.Graphics;
-using osu.Framework.Extensions.Color4Extensions;
-using osuTK;
 
 namespace osu.Game.Screens.Evast.UserInterface
 {
@@ -25,13 +21,6 @@ namespace osu.Game.Screens.Evast.UserInterface
             {
                 RelativeSizeAxes = Axes.Both,
                 Masking = true,
-                EdgeEffect = new EdgeEffectParameters
-                {
-                    Colour = Color4.Black.Opacity(0.15f),
-                    Type = EdgeEffectType.Shadow,
-                    Radius = 8,
-                    Offset = new Vector2(4, 5)
-                }
             }); 
         }
 
