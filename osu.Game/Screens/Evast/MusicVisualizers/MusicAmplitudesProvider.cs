@@ -5,7 +5,7 @@ using osu.Game.Beatmaps;
 
 namespace osu.Game.Screens.Evast.MusicVisualizers
 {
-    public abstract class MusicVisualizer : Container
+    public abstract class MusicAmplitudesProvider : Container
     {
         [Resolved]
         private Bindable<WorkingBeatmap> beatmap { get; set; }

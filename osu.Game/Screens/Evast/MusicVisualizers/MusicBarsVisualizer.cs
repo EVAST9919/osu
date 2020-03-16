@@ -7,7 +7,7 @@ using osuTK.Graphics;
 
 namespace osu.Game.Screens.Evast.MusicVisualizers
 {
-    public abstract class MusicBarsVisualizer : MusicVisualizer
+    public abstract class MusicBarsVisualizer : MusicAmplitudesProvider
     {
         protected virtual BasicBar CreateBar() => new BasicBar();
 
