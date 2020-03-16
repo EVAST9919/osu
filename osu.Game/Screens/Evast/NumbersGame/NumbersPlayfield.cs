@@ -311,44 +311,8 @@ namespace osu.Game.Screens.Evast.NumbersGame
                         }
                     }
 
-                    int newYIndex;
-
-                    if (closest == null)
-                    {
-                        newYIndex = 0;
-
-                        if (newYIndex == currentNumber.YIndex)
-                            continue;
-
-                        currentNumber.YIndex = newYIndex;
-                        currentNumber.MoveToY(getPosition(newYIndex), move_duration, Easing.OutQuint);
-                    }
-                    else
-                    {
-                        if (closest.IsBlocked || closest.Power != currentNumber.Power)
-                        {
-                            newYIndex = closest.YIndex + 1;
-
-                            if (newYIndex == currentNumber.YIndex)
-                                continue;
-
-                            currentNumber.YIndex = newYIndex;
-                            currentNumber.MoveToY(getPosition(newYIndex), move_duration, Easing.OutQuint);
-                        }
-                        else
-                        {
-                            newYIndex = closest.YIndex;
-
-                            currentNumber.IsBlocked = true;
-                            currentNumber.YIndex = newYIndex;
-                            currentNumber.MoveToY(getPosition(newYIndex), move_duration, Easing.OutQuint).Expire();
-
-                            closest.IsBlocked = true;
-                            closest.IncreaseValue(move_duration);
-
-                            Score.Value += closest.GetValue();
-                        }
-                    }
+                    if (!tryTargetInteraction(MoveDirection.Up, currentNumber, closest))
+                        continue;
 
                     moveHasBeenMade = true;
                 }
@@ -382,44 +346,8 @@ namespace osu.Game.Screens.Evast.NumbersGame
                         }
                     }
 
-                    int newYIndex;
-
-                    if (closest == null)
-                    {
-                        newYIndex = rowCount - 1;
-
-                        if (newYIndex == currentNumber.YIndex)
-                            continue;
-
-                        currentNumber.YIndex = newYIndex;
-                        currentNumber.MoveToY(getPosition(newYIndex), move_duration, Easing.OutQuint);
-                    }
-                    else
-                    {
-                        if (closest.IsBlocked || closest.Power != currentNumber.Power)
-                        {
-                            newYIndex = closest.YIndex - 1;
-
-                            if (newYIndex == currentNumber.YIndex)
-                                continue;
-
-                            currentNumber.YIndex = newYIndex;
-                            currentNumber.MoveToY(getPosition(newYIndex), move_duration, Easing.OutQuint);
-                        }
-                        else
-                        {
-                            newYIndex = closest.YIndex;
-
-                            currentNumber.IsBlocked = true;
-                            currentNumber.YIndex = newYIndex;
-                            currentNumber.MoveToY(getPosition(newYIndex), move_duration, Easing.OutQuint).Expire();
-
-                            closest.IsBlocked = true;
-                            closest.IncreaseValue(move_duration);
-
-                            Score.Value += closest.GetValue();
-                        }
-                    }
+                    if (!tryTargetInteraction(MoveDirection.Down, currentNumber, closest))
+                        continue;
 
                     moveHasBeenMade = true;
                 }
@@ -453,44 +381,8 @@ namespace osu.Game.Screens.Evast.NumbersGame
                         }
                     }
 
-                    int newXIndex;
-
-                    if (closest == null)
-                    {
-                        newXIndex = 0;
-
-                        if (newXIndex == currentNumber.XIndex)
-                            continue;
-
-                        currentNumber.XIndex = newXIndex;
-                        currentNumber.MoveToX(getPosition(newXIndex), move_duration, Easing.OutQuint);
-                    }
-                    else
-                    {
-                        if (closest.IsBlocked || closest.Power != currentNumber.Power)
-                        {
-                            newXIndex = closest.XIndex + 1;
-
-                            if (newXIndex == currentNumber.XIndex)
-                                continue;
-
-                            currentNumber.XIndex = newXIndex;
-                            currentNumber.MoveToX(getPosition(newXIndex), move_duration, Easing.OutQuint);
-                        }
-                        else
-                        {
-                            newXIndex = closest.XIndex;
-
-                            currentNumber.IsBlocked = true;
-                            currentNumber.XIndex = newXIndex;
-                            currentNumber.MoveToX(getPosition(newXIndex), move_duration, Easing.OutQuint).Expire();
-
-                            closest.IsBlocked = true;
-                            closest.IncreaseValue(move_duration);
-
-                            Score.Value += closest.GetValue();
-                        }
-                    }
+                    if (!tryTargetInteraction(MoveDirection.Left, currentNumber, closest))
+                        continue;
 
                     moveHasBeenMade = true;
                 }
@@ -524,44 +416,8 @@ namespace osu.Game.Screens.Evast.NumbersGame
                         }
                     }
 
-                    int newXIndex;
-
-                    if (closest == null)
-                    {
-                        newXIndex = columnCount - 1;
-
-                        if (newXIndex == currentNumber.XIndex)
-                            continue;
-
-                        currentNumber.XIndex = newXIndex;
-                        currentNumber.MoveToX(getPosition(newXIndex), move_duration, Easing.OutQuint);
-                    }
-                    else
-                    {
-                        if (closest.IsBlocked || closest.Power != currentNumber.Power)
-                        {
-                            newXIndex = closest.XIndex - 1;
-
-                            if (newXIndex == currentNumber.XIndex)
-                                continue;
-
-                            currentNumber.XIndex = newXIndex;
-                            currentNumber.MoveToX(getPosition(newXIndex), move_duration, Easing.OutQuint);
-                        }
-                        else
-                        {
-                            newXIndex = closest.XIndex;
-
-                            currentNumber.IsBlocked = true;
-                            currentNumber.XIndex = newXIndex;
-                            currentNumber.MoveToX(getPosition(newXIndex), move_duration, Easing.OutQuint).Expire();
-
-                            closest.IsBlocked = true;
-                            closest.IncreaseValue(move_duration);
-
-                            Score.Value += closest.GetValue();
-                        }
-                    }
+                    if (!tryTargetInteraction(MoveDirection.Right, currentNumber, closest))
+                        continue;
 
                     moveHasBeenMade = true;
                 }
@@ -569,6 +425,80 @@ namespace osu.Game.Screens.Evast.NumbersGame
 
             return moveHasBeenMade;
         }
+
+        /// <summary>
+        /// Returns true if move has been made.
+        /// </summary>
+        private bool tryTargetInteraction(MoveDirection direction, DrawableNumber current, DrawableNumber target)
+        {
+            bool horizontal = direction == MoveDirection.Left || direction == MoveDirection.Right;
+
+            if (target == null)
+            {
+                var newIndex = direction switch
+                {
+                    MoveDirection.Right => columnCount - 1,
+                    MoveDirection.Down => rowCount - 1,
+                    _ => 0
+                };
+
+                if (newIndex == getNumberIndex(horizontal, current))
+                    return false;
+
+                setNewIndex(horizontal, newIndex, current, false);
+
+                return true;
+            }
+
+            if (target.IsBlocked || target.Power != current.Power)
+            {
+                var newIndex = direction switch
+                {
+                    MoveDirection.Left => target.XIndex + 1,
+                    MoveDirection.Right => target.XIndex - 1,
+                    MoveDirection.Down => target.YIndex - 1,
+                    MoveDirection.Up => target.YIndex + 1,
+                    _ => 0
+                };
+
+                if (newIndex == getNumberIndex(horizontal, current))
+                    return false;
+
+                setNewIndex(horizontal, newIndex, current, false);
+
+                return true;
+            }
+
+            current.IsBlocked = true;
+
+            setNewIndex(horizontal, getNumberIndex(horizontal, target), current, true);
+
+            target.IsBlocked = true;
+            target.IncreaseValue(move_duration);
+
+            Score.Value += target.GetValue();
+
+            return true;
+        }
+
+        private void setNewIndex(bool horizontal, int newIndex, DrawableNumber number, bool expire)
+        {
+            if (horizontal)
+            {
+                number.XIndex = newIndex;
+                number.MoveToX(getPosition(newIndex), move_duration, Easing.OutQuint);
+            }
+            else
+            {
+                number.YIndex = newIndex;
+                number.MoveToY(getPosition(newIndex), move_duration, Easing.OutQuint);
+            }
+
+            if (expire)
+                number.Expire();
+        }
+
+        private int getNumberIndex(bool horizontal, DrawableNumber number) => horizontal ? number.XIndex : number.YIndex;
 
         #endregion
 
