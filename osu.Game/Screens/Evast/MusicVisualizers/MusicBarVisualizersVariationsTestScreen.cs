@@ -182,19 +182,16 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                 {
                     var newValue = ValueFormula(amplitudeValue, valueMultiplier);
 
-                    if (newValue > mainBar.Height)
-                    {
-                        mainBar.ResizeHeightTo(newValue)
-                            .Then()
-                            .ResizeHeightTo(0, smoothness);
-                    }
+                    if (newValue < mainBar.Height)
+                        return;
 
-                    if (mainBar.Height > -fallingPiece.Y)
-                    {
-                        fallingPiece.MoveToY(-newValue)
-                            .Then()
-                            .MoveToY(0, smoothness * 6);
-                    }
+                    mainBar.ResizeHeightTo(newValue)
+                        .Then()
+                        .ResizeHeightTo(0, smoothness);
+
+                    fallingPiece.MoveToY(-newValue)
+                        .Then()
+                        .MoveToY(0, smoothness * 6);
                 }
             }
         }
