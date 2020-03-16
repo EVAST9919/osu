@@ -12,11 +12,13 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                 {
                     Anchor = Anchor.TopLeft,
                     Origin = Anchor.TopLeft,
+                    Spacing = 3,
                 },
                 new MusicLinearVisualizer
                 {
                     Anchor = Anchor.BottomRight,
                     Origin = Anchor.BottomRight,
+                    Spacing = 3,
                 },
                 new MusicCircularVisualizer
                 {

@@ -1,4 +1,5 @@
-﻿using osu.Framework.Graphics;
+﻿using osu.Framework.Extensions.IEnumerableExtensions;
+using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osuTK;
 
@@ -14,7 +15,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
             set
             {
                 spacing = value;
-                flow.Spacing = new Vector2(value);
+                flow.Spacing = new Vector2(value, 0);
             }
         }
 
@@ -27,24 +28,15 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
             {
                 AutoSizeAxes = Axes.Both,
                 Direction = FillDirection.Horizontal,
-                Spacing = new Vector2(spacing),
+                Spacing = new Vector2(spacing, 0),
             };
         }
 
-        protected override void ClearBars()
-        {
-            if (flow.Children.Count > 0)
-                flow.Clear(true);
-        }
+        protected override void ClearBars() => flow.Clear(true);
 
         protected override void AddBars()
         {
-            foreach (var bar in EqualizerBars)
-                flow.Add(bar);
-
-            if (!IsLoaded)
-                return;
-
+            EqualizerBars.ForEach(flow.Add);
             setOrigins();
         }
 
