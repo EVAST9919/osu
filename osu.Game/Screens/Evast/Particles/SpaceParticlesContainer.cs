@@ -8,10 +8,11 @@ using osu.Framework.Utils;
 using osu.Game.Screens.Evast.MusicVisualizers;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions.IEnumerableExtensions;
+using osu.Framework.Graphics.Containers;
 
 namespace osu.Game.Screens.Evast.Particles
 {
-    public class SpaceParticlesContainer : SpeedAdjustableContainer
+    public class SpaceParticlesContainer : Container
     {
         /// <summary>
         /// Number of milliseconds between addition of a new particle.
@@ -38,6 +39,10 @@ namespace osu.Game.Screens.Evast.Particles
         /// </summary>
         private const float particle_max_scale = 5;
 
+        protected override Container<Drawable> Content => content;
+
+        private readonly SpeedAdjustableContainer content; 
+
         private readonly BindableFloat rate = new BindableFloat();
 
         public SpaceParticlesContainer()
@@ -45,9 +50,19 @@ namespace osu.Game.Screens.Evast.Particles
             Anchor = Anchor.Centre;
             Origin = Anchor.Centre;
             RelativeSizeAxes = Axes.Both;
-            Add(new RateController
+
+            AddRangeInternal(new Drawable[]
             {
-                Rate = { BindTarget = rate }
+                content = new SpeedAdjustableContainer
+                {
+                    Anchor = Anchor.Centre,
+                    Origin = Anchor.Centre,
+                    RelativeSizeAxes = Axes.Both,
+                },
+                new RateController
+                {
+                    Rate = { BindTarget = rate }
+                }
             });
         }
 
@@ -55,7 +70,7 @@ namespace osu.Game.Screens.Evast.Particles
         {
             base.LoadComplete();
 
-            rate.BindValueChanged(rate => Rate = rate.NewValue);
+            rate.BindValueChanged(rate => content.Rate = rate.NewValue);
 
             generateParticles();
         }
