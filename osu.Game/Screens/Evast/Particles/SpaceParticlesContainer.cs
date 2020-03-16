@@ -5,6 +5,9 @@ using osuTK.Graphics;
 using System;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Utils;
+using osu.Game.Screens.Evast.MusicVisualizers;
+using osu.Framework.Bindables;
+using osu.Framework.Extensions.IEnumerableExtensions;
 
 namespace osu.Game.Screens.Evast.Particles
 {
@@ -35,16 +38,25 @@ namespace osu.Game.Screens.Evast.Particles
         /// </summary>
         private const float particle_max_scale = 5;
 
+        private readonly BindableFloat rate = new BindableFloat();
+
         public SpaceParticlesContainer()
         {
             Anchor = Anchor.Centre;
             Origin = Anchor.Centre;
             RelativeSizeAxes = Axes.Both;
+            Add(new RateController
+            {
+                Rate = { BindTarget = rate }
+            });
         }
 
         protected override void LoadComplete()
         {
             base.LoadComplete();
+
+            rate.BindValueChanged(rate => Rate = rate.NewValue);
+
             generateParticles();
         }
 
@@ -124,6 +136,18 @@ namespace osu.Game.Screens.Evast.Particles
                 float heightDiff = Math.Abs(pointFirst.Y - pointSecond.Y);
 
                 return (float)Math.Sqrt((widthDiff * widthDiff) + (heightDiff * heightDiff));
+            }
+        }
+
+        private class RateController : MusicAmplitudesProvider
+        {
+            public readonly BindableFloat Rate = new BindableFloat();
+
+            protected override void OnAmplitudesUpdate(float[] amplitudes)
+            {
+                float sum = 0;
+                amplitudes.ForEach(amp => sum += amp);
+                Rate.Value = sum;
             }
         }
     }
