@@ -92,7 +92,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                     }
                 };
 
-                public override void SetValue(float amplitudeValue, float valueMultiplier, int smoothness, int faloff)
+                public override void SetValue(float amplitudeValue, float valueMultiplier, int smoothness)
                 {
                     var newValue = ValueFormula(amplitudeValue, valueMultiplier);
 
@@ -178,7 +178,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                     },
                 };
 
-                public override void SetValue(float amplitudeValue, float valueMultiplier, int smoothness, int faloff)
+                public override void SetValue(float amplitudeValue, float valueMultiplier, int smoothness)
                 {
                     var newValue = ValueFormula(amplitudeValue, valueMultiplier);
 

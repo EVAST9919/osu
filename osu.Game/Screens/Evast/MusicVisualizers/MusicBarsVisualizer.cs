@@ -99,7 +99,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
             for (int i = 0; i < BarsAmount; i++)
             {
                 var currentAmplitude = amplitudes[RealAmplitudeFor(i)];
-                EqualizerBars[IsReversed ? BarsAmount - 1 - i : i].SetValue(currentAmplitude, ValueMultiplier, Smoothness, UpdateDelay);
+                EqualizerBars[IsReversed ? BarsAmount - 1 - i : i].SetValue(currentAmplitude, ValueMultiplier, Smoothness);
             }
         }
 
@@ -117,7 +117,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                 Colour = Color4.White,
             };
 
-            public virtual void SetValue(float amplitudeValue, float valueMultiplier, int softness, int faloff)
+            public virtual void SetValue(float amplitudeValue, float valueMultiplier, int softness)
             {
                 var newHeight = ValueFormula(amplitudeValue, valueMultiplier);
 
