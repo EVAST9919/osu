@@ -1,5 +1,4 @@
-﻿using osu.Framework.Graphics.Containers;
-using osu.Framework.Graphics;
+﻿using osu.Framework.Graphics;
 using osu.Framework.Graphics.Shapes;
 using osuTK;
 using osuTK.Graphics;
@@ -9,7 +8,7 @@ using osu.Framework.Utils;
 
 namespace osu.Game.Screens.Evast.Particles
 {
-    public class SpaceParticlesContainer : Container
+    public class SpaceParticlesContainer : SpeedAdjustableContainer
     {
         /// <summary>
         /// Number of milliseconds between addition of a new particle.
