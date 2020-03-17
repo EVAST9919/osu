@@ -59,9 +59,9 @@ namespace osu.Game.Screens.Evast.Particles
                     Origin = Anchor.Centre,
                     RelativeSizeAxes = Axes.Both,
                 },
-                new RateController
+                new MusicIntensityController
                 {
-                    Rate = { BindTarget = rate }
+                    Intensity = { BindTarget = rate }
                 }
             });
         }
@@ -151,18 +151,6 @@ namespace osu.Game.Screens.Evast.Particles
                 float heightDiff = Math.Abs(pointFirst.Y - pointSecond.Y);
 
                 return (float)Math.Sqrt((widthDiff * widthDiff) + (heightDiff * heightDiff));
-            }
-        }
-
-        private class RateController : MusicAmplitudesProvider
-        {
-            public readonly BindableFloat Rate = new BindableFloat();
-
-            protected override void OnAmplitudesUpdate(float[] amplitudes)
-            {
-                float sum = 0;
-                amplitudes.ForEach(amp => sum += amp);
-                Rate.Value = sum;
             }
         }
     }
