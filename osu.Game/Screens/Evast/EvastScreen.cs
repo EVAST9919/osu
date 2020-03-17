@@ -82,14 +82,11 @@ namespace osu.Game.Screens.Evast
             LoadComponentAsync(card, loaded =>
             {
                 if (lastCard != null)
-                {
-                    lastCard.ClearTransforms();
-                    lastCard.MoveToX(1.1f, 600, Easing.OutQuint).Expire();
-                }
+                    lastCard.MoveToX(1.2f, 600, Easing.OutQuint).Expire();
 
                 lastCard = card;
                 AddInternal(lastCard);
-                lastCard.MoveToX(0.5f, 700, Easing.OutElastic).Delay(2000).MoveToX(1.1f, 600, Easing.InQuint).Expire();
+                lastCard.MoveToX(0.5f, 700, Easing.OutElastic).Delay(2000).MoveToX(1.2f, 600, Easing.InQuint).Expire();
             });
         }
 
