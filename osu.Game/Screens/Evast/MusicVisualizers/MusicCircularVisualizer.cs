@@ -47,9 +47,9 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
 
         private void calculateBarProperties()
         {
-            float spacing = DegreeValue / BarsAmount;
+            float spacing = DegreeValue / BarsCount;
 
-            for (int i = 0; i < BarsAmount; i++)
+            for (int i = 0; i < BarsCount; i++)
             {
                 var bar = EqualizerBars[i];
                 bar.Origin = Anchor.BottomCentre;

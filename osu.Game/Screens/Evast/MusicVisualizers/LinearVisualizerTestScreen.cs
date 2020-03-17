@@ -32,7 +32,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                     visualizer.Smoothness,
                     visualizer.BarWidth,
                     visualizer.Spacing,
-                    visualizer.BarsAmount,
+                    visualizer.BarsCount,
                     visualizer.IsReversed)
             };
         }
@@ -44,7 +44,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
             settings.WidthBindable.ValueChanged += newValue => visualizer.BarWidth = newValue.NewValue;
             settings.ReverseBindable.ValueChanged += newValue => visualizer.IsReversed = newValue.NewValue;
             settings.SpacingBindable.ValueChanged += newValue => visualizer.Spacing = newValue.NewValue;
-            settings.AmountBindable.ValueChanged += newValue => visualizer.BarsAmount = newValue.NewValue;
+            settings.AmountBindable.ValueChanged += newValue => visualizer.BarsCount = newValue.NewValue;
         }
 
         private class Settings : PlayerSettingsGroup

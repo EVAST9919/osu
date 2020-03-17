@@ -48,7 +48,7 @@ namespace osu.Game.Screens.Evast.NumbersGame
                                     DegreeValue = 45,
                                     Rotation = 40,
                                     BarWidth = 1.5f,
-                                    BarsAmount = music_visualizer_bars_count,
+                                    BarsCount = music_visualizer_bars_count,
                                     CircleSize = music_visualizer_radius,
                                 },
                                 new MusicCircularVisualizer
@@ -58,7 +58,7 @@ namespace osu.Game.Screens.Evast.NumbersGame
                                     DegreeValue = 45,
                                     Rotation = 95,
                                     BarWidth = 1.5f,
-                                    BarsAmount = music_visualizer_bars_count,
+                                    BarsCount = music_visualizer_bars_count,
                                     CircleSize = music_visualizer_radius,
                                 }
                             }
@@ -79,7 +79,7 @@ namespace osu.Game.Screens.Evast.NumbersGame
                                     DegreeValue = 45,
                                     Rotation = 220,
                                     BarWidth = 1.5f,
-                                    BarsAmount = music_visualizer_bars_count,
+                                    BarsCount = music_visualizer_bars_count,
                                     CircleSize = music_visualizer_radius,
                                 },
                                 new MusicCircularVisualizer
@@ -89,7 +89,7 @@ namespace osu.Game.Screens.Evast.NumbersGame
                                     DegreeValue = 45,
                                     Rotation = 275,
                                     BarWidth = 1.5f,
-                                    BarsAmount = music_visualizer_bars_count,
+                                    BarsCount = music_visualizer_bars_count,
                                     CircleSize = music_visualizer_radius,
                                 }
                             }

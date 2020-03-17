@@ -16,7 +16,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                 {
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
-                    BarsAmount = 100,
+                    BarsCount = 100,
                     BarWidth = 5,
                     CircleSize = 250,
                     X = -400,
@@ -25,7 +25,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                 {
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
-                    BarsAmount = 100,
+                    BarsCount = 100,
                     BarWidth = 5,
                     CircleSize = 250,
                 },
@@ -33,7 +33,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                 {
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
-                    BarsAmount = 100,
+                    BarsCount = 100,
                     BarWidth = 5,
                     CircleSize = 250,
                     X = 400,

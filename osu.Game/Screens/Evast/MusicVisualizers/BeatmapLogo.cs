@@ -7,7 +7,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
 {
     public class BeatmapLogo : CompositeDrawable
     {
-        public BeatmapLogo(int radius = 300)
+        public BeatmapLogo(int radius = 350, int barsCount = 80)
         {
             Origin = Anchor.Centre;
             AutoSizeAxes = Axes.Both;
@@ -20,7 +20,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                     Origin = Anchor.Centre,
                     DegreeValue = 90,
                     BarWidth = 1,
-                    BarsAmount = 80,
+                    BarsCount = barsCount,
                     CircleSize = radius,
                 },
                 new MusicCircularVisualizer
@@ -30,7 +30,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                     DegreeValue = 90,
                     Rotation = 90,
                     BarWidth = 1,
-                    BarsAmount = 80,
+                    BarsCount = barsCount,
                     CircleSize = radius,
                 },
                 new MusicCircularVisualizer
@@ -40,7 +40,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                     DegreeValue = 90,
                     Rotation = 180,
                     BarWidth = 1,
-                    BarsAmount = 80,
+                    BarsCount = barsCount,
                     CircleSize = radius,
                 },
                 new MusicCircularVisualizer
@@ -50,7 +50,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                     DegreeValue = 90,
                     Rotation = 270,
                     BarWidth = 1,
-                    BarsAmount = 80,
+                    BarsCount = barsCount,
                     CircleSize = radius,
                 },
                 new BeatmapCircleCard

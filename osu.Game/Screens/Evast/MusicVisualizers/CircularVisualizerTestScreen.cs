@@ -33,7 +33,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                     visualizer.Smoothness,
                     visualizer.BarWidth,
                     visualizer.CircleSize,
-                    visualizer.BarsAmount,
+                    visualizer.BarsCount,
                     visualizer.DegreeValue,
                     visualizer.IsReversed)
             };
@@ -46,7 +46,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
             settings.WidthBindable.ValueChanged += newValue => visualizer.BarWidth = newValue.NewValue;
             settings.ReverseBindable.ValueChanged += newValue => visualizer.IsReversed = newValue.NewValue;
             settings.SizeBindable.ValueChanged += newValue => visualizer.CircleSize = newValue.NewValue;
-            settings.AmountBindable.ValueChanged += newValue => visualizer.BarsAmount = newValue.NewValue;
+            settings.AmountBindable.ValueChanged += newValue => visualizer.BarsCount = newValue.NewValue;
             settings.DegreeBindable.ValueChanged += newValue => visualizer.DegreeValue = newValue.NewValue;
         }
 

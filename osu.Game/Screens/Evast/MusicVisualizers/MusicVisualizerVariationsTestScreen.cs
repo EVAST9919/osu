@@ -27,7 +27,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                     DegreeValue = 120,
                     X = -400,
                     BarWidth = 2,
-                    BarsAmount = 50,
+                    BarsCount = 50,
                 },
                 new MusicCircularVisualizer
                 {
@@ -37,7 +37,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                     X = -400,
                     Rotation = 120,
                     BarWidth = 2,
-                    BarsAmount = 50,
+                    BarsCount = 50,
                 },
                 new MusicCircularVisualizer
                 {
@@ -47,14 +47,14 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                     Rotation = 240,
                     X = -400,
                     BarWidth = 2,
-                    BarsAmount = 50,
+                    BarsCount = 50,
                 },
                 new MusicCircularVisualizer
                 {
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
                     DegreeValue = 180,
-                    BarsAmount = 50,
+                    BarsCount = 50,
                     BarWidth = 2,
                 },
                 new MusicCircularVisualizer
@@ -62,7 +62,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
                     DegreeValue = 180,
-                    BarsAmount = 50,
+                    BarsCount = 50,
                     BarWidth = 2,
                     Rotation = 180,
                 },
@@ -71,7 +71,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
                     ValueMultiplier = 200,
-                    BarsAmount = 200,
+                    BarsCount = 200,
                     CircleSize = 250,
                     BarWidth = 1,
                     X = 400,

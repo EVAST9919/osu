@@ -42,13 +42,13 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
             }
         }
 
-        private int barsAmount = 200;
-        public int BarsAmount
+        private int barsCount = 200;
+        public int BarsCount
         {
-            get => barsAmount;
+            get => barsCount;
             set
             {
-                barsAmount = value;
+                barsCount = value;
 
                 if (!IsLoaded)
                     return;
@@ -72,15 +72,15 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
 
         private void rearrangeBars()
         {
-            EqualizerBars = new BasicBar[barsAmount];
-            for (int i = 0; i < barsAmount; i++)
+            EqualizerBars = new BasicBar[barsCount];
+            for (int i = 0; i < barsCount; i++)
             {
                 EqualizerBars[i] = CreateBar();
                 EqualizerBars[i].Width = barWidth;
             }
         }
 
-        protected int RealAmplitudeFor(int barNumber) => 200 / BarsAmount * barNumber;
+        protected int RealAmplitudeFor(int barNumber) => 200 / barsCount * barNumber;
 
         protected BasicBar[] EqualizerBars;
 
@@ -96,10 +96,10 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
 
         protected override void OnAmplitudesUpdate(float[] amplitudes)
         {
-            for (int i = 0; i < BarsAmount; i++)
+            for (int i = 0; i < barsCount; i++)
             {
                 var currentAmplitude = amplitudes[RealAmplitudeFor(i)];
-                EqualizerBars[IsReversed ? BarsAmount - 1 - i : i].SetValue(currentAmplitude, ValueMultiplier, Smoothness);
+                EqualizerBars[IsReversed ? barsCount - 1 - i : i].SetValue(currentAmplitude, ValueMultiplier, Smoothness);
             }
         }
 
