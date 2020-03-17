@@ -5,88 +5,22 @@ using osuTK.Graphics;
 using System;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Utils;
-using osu.Game.Screens.Evast.MusicVisualizers;
-using osu.Framework.Bindables;
-using osu.Framework.Extensions.IEnumerableExtensions;
-using osu.Framework.Graphics.Containers;
 
 namespace osu.Game.Screens.Evast.Particles
 {
-    public class SpaceParticlesContainer : Container
+    public class SpaceParticlesContainer : ParticlesContainer
     {
-        /// <summary>
-        /// Number of milliseconds between addition of a new particle.
-        /// </summary>
-        private const float time_between_updates = 100;
-
         /// <summary>
         /// Adjusts the speed of all the particles.
         /// </summary>
         private const int absolute_time = 5000;
 
         /// <summary>
-        /// Maximum allowed amount of particles which can be shown at once.
-        /// </summary>
-        private const int max_particles_count = 350;
-
-        /// <summary>
-        /// The size of a single particle.
-        /// </summary>
-        private const float particle_size = 2;
-
-        /// <summary>
         /// The maximum scale of a single particle.
         /// </summary>
         private const float particle_max_scale = 5;
 
-        protected override Container<Drawable> Content => content;
-
-        private readonly SpeedAdjustableContainer content; 
-
-        private readonly BindableFloat rate = new BindableFloat();
-
-        public SpaceParticlesContainer()
-        {
-            Anchor = Anchor.Centre;
-            Origin = Anchor.Centre;
-            RelativeSizeAxes = Axes.Both;
-
-            AddRangeInternal(new Drawable[]
-            {
-                content = new SpeedAdjustableContainer
-                {
-                    Anchor = Anchor.Centre,
-                    Origin = Anchor.Centre,
-                    RelativeSizeAxes = Axes.Both,
-                },
-                new MusicIntensityController
-                {
-                    Intensity = { BindTarget = rate }
-                }
-            });
-        }
-
-        protected override void LoadComplete()
-        {
-            base.LoadComplete();
-
-            rate.BindValueChanged(rate => content.Rate = rate.NewValue);
-
-            generateParticles();
-        }
-
-        private void generateParticles()
-        {
-            var currentParticlesCount = Children.Count;
-
-            if (currentParticlesCount < max_particles_count)
-            {
-                for (int i = 0; i < max_particles_count - currentParticlesCount; i++)
-                    Add(new Particle());
-            }
-
-            Scheduler.AddDelayed(generateParticles, time_between_updates);
-        }
+        protected override Drawable CreateParticle(bool firstLoad) => new Particle();
 
         private class Particle : Circle
         {
@@ -102,7 +36,8 @@ namespace osu.Game.Screens.Evast.Particles
                 Colour = Color4.White.Opacity(200);
                 Position = new Vector2(RNG.NextSingle(-0.5f, 0.5f), RNG.NextSingle(-0.5f, 0.5f));
                 Depth = RNG.NextSingle(0.25f, 1);
-                Size = new Vector2(particle_size);
+                Size = new Vector2(2);
+                Scale = new Vector2(Depth);
                 Alpha = 0;
             }
 
@@ -141,8 +76,6 @@ namespace osu.Game.Screens.Evast.Particles
 
                 lifeTime = ((absolute_time * elapsedDistance) / fullDistance) / Depth;
                 finalScale = 1 + ((particle_max_scale - 1) * Depth * (elapsedDistance / fullDistance));
-
-                Scale = new Vector2(Depth);
             }
 
             private float distance(Vector2 pointFirst, Vector2 pointSecond)
