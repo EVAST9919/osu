@@ -11,7 +11,7 @@ namespace osu.Game.Screens.Evast.Particles
         /// <summary>
         /// Adjusts the speed of all the particles.
         /// </summary>
-        private const int absolute_time = 7000;
+        private const int absolute_time = 8500;
 
         protected override Drawable CreateParticle(bool firstLoad) => new Particle(firstLoad);
 
