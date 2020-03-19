@@ -1,9 +1,5 @@
 ﻿using osu.Framework.Extensions.IEnumerableExtensions;
-using osu.Framework.Graphics;
-using osu.Framework.Graphics.Containers;
-using osu.Framework.Graphics.Shapes;
-using osuTK;
-using osuTK.Graphics;
+using osu.Game.Screens.Evast.MusicVisualizers.Bars;
 
 namespace osu.Game.Screens.Evast.MusicVisualizers
 {
@@ -101,34 +97,6 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                 var currentAmplitude = amplitudes[RealAmplitudeFor(i)];
                 EqualizerBars[IsReversed ? barsCount - 1 - i : i].SetValue(currentAmplitude, ValueMultiplier, Smoothness);
             }
-        }
-
-        protected class BasicBar : Container
-        {
-            public BasicBar()
-            {
-                Child = CreateContent();
-            }
-
-            protected virtual Drawable CreateContent() => new Box
-            {
-                EdgeSmoothness = Vector2.One,
-                RelativeSizeAxes = Axes.Both,
-                Colour = Color4.White,
-            };
-
-            public virtual void SetValue(float amplitudeValue, float valueMultiplier, int softness)
-            {
-                var newHeight = ValueFormula(amplitudeValue, valueMultiplier);
-
-                // Don't allow resize if new height less than current
-                if (newHeight <= Height)
-                    return;
-
-                this.ResizeHeightTo(newHeight).Then().ResizeHeightTo(0, softness);
-            }
-
-            protected virtual float ValueFormula(float amplitudeValue, float valueMultiplier) => amplitudeValue * valueMultiplier;
         }
     }
 }
