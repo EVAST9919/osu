@@ -6,6 +6,7 @@ using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Screens.Evast.MusicVisualizers;
+using osu.Game.Screens.Evast.MusicVisualizers.Bars;
 using osu.Game.Screens.Evast.Particles;
 using osuTK.Graphics;
 
@@ -40,24 +41,24 @@ namespace osu.Game.Screens.Evast.NumbersGame
                             RelativeSizeAxes = Axes.Both,
                             Children = new Drawable[]
                             {
-                                new MusicCircularVisualizer
+                                new CircularVisualizer
                                 {
                                     IsReversed = true,
                                     Anchor = Anchor.Centre,
                                     Origin = Anchor.Centre,
                                     DegreeValue = 45,
                                     Rotation = 40,
-                                    BarWidth = 1.5f,
+                                    BarWidth = 3,
                                     BarsCount = music_visualizer_bars_count,
                                     CircleSize = music_visualizer_radius,
                                 },
-                                new MusicCircularVisualizer
+                                new CircularVisualizer
                                 {
                                     Anchor = Anchor.Centre,
                                     Origin = Anchor.Centre,
                                     DegreeValue = 45,
                                     Rotation = 95,
-                                    BarWidth = 1.5f,
+                                    BarWidth = 3,
                                     BarsCount = music_visualizer_bars_count,
                                     CircleSize = music_visualizer_radius,
                                 }
@@ -71,24 +72,24 @@ namespace osu.Game.Screens.Evast.NumbersGame
                             RelativeSizeAxes = Axes.Both,
                             Children = new Drawable[]
                             {
-                                new MusicCircularVisualizer
+                                new CircularVisualizer
                                 {
                                     IsReversed = true,
                                     Anchor = Anchor.Centre,
                                     Origin = Anchor.Centre,
                                     DegreeValue = 45,
                                     Rotation = 220,
-                                    BarWidth = 1.5f,
+                                    BarWidth = 3,
                                     BarsCount = music_visualizer_bars_count,
                                     CircleSize = music_visualizer_radius,
                                 },
-                                new MusicCircularVisualizer
+                                new CircularVisualizer
                                 {
                                     Anchor = Anchor.Centre,
                                     Origin = Anchor.Centre,
                                     DegreeValue = 45,
                                     Rotation = 275,
-                                    BarWidth = 1.5f,
+                                    BarWidth = 3,
                                     BarsCount = music_visualizer_bars_count,
                                     CircleSize = music_visualizer_radius,
                                 }
@@ -165,6 +166,11 @@ namespace osu.Game.Screens.Evast.NumbersGame
         private void onScoreChanged(ValueChangedEvent<int> newScore)
         {
             scoreText.Text = newScore.NewValue.ToString();
+        }
+
+        private class CircularVisualizer : MusicCircularVisualizer
+        {
+            protected override BasicBar CreateBar() => new CircularBar();
         }
     }
 }
