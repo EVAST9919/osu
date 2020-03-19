@@ -1,5 +1,6 @@
 ﻿using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Game.Screens.Evast.MusicVisualizers.Bars;
 using osu.Game.Screens.Evast.UserInterface;
 using osuTK;
 
@@ -7,49 +8,39 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
 {
     public class BeatmapLogo : CompositeDrawable
     {
-        public BeatmapLogo(int radius = 350, int barsCount = 80)
+        public BeatmapLogo(int radius = 350, int barsCount = 70, float barWidth = 4f)
         {
             Origin = Anchor.Centre;
             AutoSizeAxes = Axes.Both;
 
             AddRangeInternal(new Drawable[]
             {
-                new MusicCircularVisualizer
+                new CircularVisualizer
                 {
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
-                    DegreeValue = 90,
-                    BarWidth = 1,
+                    DegreeValue = 120,
+                    BarWidth = barWidth,
                     BarsCount = barsCount,
                     CircleSize = radius,
                 },
-                new MusicCircularVisualizer
+                new CircularVisualizer
                 {
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
-                    DegreeValue = 90,
-                    Rotation = 90,
-                    BarWidth = 1,
+                    DegreeValue = 120,
+                    Rotation = 120,
+                    BarWidth = barWidth,
                     BarsCount = barsCount,
                     CircleSize = radius,
                 },
-                new MusicCircularVisualizer
+                new CircularVisualizer
                 {
                     Anchor = Anchor.Centre,
                     Origin = Anchor.Centre,
-                    DegreeValue = 90,
-                    Rotation = 180,
-                    BarWidth = 1,
-                    BarsCount = barsCount,
-                    CircleSize = radius,
-                },
-                new MusicCircularVisualizer
-                {
-                    Anchor = Anchor.Centre,
-                    Origin = Anchor.Centre,
-                    DegreeValue = 90,
-                    Rotation = 270,
-                    BarWidth = 1,
+                    DegreeValue = 120,
+                    Rotation = 240,
+                    BarWidth = barWidth,
                     BarsCount = barsCount,
                     CircleSize = radius,
                 },
@@ -60,6 +51,11 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                     Origin = Anchor.Centre,
                 }
             });
+        }
+
+        private class CircularVisualizer : MusicCircularVisualizer
+        {
+            protected override BasicBar CreateBar() => new CircularBar();
         }
     }
 }
