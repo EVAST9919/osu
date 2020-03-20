@@ -7,6 +7,11 @@ using System;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Allocation;
 using osu.Framework.Graphics.Textures;
+using osu.Game.Screens.Evast.MusicVisualizers;
+using osu.Framework.Graphics.Effects;
+using osu.Framework.Graphics.Shapes;
+using osuTK.Graphics;
+using osu.Framework.Extensions.Color4Extensions;
 
 namespace osu.Game.Screens.Evast.SpaceShip
 {
@@ -25,9 +30,18 @@ namespace osu.Game.Screens.Evast.SpaceShip
             Size = new Vector2(60);
             RelativePositionAxes = Axes.Both;
             Y = 0.5f;
-            Child = sprite = new Sprite
+            Children = new Drawable[]
             {
-                RelativeSizeAxes = Axes.Both,
+                sprite = new Sprite
+                {
+                    RelativeSizeAxes = Axes.Both,
+                },
+                new Engine
+                {
+                    Anchor = Anchor.CentreLeft,
+                    Origin = Anchor.CentreRight,
+                    X = 4,
+                }
             };
         }
 
@@ -120,6 +134,44 @@ namespace osu.Game.Screens.Evast.SpaceShip
                 return;
 
             Y = (float)position;
+        }
+
+        private class Engine : CompositeDrawable
+        {
+            private readonly MusicIntensityController intensityController;
+            private readonly Triangle triangle;
+
+            public Engine()
+            {
+                AutoSizeAxes = Axes.Both;
+                Masking = true;
+                EdgeEffect = new EdgeEffectParameters
+                {
+                    Colour = Color4.White.Opacity(0.7f),
+                    Radius = 5,
+                    Roundness = 5,
+                    Type = EdgeEffectType.Glow,
+                };
+                InternalChildren = new Drawable[]
+                {
+                    intensityController = new MusicIntensityController(),
+                    triangle = new Triangle
+                    {
+                        Anchor = Anchor.CentreRight,
+                        Origin = Anchor.BottomCentre,
+                        Width = 5,
+                        Colour = Color4.White,
+                        Rotation = -90,
+                        EdgeSmoothness = new Vector2(2)
+                    }
+                };
+            }
+
+            protected override void LoadComplete()
+            {
+                base.LoadComplete();
+                intensityController.Intensity.BindValueChanged(intensity => triangle.Height = 5 * intensity.NewValue, true);
+            }
         }
     }
 }
