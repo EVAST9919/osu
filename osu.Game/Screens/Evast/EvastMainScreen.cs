@@ -2,6 +2,7 @@
 using osu.Framework.Screens;
 using osu.Game.Screens.Evast.Particles;
 using osu.Game.Screens.Evast.ApiHelper;
+using osu.Game.Screens.Evast.SpaceShip;
 
 namespace osu.Game.Screens.Evast
 {
@@ -12,6 +13,7 @@ namespace osu.Game.Screens.Evast
             Buttons = new[]
             {
                 new Button("2048", () => this.Push(new NumbersGameScreen())),
+                new Button("Space Ship", () => this.Push(new SpaceShipScreen())),
                 new Button("Pixel Games", () => this.Push(new PixelsSelectableScreen())),
                 new Button("Particles", () => this.Push(new ParticlesSelectableScreen())),
                 new Button("Music Visualizers", () => this.Push(new MusicVisualizersSelectableScreen())),
