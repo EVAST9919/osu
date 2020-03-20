@@ -15,7 +15,7 @@ namespace osu.Game.Screens.Evast.Particles
         /// <summary>
         /// Maximum allowed amount of particles which can be shown at once.
         /// </summary>
-        private const int max_particles_count = 350;
+        protected virtual int MaxParticlesCount => 350;
 
         protected override Container<Drawable> Content => content;
 
@@ -57,9 +57,9 @@ namespace osu.Game.Screens.Evast.Particles
         {
             var currentParticlesCount = Children.Count;
 
-            if (currentParticlesCount < max_particles_count)
+            if (currentParticlesCount < MaxParticlesCount)
             {
-                for (int i = 0; i < max_particles_count - currentParticlesCount; i++)
+                for (int i = 0; i < MaxParticlesCount - currentParticlesCount; i++)
                     Add(CreateParticle(firstLoad));
             }
 

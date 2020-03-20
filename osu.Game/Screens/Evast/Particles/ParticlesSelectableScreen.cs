@@ -9,7 +9,8 @@ namespace osu.Game.Screens.Evast.Particles
             Buttons = new[]
             {
                 new Button("Space Particles", () => this.Push(new SpaceParticlesScreen())),
-                new Button("Horizontal Particles", () => this.Push(new HorizontalParticlesScreen()))
+                new Button("Horizontal Particles", () => this.Push(new HorizontalParticlesScreen())),
+                new Button("Targeted Horizontal Particles", () => this.Push(new TargetedHorizontalParticlesScreen()))
             };
         }
     }
