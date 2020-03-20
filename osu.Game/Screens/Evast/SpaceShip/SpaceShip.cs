@@ -19,6 +19,9 @@ namespace osu.Game.Screens.Evast.SpaceShip
     {
         private const double base_speed = 1.0 / 2048;
 
+        public Action Shoot;
+        public Action StopShoot;
+
         private int horizontalDirection;
         private int verticalDirection;
 
@@ -26,10 +29,11 @@ namespace osu.Game.Screens.Evast.SpaceShip
 
         public SpaceShip()
         {
-            Origin = Anchor.CentreLeft;
+            Origin = Anchor.CentreRight;
             Size = new Vector2(60);
             RelativePositionAxes = Axes.Both;
             Y = 0.5f;
+            X = 0.1f;
             Children = new Drawable[]
             {
                 sprite = new Sprite
@@ -72,6 +76,10 @@ namespace osu.Game.Screens.Evast.SpaceShip
                     case Key.Right:
                         horizontalDirection++;
                         return true;
+
+                    case Key.Space:
+                        Shoot?.Invoke();
+                        return true;
                 };
             }
 
@@ -96,6 +104,10 @@ namespace osu.Game.Screens.Evast.SpaceShip
 
                 case Key.Right:
                     horizontalDirection--;
+                    return;
+
+                case Key.Space:
+                    StopShoot?.Invoke();
                     return;
             };
 
