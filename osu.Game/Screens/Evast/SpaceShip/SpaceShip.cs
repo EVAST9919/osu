@@ -147,9 +147,9 @@ namespace osu.Game.Screens.Evast.SpaceShip
                 Masking = true;
                 EdgeEffect = new EdgeEffectParameters
                 {
-                    Colour = Color4.White.Opacity(0.7f),
-                    Radius = 5,
-                    Roundness = 5,
+                    Colour = Color4.White.Opacity(0.3f),
+                    Radius = 3,
+                    Roundness = 2,
                     Type = EdgeEffectType.Glow,
                 };
                 InternalChildren = new Drawable[]
@@ -170,7 +170,7 @@ namespace osu.Game.Screens.Evast.SpaceShip
             protected override void LoadComplete()
             {
                 base.LoadComplete();
-                intensityController.Intensity.BindValueChanged(intensity => triangle.Height = 5 * intensity.NewValue, true);
+                intensityController.Intensity.BindValueChanged(intensity => triangle.Height = 5 * (intensity.NewValue / 2f), true);
             }
         }
     }
