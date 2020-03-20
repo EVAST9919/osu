@@ -1,10 +1,12 @@
 ﻿using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics;
 using osuTK;
-using osu.Framework.Graphics.Shapes;
 using osu.Framework.Input.Events;
 using osuTK.Input;
 using System;
+using osu.Framework.Graphics.Sprites;
+using osu.Framework.Allocation;
+using osu.Framework.Graphics.Textures;
 
 namespace osu.Game.Screens.Evast.SpaceShip
 {
@@ -15,16 +17,24 @@ namespace osu.Game.Screens.Evast.SpaceShip
         private int horizontalDirection;
         private int verticalDirection;
 
+        private readonly Sprite sprite;
+
         public SpaceShip()
         {
             Origin = Anchor.CentreLeft;
-            Size = new Vector2(50, 30);
+            Size = new Vector2(60);
             RelativePositionAxes = Axes.Both;
             Y = 0.5f;
-            Child = new Box
+            Child = sprite = new Sprite
             {
-                RelativeSizeAxes = Axes.Both
+                RelativeSizeAxes = Axes.Both,
             };
+        }
+
+        [BackgroundDependencyLoader]
+        private void load(TextureStore textures)
+        {
+            sprite.Texture = textures.Get("Evast/SpaceShip/space-ship");
         }
 
         protected override bool OnKeyDown(KeyDownEvent e)
