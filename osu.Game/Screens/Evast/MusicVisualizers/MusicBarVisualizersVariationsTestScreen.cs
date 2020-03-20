@@ -3,7 +3,7 @@ using osu.Game.Screens.Evast.MusicVisualizers.Bars;
 
 namespace osu.Game.Screens.Evast.MusicVisualizers
 {
-    public class MusicBarVisualizersVariationsTestScreen : EvastScreen
+    public class MusicBarVisualizersVariationsTestScreen : EvastVisualScreen
     {
         public MusicBarVisualizersVariationsTestScreen()
         {

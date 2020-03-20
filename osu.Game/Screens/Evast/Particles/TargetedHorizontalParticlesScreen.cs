@@ -3,13 +3,13 @@ using osu.Framework.Graphics;
 
 namespace osu.Game.Screens.Evast.Particles
 {
-    public class TargetedHorizontalParticlesScreen : EvastNoBackButtonScreen
+    public class TargetedHorizontalParticlesScreen : EvastVisualScreen
     {
         public TargetedHorizontalParticlesScreen()
         {
             AddInternal(new TargetedHorizontalParticlesContainer
             {
-                Child = new BeatmapLogo
+                Child = new BeatmapLogo(100, 50, 2)
                 {
                     Anchor = Anchor.Centre,
                 }

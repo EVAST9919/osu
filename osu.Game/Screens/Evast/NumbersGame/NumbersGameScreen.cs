@@ -12,7 +12,7 @@ using osuTK.Graphics;
 
 namespace osu.Game.Screens.Evast.NumbersGame
 {
-    public class NumbersGameScreen : EvastNoBackButtonScreen
+    public class NumbersGameScreen : EvastVisualScreen
     {
         private const int music_visualizer_radius = 1000;
         private const int music_visualizer_bars_count = 70;
@@ -23,8 +23,6 @@ namespace osu.Game.Screens.Evast.NumbersGame
 
         public NumbersGameScreen()
         {
-            DimValue = 0.35f;
-
             AddRangeInternal(new Drawable[]
             {
                 new SpaceParticlesContainer(),

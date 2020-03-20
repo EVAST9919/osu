@@ -1,6 +1,5 @@
 ﻿using osu.Framework.Graphics;
 using osu.Game.Screens.Evast.MusicVisualizers;
-using osu.Framework.Bindables;
 using osu.Framework.Graphics.Containers;
 
 namespace osu.Game.Screens.Evast.Particles
@@ -20,8 +19,7 @@ namespace osu.Game.Screens.Evast.Particles
         protected override Container<Drawable> Content => content;
 
         private readonly SpeedAdjustableContainer content;
-
-        private readonly BindableFloat rate = new BindableFloat();
+        private readonly MusicIntensityController intensityController;
 
         protected ParticlesContainer()
         {
@@ -37,10 +35,7 @@ namespace osu.Game.Screens.Evast.Particles
                     Origin = Anchor.Centre,
                     RelativeSizeAxes = Axes.Both,
                 },
-                new MusicIntensityController
-                {
-                    Intensity = { BindTarget = rate }
-                }
+                intensityController = new MusicIntensityController()
             });
         }
 
@@ -48,7 +43,7 @@ namespace osu.Game.Screens.Evast.Particles
         {
             base.LoadComplete();
 
-            rate.BindValueChanged(rate => content.Rate = rate.NewValue);
+            intensityController.Intensity.BindValueChanged(rate => content.Rate = rate.NewValue);
 
             generateParticles(true);
         }

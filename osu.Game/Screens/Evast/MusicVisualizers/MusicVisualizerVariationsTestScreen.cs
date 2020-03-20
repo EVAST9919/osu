@@ -2,7 +2,7 @@
 
 namespace osu.Game.Screens.Evast.MusicVisualizers
 {
-    public class MusicVisualizerVariationsTestScreen : EvastScreen
+    public class MusicVisualizerVariationsTestScreen : EvastVisualScreen
     {
         public MusicVisualizerVariationsTestScreen()
         {
