@@ -4,9 +4,6 @@ using osuTK;
 using osu.Framework.Input.Events;
 using osuTK.Input;
 using System;
-using osu.Framework.Graphics.Sprites;
-using osu.Framework.Allocation;
-using osu.Framework.Graphics.Textures;
 using osu.Game.Screens.Evast.MusicVisualizers;
 using osu.Framework.Graphics.Effects;
 using osu.Framework.Graphics.Shapes;
@@ -15,7 +12,7 @@ using osu.Framework.Extensions.Color4Extensions;
 
 namespace osu.Game.Screens.Evast.SpaceShip
 {
-    public class SpaceShip : Container
+    public class PlayerShip : Ship
     {
         private const double base_speed = 1.0 / 2048;
 
@@ -25,34 +22,16 @@ namespace osu.Game.Screens.Evast.SpaceShip
         private int horizontalDirection;
         private int verticalDirection;
 
-        private readonly Sprite sprite;
-
-        public SpaceShip()
+        public PlayerShip()
         {
-            Origin = Anchor.CentreRight;
-            Size = new Vector2(60);
-            RelativePositionAxes = Axes.Both;
             Y = 0.5f;
             X = 0.1f;
-            Children = new Drawable[]
+            Add(new Engine
             {
-                sprite = new Sprite
-                {
-                    RelativeSizeAxes = Axes.Both,
-                },
-                new Engine
-                {
-                    Anchor = Anchor.CentreLeft,
-                    Origin = Anchor.CentreRight,
-                    X = 4,
-                }
-            };
-        }
-
-        [BackgroundDependencyLoader]
-        private void load(TextureStore textures)
-        {
-            sprite.Texture = textures.Get("Evast/SpaceShip/space-ship");
+                Anchor = Anchor.CentreLeft,
+                Origin = Anchor.CentreRight,
+                X = 4,
+            });
         }
 
         protected override bool OnKeyDown(KeyDownEvent e)
