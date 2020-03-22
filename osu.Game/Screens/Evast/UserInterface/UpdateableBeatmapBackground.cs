@@ -6,7 +6,7 @@ using osu.Framework.Allocation;
 
 namespace osu.Game.Screens.Evast.UserInterface
 {
-    public class BeatmapCircleCard : Container
+    public class UpdateableBeatmapBackground : Container
     {
         private const int animation_duration = 500;
 
@@ -17,7 +17,7 @@ namespace osu.Game.Screens.Evast.UserInterface
         private readonly CircularContainer content;
         private BeatmapBackground background;
 
-        public BeatmapCircleCard()
+        public UpdateableBeatmapBackground()
         {
             AddInternal(content = new CircularContainer
             {

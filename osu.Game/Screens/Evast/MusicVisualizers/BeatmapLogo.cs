@@ -54,7 +54,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                     BarsCount = barsCount,
                     CircleSize = radius,
                 },
-                new BeatmapCircleCard
+                new UpdateableBeatmapBackground
                 {
                     RelativeSizeAxes = Axes.Both,
                     Anchor = Anchor.Centre,
