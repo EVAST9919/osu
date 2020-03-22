@@ -18,7 +18,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
 
         private readonly CircularProgress progressGlow;
 
-        public BeatmapLogo(int radius = 350, int barsCount = 70, float barWidth = 4f)
+        public BeatmapLogo(int radius = 350, int barsCount = 180, float barWidth = 2f)
         {
             Origin = Anchor.Centre;
             Size = new Vector2(radius);

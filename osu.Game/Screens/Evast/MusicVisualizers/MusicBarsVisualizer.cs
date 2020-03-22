@@ -7,7 +7,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
     {
         protected virtual BasicBar CreateBar() => new BasicBar();
 
-        private int smoothness = 150;
+        private int smoothness = 200;
         public int Smoothness
         {
             get => smoothness;
@@ -76,8 +76,6 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
             }
         }
 
-        protected int RealAmplitudeFor(int barNumber) => 200 / barsCount * barNumber;
-
         protected BasicBar[] EqualizerBars;
 
         public bool IsReversed { get; set; }
@@ -92,11 +90,25 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
 
         protected override void OnAmplitudesUpdate(float[] amplitudes)
         {
+            var amps = new float[barsCount];
+
             for (int i = 0; i < barsCount; i++)
             {
-                var currentAmplitude = amplitudes[RealAmplitudeFor(i)];
-                EqualizerBars[IsReversed ? barsCount - 1 - i : i].SetValue(currentAmplitude, ValueMultiplier, Smoothness);
+                if (i == 0)
+                {
+                    amps[i] = amplitudes[getAmpIndexForBar(i)];
+                    continue;
+                }
+
+                amps[i] = (amps[i - 1] + amplitudes[getAmpIndexForBar(i)] + amplitudes[getAmpIndexForBar(i + 1)]) / 3f;
+            }
+
+            for (int i = 0; i < barsCount; i++)
+            {
+                EqualizerBars[IsReversed ? barsCount - 1 - i : i].SetValue(amps[i], ValueMultiplier, Smoothness);
             }
         }
+
+        private int getAmpIndexForBar(int barIndex) => 200 / barsCount * barIndex;
     }
 }

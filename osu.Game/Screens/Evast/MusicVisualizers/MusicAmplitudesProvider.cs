@@ -20,8 +20,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
 
         private void updateAmplitudes()
         {
-            var frequencyAmplitudes = beatmap.Value.Track?.CurrentAmplitudes.FrequencyAmplitudes ?? new float[256];
-            OnAmplitudesUpdate(frequencyAmplitudes);
+            OnAmplitudesUpdate(beatmap.Value.Track?.CurrentAmplitudes.FrequencyAmplitudes ?? new float[256]);
             Scheduler.AddDelayed(updateAmplitudes, 1);
         }
 
