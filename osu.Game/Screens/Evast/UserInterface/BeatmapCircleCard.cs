@@ -8,6 +8,8 @@ namespace osu.Game.Screens.Evast.UserInterface
 {
     public class BeatmapCircleCard : Container
     {
+        private const int animation_duration = 500;
+
         protected override Container<Drawable> Content => content;
 
         private readonly Bindable<WorkingBeatmap> working = new Bindable<WorkingBeatmap>();
@@ -38,11 +40,21 @@ namespace osu.Game.Screens.Evast.UserInterface
 
         private void onBeatmapChanged(ValueChangedEvent<WorkingBeatmap> beatmap)
         {
-            LoadComponentAsync(new BeatmapBackground(beatmap.NewValue), newBackground =>
+            LoadComponentAsync(new BeatmapBackground(beatmap.NewValue)
             {
-                background?.FadeOut(200).Expire();
+                Anchor = Anchor.Centre,
+                Origin = Anchor.Centre,
+                Alpha = 0,
+            }, newBackground =>
+            {
+                background?.FadeOut(animation_duration, Easing.OutQuint);
+                background?.RotateTo(360, animation_duration, Easing.OutQuint);
+                background?.Expire();
+
                 background = newBackground;
                 Add(newBackground);
+                newBackground.RotateTo(360, animation_duration, Easing.OutQuint);
+                newBackground.FadeIn(animation_duration, Easing.OutQuint);
             });
         }
     }

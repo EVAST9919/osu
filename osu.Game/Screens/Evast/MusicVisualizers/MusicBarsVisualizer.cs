@@ -100,7 +100,9 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                     continue;
                 }
 
-                amps[i] = (amps[i - 1] + amplitudes[getAmpIndexForBar(i)] + amplitudes[getAmpIndexForBar(i + 1)]) / 3f;
+                var nextAmp = i == barsCount - 1 ? 0 : amplitudes[getAmpIndexForBar(i + 1)];
+
+                amps[i] = (amps[i - 1] + amplitudes[getAmpIndexForBar(i)] + nextAmp) / 3f;
             }
 
             for (int i = 0; i < barsCount; i++)
