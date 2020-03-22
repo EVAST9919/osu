@@ -21,7 +21,7 @@ namespace osu.Game.Screens.Evast.UserInterface
             {
                 RelativeSizeAxes = Axes.Both,
                 Masking = true,
-            }); 
+            });
         }
 
         [BackgroundDependencyLoader]
