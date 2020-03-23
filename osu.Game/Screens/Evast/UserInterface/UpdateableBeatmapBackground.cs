@@ -3,6 +3,8 @@ using osu.Framework.Graphics;
 using osu.Framework.Bindables;
 using osu.Game.Beatmaps;
 using osu.Framework.Allocation;
+using osuTK;
+using osu.Game.Screens.Evast.MusicVisualizers;
 
 namespace osu.Game.Screens.Evast.UserInterface
 {
@@ -14,15 +16,27 @@ namespace osu.Game.Screens.Evast.UserInterface
 
         private readonly Bindable<WorkingBeatmap> working = new Bindable<WorkingBeatmap>();
 
-        private readonly CircularContainer content;
+        private readonly Container content;
         private BeatmapBackground background;
+        private MusicIntensityController intensityController;
 
         public UpdateableBeatmapBackground()
         {
-            AddInternal(content = new CircularContainer
+            AddRangeInternal(new Drawable[]
             {
-                RelativeSizeAxes = Axes.Both,
-                Masking = true,
+                new CircularContainer
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Masking = true,
+                    Child = content = new Container
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Size = new Vector2(1.2f),
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                    }
+                },
+                intensityController = new MusicIntensityController()
             });
         }
 
@@ -35,6 +49,21 @@ namespace osu.Game.Screens.Evast.UserInterface
         protected override void LoadComplete()
         {
             working.BindValueChanged(onBeatmapChanged, true);
+            intensityController.Intensity.BindValueChanged(intensity =>
+            {
+                var adjustedIntensity = intensity.NewValue / 150;
+
+                if (adjustedIntensity > 0.2f)
+                    adjustedIntensity = 0.2f;
+
+                var sizeDelta = 1.2f - adjustedIntensity;
+
+                if (sizeDelta > content.Size.X)
+                    return;
+
+                content.ResizeTo(sizeDelta, 10, Easing.OutQuint).Then().ResizeTo(1.2f, 1500, Easing.OutQuint);
+
+            }, true);
             base.LoadComplete();
         }
 
