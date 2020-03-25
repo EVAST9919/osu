@@ -2,19 +2,17 @@
 using osu.Framework.Graphics;
 using osu.Framework.Bindables;
 using osu.Game.Beatmaps;
-using osu.Framework.Allocation;
 using osuTK;
 using osu.Game.Screens.Evast.MusicVisualizers;
+using osu.Game.Screens.Evast.Helpers;
 
 namespace osu.Game.Screens.Evast.UserInterface
 {
-    public class UpdateableBeatmapBackground : Container
+    public class UpdateableBeatmapBackground : CurrentBeatmapProvider
     {
         private const int animation_duration = 500;
 
         protected override Container<Drawable> Content => content;
-
-        private readonly Bindable<WorkingBeatmap> working = new Bindable<WorkingBeatmap>();
 
         private readonly Container content;
         private BeatmapBackground background;
@@ -40,15 +38,9 @@ namespace osu.Game.Screens.Evast.UserInterface
             });
         }
 
-        [BackgroundDependencyLoader]
-        private void load(Bindable<WorkingBeatmap> beatmap)
-        {
-            working.BindTo(beatmap);
-        }
-
         protected override void LoadComplete()
         {
-            working.BindValueChanged(onBeatmapChanged, true);
+            base.LoadComplete();
             intensityController.Intensity.BindValueChanged(intensity =>
             {
                 var adjustedIntensity = intensity.NewValue / 150;
@@ -62,12 +54,10 @@ namespace osu.Game.Screens.Evast.UserInterface
                     return;
 
                 content.ResizeTo(sizeDelta, 10, Easing.OutQuint).Then().ResizeTo(1.2f, 1500, Easing.OutQuint);
-
             }, true);
-            base.LoadComplete();
         }
 
-        private void onBeatmapChanged(ValueChangedEvent<WorkingBeatmap> beatmap)
+        protected override void OnBeatmapChanged(ValueChangedEvent<WorkingBeatmap> beatmap)
         {
             LoadComponentAsync(new BeatmapBackground(beatmap.NewValue)
             {

@@ -1,10 +1,7 @@
-﻿using osu.Framework.Allocation;
-using osu.Framework.Bindables;
-using osu.Framework.Graphics;
-using osu.Framework.Graphics.Containers;
+﻿using osu.Framework.Graphics;
 using osu.Framework.Graphics.Effects;
 using osu.Framework.Graphics.UserInterface;
-using osu.Game.Beatmaps;
+using osu.Game.Screens.Evast.Helpers;
 using osu.Game.Screens.Evast.MusicVisualizers.Bars;
 using osu.Game.Screens.Evast.UserInterface;
 using osuTK;
@@ -12,10 +9,8 @@ using osuTK.Graphics;
 
 namespace osu.Game.Screens.Evast.MusicVisualizers
 {
-    public class BeatmapLogo : CompositeDrawable
+    public class BeatmapLogo : CurrentBeatmapProvider
     {
-        private readonly Bindable<WorkingBeatmap> working = new Bindable<WorkingBeatmap>();
-
         private readonly CircularProgress progressGlow;
 
         public BeatmapLogo(int radius = 350, int barsCount = 120, float barWidth = 3f)
@@ -75,17 +70,11 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
             });
         }
 
-        [BackgroundDependencyLoader]
-        private void load(Bindable<WorkingBeatmap> beatmap)
-        {
-            working.BindTo(beatmap);
-        }
-
         protected override void Update()
         {
             base.Update();
 
-            var track = working.Value?.Track;
+            var track = Beatmap.Value?.Track;
 
             progressGlow.Current.Value = track == null ? 0 : (float)(track.CurrentTime / track.Length);
         }

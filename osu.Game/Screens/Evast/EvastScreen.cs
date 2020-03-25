@@ -19,6 +19,8 @@ namespace osu.Game.Screens.Evast
     {
         private const int blur = 20;
 
+        protected virtual bool ShowCardOnBeatmapChange => true;
+
         protected override BackgroundScreen CreateBackground() => new BackgroundScreenBeatmap();
 
         protected float DimValue
@@ -63,6 +65,9 @@ namespace osu.Game.Screens.Evast
                 backgroundModeBeatmap.BlurAmount.Value = blur;
                 backgroundModeBeatmap.FadeTo(1, 250);
             }
+
+            if (!ShowCardOnBeatmapChange)
+                return;
 
             if (firstChange)
             {

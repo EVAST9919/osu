@@ -1,15 +1,9 @@
-﻿using osu.Framework.Allocation;
-using osu.Framework.Bindables;
-using osu.Framework.Graphics.Containers;
-using osu.Game.Beatmaps;
+﻿using osu.Game.Screens.Evast.Helpers;
 
 namespace osu.Game.Screens.Evast.MusicVisualizers
 {
-    public abstract class MusicAmplitudesProvider : Container
+    public abstract class MusicAmplitudesProvider : CurrentBeatmapProvider
     {
-        [Resolved]
-        private Bindable<WorkingBeatmap> beatmap { get; set; }
-
         protected override void LoadComplete()
         {
             base.LoadComplete();
@@ -20,7 +14,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
 
         private void updateAmplitudes()
         {
-            OnAmplitudesUpdate(beatmap.Value.Track?.CurrentAmplitudes.FrequencyAmplitudes ?? new float[256]);
+            OnAmplitudesUpdate(Beatmap.Value.Track?.CurrentAmplitudes.FrequencyAmplitudes ?? new float[256]);
             Scheduler.AddDelayed(updateAmplitudes, 1);
         }
 

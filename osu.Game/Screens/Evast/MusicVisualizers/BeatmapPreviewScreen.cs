@@ -6,6 +6,8 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
 {
     public class BeatmapPreviewScreen : EvastVisualScreen
     {
+        protected override bool ShowCardOnBeatmapChange => false;
+
         public BeatmapPreviewScreen()
         {
             AddRangeInternal(new Drawable[]
