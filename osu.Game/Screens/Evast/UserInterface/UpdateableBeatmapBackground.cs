@@ -5,6 +5,11 @@ using osu.Game.Beatmaps;
 using osuTK;
 using osu.Game.Screens.Evast.MusicVisualizers;
 using osu.Game.Screens.Evast.Helpers;
+using osu.Game.Graphics.Sprites;
+using osu.Game.Graphics;
+using osuTK.Graphics;
+using osu.Framework.Extensions.Color4Extensions;
+using osu.Framework.Graphics.Shapes;
 
 namespace osu.Game.Screens.Evast.UserInterface
 {
@@ -12,11 +17,12 @@ namespace osu.Game.Screens.Evast.UserInterface
     {
         private const int animation_duration = 500;
 
-        protected override Container<Drawable> Content => content;
+        private readonly Container backgroundContainer;
+        private readonly Container nameContainer;
+        private readonly MusicIntensityController intensityController;
 
-        private readonly Container content;
         private BeatmapBackground background;
-        private MusicIntensityController intensityController;
+        private BeatmapName name;
 
         public UpdateableBeatmapBackground()
         {
@@ -26,12 +32,26 @@ namespace osu.Game.Screens.Evast.UserInterface
                 {
                     RelativeSizeAxes = Axes.Both,
                     Masking = true,
-                    Child = content = new Container
+                    Children = new Drawable[]
                     {
-                        RelativeSizeAxes = Axes.Both,
-                        Size = new Vector2(1.2f),
-                        Anchor = Anchor.Centre,
-                        Origin = Anchor.Centre,
+                        backgroundContainer = new Container
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            Size = new Vector2(1.2f),
+                            Anchor = Anchor.Centre,
+                            Origin = Anchor.Centre,
+                        },
+                        new Box
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            Colour = Color4.Black.Opacity(0.25f)
+                        },
+                        nameContainer = new Container
+                        {
+                            RelativeSizeAxes = Axes.Both,
+                            Anchor = Anchor.Centre,
+                            Origin = Anchor.Centre,
+                        },
                     }
                 },
                 intensityController = new MusicIntensityController()
@@ -50,10 +70,10 @@ namespace osu.Game.Screens.Evast.UserInterface
 
                 var sizeDelta = 1.2f - adjustedIntensity;
 
-                if (sizeDelta > content.Size.X)
+                if (sizeDelta > backgroundContainer.Size.X)
                     return;
 
-                content.ResizeTo(sizeDelta, 10, Easing.OutQuint).Then().ResizeTo(1.2f, 1500, Easing.OutQuint);
+                backgroundContainer.ResizeTo(sizeDelta, 10, Easing.OutQuint).Then().ResizeTo(1.2f, 1500, Easing.OutQuint);
             }, true);
         }
 
@@ -71,10 +91,104 @@ namespace osu.Game.Screens.Evast.UserInterface
                 background?.Expire();
 
                 background = newBackground;
-                Add(newBackground);
+                backgroundContainer.Add(newBackground);
                 newBackground.RotateTo(360, animation_duration, Easing.OutQuint);
                 newBackground.FadeIn(animation_duration, Easing.OutQuint);
             });
+
+            LoadComponentAsync(new BeatmapName(beatmap.NewValue)
+            {
+                Anchor = Anchor.Centre,
+                Origin = Anchor.Centre,
+                Y = -1.2f,
+                Depth = -float.MaxValue,
+            }, newName =>
+            {
+                name?.MoveToY(1.2f, animation_duration, Easing.Out);
+                name?.Expire();
+
+                name = newName;
+                nameContainer.Add(newName);
+                newName.MoveToY(0, animation_duration, Easing.OutQuint);
+            });
+        }
+
+        private class BeatmapName : CompositeDrawable
+        {
+            public BeatmapName(WorkingBeatmap beatmap = null)
+            {
+                RelativeSizeAxes = Axes.Both;
+                RelativePositionAxes = Axes.Y;
+
+                if (beatmap == null)
+                    return;
+
+                AddRangeInternal(new Drawable[]
+                {
+                    new BufferedContainer
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        BlurSigma = new Vector2(5),
+                        Child = new FillFlowContainer
+                        {
+                            Anchor = Anchor.Centre,
+                            Origin = Anchor.Centre,
+                            AutoSizeAxes = Axes.Both,
+                            Direction = FillDirection.Vertical,
+                            Spacing = new Vector2(0, 10),
+                            Colour = Color4.Black,
+                            Children = new Drawable[]
+                            {
+                                new OsuSpriteText
+                                {
+                                    Anchor = Anchor.Centre,
+                                    Origin = Anchor.Centre,
+                                    Font = OsuFont.GetFont(size: 26, weight: FontWeight.SemiBold),
+                                    Text = beatmap.Metadata.Artist,
+                                    Shadow = false,
+                                },
+                                new OsuSpriteText
+                                {
+                                    Anchor = Anchor.Centre,
+                                    Origin = Anchor.Centre,
+                                    Font = OsuFont.GetFont(size: 20, weight: FontWeight.SemiBold),
+                                    Text = beatmap.Metadata.Title,
+                                    Shadow = false,
+                                }
+                            }
+                        }
+                    },
+                    new FillFlowContainer
+                    {
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        AutoSizeAxes = Axes.Both,
+                        Direction = FillDirection.Vertical,
+                        Spacing = new Vector2(0, 10),
+                        Children = new Drawable[]
+                        {
+                            new OsuSpriteText
+                            {
+                                Anchor = Anchor.Centre,
+                                Origin = Anchor.Centre,
+                                Font = OsuFont.GetFont(size: 26, weight: FontWeight.SemiBold),
+                                Text = beatmap.Metadata.Artist,
+                                Shadow = false,
+                            },
+                            new OsuSpriteText
+                            {
+                                Anchor = Anchor.Centre,
+                                Origin = Anchor.Centre,
+                                Font = OsuFont.GetFont(size: 20, weight: FontWeight.SemiBold),
+                                Text = beatmap.Metadata.Title,
+                                Shadow = false,
+                            }
+                        }
+                    }
+                });
+            }
         }
     }
 }
