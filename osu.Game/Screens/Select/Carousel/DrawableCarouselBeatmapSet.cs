@@ -195,56 +195,6 @@ namespace osu.Game.Screens.Select.Carousel
             });
         }
 
-        private async void saveVideo()
-        {
-            BeatmapMetadata metadata = beatmapSet.Metadata;
-
-            BeatmapSetFileInfo file = beatmapSet.Files?.Find(f => f.Filename == metadata.VideoFile);
-
-            if (file == null)
-            {
-                notifications?.Post(new SimpleNotification
-                {
-                    Text = $@"Selected beatmap has no video!",
-                    Icon = FontAwesome.Solid.Times,
-                });
-                return;
-            }
-
-            string storagePath = storage.GetFullPath("");
-
-            string directory = @"D:\saved osu!videos";
-            if (!Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
-
-            string localVideoPath = @"\files\" + file.FileInfo.StoragePath;
-            string videoName = metadata.Artist + " - " + metadata.Title + ".mp4";
-
-            //just to be sure there are no invalid symbols
-            videoName = string.Join("", videoName.Split(Path.GetInvalidFileNameChars()));
-            videoName = string.Join("", videoName.Split(Path.GetInvalidPathChars()));
-
-            string finalFilePath = directory + @"\" + videoName;
-
-            if (File.Exists(finalFilePath))
-            {
-                notifications?.Post(new SimpleNotification
-                {
-                    Text = $@"{videoName} already exists!",
-                    Icon = FontAwesome.Solid.Times,
-                });
-                return;
-            }
-
-            await Task.Run(() => File.Copy(storagePath + localVideoPath, finalFilePath));
-            notifications?.Post(new ProgressCompletionNotification
-            {
-                Text = $@"{videoName} has been successfully exported!",
-            });
-        }
-
         private const int maximum_difficulty_icons = 18;
 
         private IEnumerable<DifficultyIcon> getDifficultyIcons()
@@ -272,7 +222,6 @@ namespace osu.Game.Screens.Select.Carousel
                     items.Add(new OsuMenuItem("Restore all hidden", MenuItemType.Standard, () => restoreHiddenRequested?.Invoke(beatmapSet)));
 
                 items.Add(new OsuMenuItem("Save audio as an mp3 file", MenuItemType.Standard, saveAudio));
-                items.Add(new OsuMenuItem("Save video background (if exists)", MenuItemType.Standard, saveVideo));
                 items.Add(new OsuMenuItem("Save background (if exists)", MenuItemType.Standard, saveBackground));
                 items.Add(new OsuMenuItem("Delete", MenuItemType.Destructive, () => dialogOverlay?.Push(new BeatmapDeleteDialog(beatmapSet))));
 
