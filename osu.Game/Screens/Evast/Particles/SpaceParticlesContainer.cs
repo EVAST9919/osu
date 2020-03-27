@@ -18,7 +18,7 @@ namespace osu.Game.Screens.Evast.Particles
         /// <summary>
         /// The maximum scale of a single particle.
         /// </summary>
-        private const float particle_max_scale = 5;
+        private const float particle_max_scale = 3;
 
         protected override Drawable CreateParticle(bool firstLoad) => new Particle();
 
@@ -35,9 +35,7 @@ namespace osu.Game.Screens.Evast.Particles
                 RelativePositionAxes = Axes.Both;
                 Colour = Color4.White.Opacity(200);
                 Position = new Vector2(RNG.NextSingle(-0.5f, 0.5f), RNG.NextSingle(-0.5f, 0.5f));
-                Depth = RNG.NextSingle(0.25f, 1);
                 Size = new Vector2(2);
-                Scale = new Vector2(Depth);
                 Alpha = 0;
             }
 
@@ -55,35 +53,30 @@ namespace osu.Game.Screens.Evast.Particles
 
             private void calculateValues()
             {
-                float distanceFromZero = distance(Vector2.Zero, Position);
+                float finalX;
+                float finalY;
+                float ratio;
 
-                float x = Position.X;
-                float y = Position.Y;
-
-                float fullDistance;
-
-                if ((y < 0 && x + y < 0 && y < x) || (y > 0 && x + y > 0 && x < y))
-                    fullDistance = Math.Abs((distance(Vector2.Zero, Position) * 0.5f) / distance(Vector2.Zero, new Vector2(0, y)));
+                if (Math.Abs(X) > Math.Abs(Y))
+                {
+                    ratio = Math.Abs(X) / 0.5f;
+                    finalX = X > 0 ? 0.5f : -0.5f;
+                    finalY = Y / ratio;
+                }
                 else
-                    fullDistance = Math.Abs((distance(Vector2.Zero, Position) * 0.5f) / distance(Vector2.Zero, new Vector2(x, 0)));
+                {
+                    ratio = Math.Abs(Y) / 0.5f;
+                    finalY = Y > 0 ? 0.5f : -0.5f;
+                    finalX = X / ratio;
+                }
 
-                float xFinal = (Position.X * fullDistance) / distanceFromZero;
-                float yFinal = (Position.Y * fullDistance) / distanceFromZero;
+                finalPosition = new Vector2(finalX, finalY);
 
-                finalPosition = new Vector2(xFinal, yFinal);
+                float depth = RNG.NextSingle(0.25f, 1);
+                Scale = new Vector2(depth);
 
-                float elapsedDistance = fullDistance - distanceFromZero;
-
-                lifeTime = ((absolute_time * elapsedDistance) / fullDistance) / Depth;
-                finalScale = 1 + ((particle_max_scale - 1) * Depth * (elapsedDistance / fullDistance));
-            }
-
-            private float distance(Vector2 pointFirst, Vector2 pointSecond)
-            {
-                float widthDiff = Math.Abs(pointFirst.X - pointSecond.X);
-                float heightDiff = Math.Abs(pointFirst.Y - pointSecond.Y);
-
-                return (float)Math.Sqrt((widthDiff * widthDiff) + (heightDiff * heightDiff));
+                lifeTime = absolute_time * (1 - ratio) / depth;
+                finalScale = 1 + ((particle_max_scale - 1) * depth * (1 - ratio));
             }
         }
     }
