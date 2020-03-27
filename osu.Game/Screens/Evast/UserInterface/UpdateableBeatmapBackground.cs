@@ -146,7 +146,7 @@ namespace osu.Game.Screens.Evast.UserInterface
                             Anchor = Anchor.Centre,
                             Origin = Anchor.Centre,
                             Font = OsuFont.GetFont(size: 20, weight: FontWeight.SemiBold),
-                            Text = beatmap.Metadata.Title,
+                            Text = getShortTitle(beatmap.Metadata.Title),
                             Shadow = false,
                         }
                     }
@@ -156,6 +156,20 @@ namespace osu.Game.Screens.Evast.UserInterface
                     DrawOriginal = true,
                     Sigma = new Vector2(5)
                 }));
+            }
+
+            /// <summary>
+            /// Trims additional info in brackets in beatmap title (if exists).
+            /// </summary>
+            /// <param name="longTitle">The title to trim.</param>
+            /// <returns></returns>
+            private string getShortTitle(string longTitle)
+            {
+                if (!longTitle.Contains("("))
+                    return longTitle;
+
+                var bracketIndex = longTitle.IndexOf('(');
+                return longTitle.Substring(0, bracketIndex);
             }
         }
     }
