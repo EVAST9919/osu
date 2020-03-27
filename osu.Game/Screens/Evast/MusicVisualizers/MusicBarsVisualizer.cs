@@ -7,20 +7,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
     {
         protected virtual BasicBar CreateBar() => new BasicBar();
 
-        private int smoothness = 200;
-        public int Smoothness
-        {
-            get => smoothness;
-            set
-            {
-                smoothness = value;
-
-                if (!IsLoaded)
-                    return;
-
-                Restart();
-            }
-        }
+        public int Smoothness { get; set; } = 200;
 
         private float barWidth = 4.5f;
         public float BarWidth
@@ -49,7 +36,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                 if (!IsLoaded)
                     return;
 
-                Scheduler.CancelDelayedTasks();
+                Pause();
                 resetBars();
                 Start();
             }

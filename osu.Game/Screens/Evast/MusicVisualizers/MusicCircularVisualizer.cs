@@ -35,17 +35,17 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                 if (!IsLoaded)
                     return;
 
-                calculateBarProperties();
+                setBarProperties();
             }
         }
 
         protected override void AddBars()
         {
-            calculateBarProperties();
+            setBarProperties();
             base.AddBars();
         }
 
-        private void calculateBarProperties()
+        private void setBarProperties()
         {
             float spacing = DegreeValue / BarsCount;
 
