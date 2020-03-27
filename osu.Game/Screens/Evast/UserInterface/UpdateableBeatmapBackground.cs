@@ -10,6 +10,7 @@ using osu.Game.Graphics;
 using osuTK.Graphics;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Graphics.Effects;
 
 namespace osu.Game.Screens.Evast.UserInterface
 {
@@ -123,71 +124,38 @@ namespace osu.Game.Screens.Evast.UserInterface
                 if (beatmap == null)
                     return;
 
-                AddRangeInternal(new Drawable[]
+                AddInternal(new FillFlowContainer
                 {
-                    new BufferedContainer
+                    Anchor = Anchor.Centre,
+                    Origin = Anchor.Centre,
+                    RelativeSizeAxes = Axes.Both,
+                    Direction = FillDirection.Vertical,
+                    Spacing = new Vector2(0, 10),
+                    Children = new Drawable[]
                     {
-                        RelativeSizeAxes = Axes.Both,
-                        Anchor = Anchor.Centre,
-                        Origin = Anchor.Centre,
-                        BlurSigma = new Vector2(5),
-                        Child = new FillFlowContainer
+                        new OsuSpriteText
                         {
                             Anchor = Anchor.Centre,
                             Origin = Anchor.Centre,
-                            AutoSizeAxes = Axes.Both,
-                            Direction = FillDirection.Vertical,
-                            Spacing = new Vector2(0, 10),
-                            Colour = Color4.Black,
-                            Children = new Drawable[]
-                            {
-                                new OsuSpriteText
-                                {
-                                    Anchor = Anchor.Centre,
-                                    Origin = Anchor.Centre,
-                                    Font = OsuFont.GetFont(size: 26, weight: FontWeight.SemiBold),
-                                    Text = beatmap.Metadata.Artist,
-                                    Shadow = false,
-                                },
-                                new OsuSpriteText
-                                {
-                                    Anchor = Anchor.Centre,
-                                    Origin = Anchor.Centre,
-                                    Font = OsuFont.GetFont(size: 20, weight: FontWeight.SemiBold),
-                                    Text = beatmap.Metadata.Title,
-                                    Shadow = false,
-                                }
-                            }
-                        }
-                    },
-                    new FillFlowContainer
-                    {
-                        Anchor = Anchor.Centre,
-                        Origin = Anchor.Centre,
-                        AutoSizeAxes = Axes.Both,
-                        Direction = FillDirection.Vertical,
-                        Spacing = new Vector2(0, 10),
-                        Children = new Drawable[]
+                            Font = OsuFont.GetFont(size: 26, weight: FontWeight.SemiBold),
+                            Text = beatmap.Metadata.Artist,
+                            Shadow = false,
+                        },
+                        new OsuSpriteText
                         {
-                            new OsuSpriteText
-                            {
-                                Anchor = Anchor.Centre,
-                                Origin = Anchor.Centre,
-                                Font = OsuFont.GetFont(size: 26, weight: FontWeight.SemiBold),
-                                Text = beatmap.Metadata.Artist,
-                                Shadow = false,
-                            },
-                            new OsuSpriteText
-                            {
-                                Anchor = Anchor.Centre,
-                                Origin = Anchor.Centre,
-                                Font = OsuFont.GetFont(size: 20, weight: FontWeight.SemiBold),
-                                Text = beatmap.Metadata.Title,
-                                Shadow = false,
-                            }
+                            Anchor = Anchor.Centre,
+                            Origin = Anchor.Centre,
+                            Font = OsuFont.GetFont(size: 20, weight: FontWeight.SemiBold),
+                            Text = beatmap.Metadata.Title,
+                            Shadow = false,
                         }
                     }
-                });
+                }.WithEffect(new BlurEffect
+                {
+                    Colour = Color4.Black.Opacity(0.7f),
+                    DrawOriginal = true,
+                    Sigma = new Vector2(5)
+                }));
             }
         }
     }
