@@ -12,8 +12,13 @@ using System;
 
 namespace osu.Game.Screens.Evast.ApiHelper
 {
-    public abstract class WebHelperScreen : EvastScreen
+    public abstract class WebHelperScreen : EvastVisualScreen
     {
+        private const int search_bar_height = 30;
+        private const int side_margin = 20;
+
+        public override bool CursorVisible => true;
+
         private readonly OsuTextBox textBox;
         private readonly LoadingLayer loading;
         private readonly OsuButton commitButton;
@@ -26,74 +31,70 @@ namespace osu.Game.Screens.Evast.ApiHelper
 
         public WebHelperScreen()
         {
-            AddRangeInternal(new Drawable[]
+            AddInternal(new Container
             {
-                new FillFlowContainer
+                RelativeSizeAxes = Axes.Both,
+                Padding = new MarginPadding(side_margin),
+                Children = new Drawable[]
                 {
-                    Anchor = Anchor.Centre,
-                    Origin = Anchor.Centre,
-                    AutoSizeAxes = Axes.Both,
-                    Direction = FillDirection.Vertical,
-                    Spacing = new Vector2(0, 50),
-                    Children = new Drawable[]
+                    new FillFlowContainer
                     {
-                        new FillFlowContainer
+                        Anchor = Anchor.TopCentre,
+                        Origin = Anchor.TopCentre,
+                        AutoSizeAxes = Axes.Both,
+                        Spacing = new Vector2(5, 0),
+                        Children = new Drawable[]
                         {
-                            Anchor = Anchor.Centre,
-                            Origin = Anchor.Centre,
-                            AutoSizeAxes = Axes.Both,
-                            Spacing = new Vector2(5, 0),
-                            Children = new Drawable[]
+                            new OsuSpriteText
                             {
-                                new OsuSpriteText
-                                {
-                                    Anchor = Anchor.CentreLeft,
-                                    Origin = Anchor.CentreLeft,
-                                    Text = CreateUri().ToString()
-                                },
-                                textBox = new OsuTextBox
-                                {
-                                    Anchor = Anchor.CentreLeft,
-                                    Origin = Anchor.CentreLeft,
-                                    Size = new Vector2(400, 30),
-                                },
-                                commitButton = new OsuButton
-                                {
-                                    Anchor = Anchor.CentreLeft,
-                                    Origin = Anchor.CentreLeft,
-                                    Size = new Vector2(100, 30),
-                                    Text = "Get Data",
-                                    Action = getData,
-                                }
-                            }
-                        },
-                        new Container
-                        {
-                            Anchor = Anchor.Centre,
-                            Origin = Anchor.Centre,
-                            Size = new Vector2 (800, 400),
-                            Children = new Drawable[]
+                                Anchor = Anchor.CentreLeft,
+                                Origin = Anchor.CentreLeft,
+                                Text = CreateUri().ToString()
+                            },
+                            textBox = new OsuTextBox
                             {
-                                new Box
-                                {
-                                    RelativeSizeAxes = Axes.Both,
-                                    Colour = Color4.Black.Opacity(100),
-                                },
-                                new BasicScrollContainer
-                                {
-                                    RelativeSizeAxes = Axes.Both,
-                                    Child = Text = new TextFlowContainer
-                                    {
-                                        AutoSizeAxes = Axes.Both,
-                                        Direction = FillDirection.Full,
-
-                                    }
-                                },
-                                loading = new LoadingLayer(),
+                                Anchor = Anchor.CentreLeft,
+                                Origin = Anchor.CentreLeft,
+                                Size = new Vector2(400, 30),
+                            },
+                            commitButton = new OsuButton
+                            {
+                                Anchor = Anchor.CentreLeft,
+                                Origin = Anchor.CentreLeft,
+                                Size = new Vector2(100, 30),
+                                Text = "Get Data",
+                                Action = getData,
                             }
                         }
+                    },
+                    new Container
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Padding = new MarginPadding
+                        {
+                            Top = search_bar_height + side_margin
+                        },
+                        Children = new Drawable[]
+                        {
+                            new Box
+                            {
+                                RelativeSizeAxes = Axes.Both,
+                                Colour = Color4.Black.Opacity(100),
+                            },
+                            new BasicScrollContainer
+                            {
+                                RelativeSizeAxes = Axes.Both,
+                                Child = Text = new TextFlowContainer
+                                {
+                                    AutoSizeAxes = Axes.Both,
+                                    Direction = FillDirection.Full,
+
+                                }
+                            },
+                            loading = new LoadingLayer(),
+                        }
                     }
-                },
+                }
             });
 
             textBox.OnCommit += (u, v) => commitButton.Click();
