@@ -36,9 +36,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                 if (!IsLoaded)
                     return;
 
-                Pause();
                 resetBars();
-                Start();
             }
         }
 
