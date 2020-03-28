@@ -11,6 +11,10 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
         {
             float sum = 0;
             amplitudes.ForEach(amp => sum += amp);
+
+            if (IsKiai.Value)
+                sum *= 1.5f;
+
             Intensity.Value = sum;
         }
     }

@@ -14,6 +14,7 @@ namespace osu.Game.Screens.Evast
                 new Button("Variations", () => this.Push(new MusicVisualizerVariationsTestScreen())),
                 new Button("Bar variations", () => this.Push(new MusicBarVisualizersVariationsTestScreen())),
                 new Button("Beatmap preview", () => this.Push(new BeatmapPreviewScreen())),
+                new Button("Music intensity", () => this.Push(new MusicIntensityScreen())),
             };
         }
     }
