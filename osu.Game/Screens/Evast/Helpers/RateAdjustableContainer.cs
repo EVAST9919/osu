@@ -1,9 +1,9 @@
 ﻿using osu.Framework.Graphics.Containers;
 using osu.Framework.Timing;
 
-namespace osu.Game.Screens.Evast
+namespace osu.Game.Screens.Evast.Helpers
 {
-    public class SpeedAdjustableContainer : Container
+    public class RateAdjustableContainer : Container
     {
         public double Rate
         {
@@ -13,7 +13,7 @@ namespace osu.Game.Screens.Evast
 
         private readonly StopwatchClock clock;
 
-        public SpeedAdjustableContainer()
+        public RateAdjustableContainer()
         {
             ProcessCustomClock = true;
             Clock = new FramedClock(clock = new StopwatchClock());

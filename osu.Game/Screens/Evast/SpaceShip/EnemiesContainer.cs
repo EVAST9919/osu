@@ -2,17 +2,17 @@
 using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Game.Screens.Evast.Helpers;
 
 namespace osu.Game.Screens.Evast.SpaceShip
 {
-    public class EnemiesContainer : Container<Ship>
+    public class EnemiesContainer : CurrentRateContainer
     {
         private readonly Container bulletsContainer;
 
         public EnemiesContainer(Container bulletsContainer)
         {
             this.bulletsContainer = bulletsContainer;
-
             RelativeSizeAxes = Axes.Both;
         }
 

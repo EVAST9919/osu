@@ -1,10 +1,9 @@
 ﻿using osu.Framework.Graphics;
-using osu.Game.Screens.Evast.MusicVisualizers;
-using osu.Framework.Graphics.Containers;
+using osu.Game.Screens.Evast.Helpers;
 
 namespace osu.Game.Screens.Evast.Particles
 {
-    public abstract class ParticlesContainer : Container
+    public abstract class ParticlesContainer : CurrentRateContainer
     {
         /// <summary>
         /// Number of milliseconds between addition of a new particle.
@@ -16,35 +15,16 @@ namespace osu.Game.Screens.Evast.Particles
         /// </summary>
         protected virtual int MaxParticlesCount => 350;
 
-        protected override Container<Drawable> Content => content;
-
-        private readonly SpeedAdjustableContainer content;
-        private readonly MusicIntensityController intensityController;
-
         protected ParticlesContainer()
         {
             Anchor = Anchor.Centre;
             Origin = Anchor.Centre;
             RelativeSizeAxes = Axes.Both;
-
-            AddRangeInternal(new Drawable[]
-            {
-                content = new SpeedAdjustableContainer
-                {
-                    Anchor = Anchor.Centre,
-                    Origin = Anchor.Centre,
-                    RelativeSizeAxes = Axes.Both,
-                },
-                intensityController = new MusicIntensityController()
-            });
         }
 
         protected override void LoadComplete()
         {
             base.LoadComplete();
-
-            intensityController.Intensity.BindValueChanged(rate => content.Rate = rate.NewValue);
-
             generateParticles(true);
         }
 

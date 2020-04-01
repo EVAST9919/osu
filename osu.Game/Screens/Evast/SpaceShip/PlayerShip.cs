@@ -9,6 +9,7 @@ using osu.Framework.Graphics.Effects;
 using osu.Framework.Graphics.Shapes;
 using osuTK.Graphics;
 using osu.Framework.Extensions.Color4Extensions;
+using osu.Game.Screens.Evast.Helpers;
 
 namespace osu.Game.Screens.Evast.SpaceShip
 {

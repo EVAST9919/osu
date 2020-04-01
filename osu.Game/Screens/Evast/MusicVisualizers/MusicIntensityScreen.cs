@@ -3,6 +3,7 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Screens.Evast.Helpers;
 using osuTK;
 
 namespace osu.Game.Screens.Evast.MusicVisualizers

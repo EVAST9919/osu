@@ -1,7 +1,7 @@
 ﻿using osu.Framework.Bindables;
 using osu.Framework.Extensions.IEnumerableExtensions;
 
-namespace osu.Game.Screens.Evast.MusicVisualizers
+namespace osu.Game.Screens.Evast.Helpers
 {
     public class MusicIntensityController : MusicAmplitudesProvider
     {

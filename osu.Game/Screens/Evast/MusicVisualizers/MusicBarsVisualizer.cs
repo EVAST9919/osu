@@ -1,4 +1,5 @@
 ﻿using osu.Framework.Extensions.IEnumerableExtensions;
+using osu.Game.Screens.Evast.Helpers;
 using osu.Game.Screens.Evast.MusicVisualizers.Bars;
 
 namespace osu.Game.Screens.Evast.MusicVisualizers

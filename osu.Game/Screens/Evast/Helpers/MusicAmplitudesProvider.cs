@@ -1,7 +1,6 @@
 ﻿using osu.Framework.Bindables;
-using osu.Game.Screens.Evast.Helpers;
 
-namespace osu.Game.Screens.Evast.MusicVisualizers
+namespace osu.Game.Screens.Evast.Helpers
 {
     public abstract class MusicAmplitudesProvider : CurrentBeatmapProvider
     {
