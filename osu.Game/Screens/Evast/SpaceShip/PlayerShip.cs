@@ -4,7 +4,6 @@ using osuTK;
 using osu.Framework.Input.Events;
 using osuTK.Input;
 using System;
-using osu.Game.Screens.Evast.MusicVisualizers;
 using osu.Framework.Graphics.Effects;
 using osu.Framework.Graphics.Shapes;
 using osuTK.Graphics;
