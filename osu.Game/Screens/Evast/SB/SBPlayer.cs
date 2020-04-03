@@ -5,6 +5,7 @@ using osuTK;
 using osu.Framework.Input.Events;
 using osuTK.Input;
 using System;
+using osu.Framework.Utils;
 
 namespace osu.Game.Screens.Evast.SB
 {
@@ -12,22 +13,29 @@ namespace osu.Game.Screens.Evast.SB
     {
         private const double base_speed = 1.0 / 2048;
 
-        private int horizontalDirection;
-        private int verticalDirection;
+        private bool isMoving;
+        private Vector2 target;
 
         private readonly Container player;
+        private readonly Box drawablePlayer;
 
         public SBPlayer()
         {
+            Anchor = Anchor.Centre;
+            Origin = Anchor.Centre;
             RelativeSizeAxes = Axes.Both;
+            FillMode = FillMode.Fit;
             AddInternal(player = new Container
             {
-                Anchor = Anchor.Centre,
                 Origin = Anchor.Centre,
                 RelativePositionAxes = Axes.Both,
+                Position = new Vector2(0.5f),
                 Size = new Vector2(15),
-                Child = new Box
+                Child = drawablePlayer = new Box
                 {
+                    Anchor = Anchor.Centre,
+                    Origin = Anchor.Centre,
+                    EdgeSmoothness = Vector2.One,
                     RelativeSizeAxes = Axes.Both
                 }
             });
@@ -42,19 +50,8 @@ namespace osu.Game.Screens.Evast.SB
                 switch (e.Key)
                 {
                     case Key.W:
-                        verticalDirection--;
-                        return true;
-
-                    case Key.S:
-                        verticalDirection++;
-                        return true;
-
-                    case Key.A:
-                        horizontalDirection--;
-                        return true;
-
-                    case Key.D:
-                        horizontalDirection++;
+                        isMoving = true;
+                        expand();
                         return true;
                 };
             }
@@ -67,19 +64,8 @@ namespace osu.Game.Screens.Evast.SB
             switch (e.Key)
             {
                 case Key.W:
-                    verticalDirection++;
-                    return;
-
-                case Key.S:
-                    verticalDirection--;
-                    return;
-
-                case Key.A:
-                    horizontalDirection++;
-                    return;
-
-                case Key.D:
-                    horizontalDirection--;
+                    isMoving = false;
+                    collapse();
                     return;
             };
 
@@ -89,31 +75,52 @@ namespace osu.Game.Screens.Evast.SB
         protected override void Update()
         {
             base.Update();
-            updatePosition();
+            updatePlayer();
         }
 
-        private void updatePosition()
+        private void updatePlayer()
         {
-            if (horizontalDirection != 0)
+            var currentMousePos = ToLocalSpace(GetContainingInputManager().CurrentState.Mouse.Position);
+            target = new Vector2(currentMousePos.X / RelativeToAbsoluteFactor.X, currentMousePos.Y / RelativeToAbsoluteFactor.Y);
+
+            if (Precision.AlmostEquals(target.X, player.X, 0.001f) && Precision.AlmostEquals(target.Y, player.Y, 0.001f))
+                return;
+
+            updateRotation();
+
+            if (isMoving)
             {
-                var position = Math.Clamp(player.X + Math.Sign(horizontalDirection) * Clock.ElapsedFrameTime * base_speed, -0.5f, 0.5f);
+                double positionX;
+                double positionY;
 
-                if (position == player.X)
-                    return;
+                double xDelta;
+                double yDelta;
 
-                player.X = (float)position;
-            }
+                var ratio = Math.Abs(target.X - player.X) / Math.Abs(target.Y - player.Y);
 
-            if (verticalDirection != 0)
-            {
-                var position = Math.Clamp(player.Y + Math.Sign(verticalDirection) * Clock.ElapsedFrameTime * base_speed, -0.5f, 0.5f);
+                if (ratio > 1)
+                {
+                    xDelta = Math.Sign(target.X - player.X) * Clock.ElapsedFrameTime * base_speed;
+                    yDelta = Math.Sign(target.Y - player.Y) * Clock.ElapsedFrameTime * base_speed / ratio;
+                }
+                else
+                {
+                    xDelta = Math.Sign(target.X - player.X) * Clock.ElapsedFrameTime * base_speed * ratio;
+                    yDelta = Math.Sign(target.Y - player.Y) * Clock.ElapsedFrameTime * base_speed;
+                }
 
-                if (position == player.Y)
-                    return;
+                positionX = Math.Clamp(player.X + xDelta, 0, 1);
+                positionY = Math.Clamp(player.Y + yDelta, 0, 1);
 
-                player.Y = (float)position;
+                player.Position = new Vector2((float)positionX, (float)positionY);
             }
         }
+
+        private void updateRotation() => drawablePlayer.Rotation = (float)(Math.Atan2(target.Y - player.Y, target.X - player.X) * 180 / Math.PI);
+
+        private void expand() => drawablePlayer.ScaleTo(new Vector2(1.4f, 0.6f), 400, Easing.Out);
+
+        private void collapse() => drawablePlayer.ScaleTo(1, 400, Easing.OutElastic);
 
         #endregion
     }

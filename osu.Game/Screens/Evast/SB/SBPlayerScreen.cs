@@ -2,6 +2,8 @@
 {
     public class SBPlayerScreen : EvastVisualScreen
     {
+        public override bool CursorVisible => true;
+
         public SBPlayerScreen()
         {
             AddInternal(new SBPlayer());
