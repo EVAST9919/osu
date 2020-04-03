@@ -120,7 +120,7 @@ namespace osu.Game.Screens.Evast.SB
 
         private void expand() => drawablePlayer.ScaleTo(new Vector2(1.4f, 0.6f), 400, Easing.Out);
 
-        private void collapse() => drawablePlayer.ScaleTo(1, 400, Easing.OutElastic);
+        private void collapse() => drawablePlayer.ScaleTo(new Vector2(0.7f, 1.3f), 100, Easing.OutQuint).Then().ScaleTo(Vector2.One, 200, Easing.Out);
 
         #endregion
     }
