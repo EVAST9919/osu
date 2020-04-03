@@ -96,21 +96,8 @@ namespace osu.Game.Screens.Evast.SB
 
             if (isMoving)
             {
-                double xDelta;
-                double yDelta;
-
-                var ratio = Math.Abs(target.X - player.X) / Math.Abs(target.Y - player.Y);
-
-                if (ratio > 1)
-                {
-                    xDelta = Math.Sign(target.X - player.X) * Clock.ElapsedFrameTime * base_speed;
-                    yDelta = Math.Sign(target.Y - player.Y) * Clock.ElapsedFrameTime * base_speed / ratio;
-                }
-                else
-                {
-                    xDelta = Math.Sign(target.X - player.X) * Clock.ElapsedFrameTime * base_speed * ratio;
-                    yDelta = Math.Sign(target.Y - player.Y) * Clock.ElapsedFrameTime * base_speed;
-                }
+                var xDelta = Clock.ElapsedFrameTime * base_speed * Math.Cos(drawablePlayer.Rotation * Math.PI / 180);
+                var yDelta = Clock.ElapsedFrameTime * base_speed * Math.Sin(drawablePlayer.Rotation * Math.PI / 180);
 
                 if (teleport)
                 {
