@@ -85,11 +85,7 @@ namespace osu.Game.Screens.Evast.SB
         protected override void Update()
         {
             base.Update();
-            updatePlayer();
-        }
 
-        private void updatePlayer()
-        {
             var currentMousePos = ToLocalSpace(GetContainingInputManager().CurrentState.Mouse.Position);
             target = new Vector2(currentMousePos.X / RelativeToAbsoluteFactor.X, currentMousePos.Y / RelativeToAbsoluteFactor.Y);
 
@@ -100,9 +96,6 @@ namespace osu.Game.Screens.Evast.SB
 
             if (isMoving)
             {
-                double positionX;
-                double positionY;
-
                 double xDelta;
                 double yDelta;
 
@@ -127,8 +120,8 @@ namespace osu.Game.Screens.Evast.SB
                     teleport = false;
                 }
 
-                positionX = Math.Clamp(player.X + xDelta, 0, 1);
-                positionY = Math.Clamp(player.Y + yDelta, 0, 1);
+                var positionX = Math.Clamp(player.X + xDelta, 0, 1);
+                var positionY = Math.Clamp(player.Y + yDelta, 0, 1);
 
                 player.Position = new Vector2((float)positionX, (float)positionY);
             }
