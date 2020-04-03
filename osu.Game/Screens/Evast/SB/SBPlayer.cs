@@ -11,9 +11,11 @@ namespace osu.Game.Screens.Evast.SB
 {
     public class SBPlayer : CompositeDrawable
     {
-        private const double base_speed = 1.0 / 2048;
+        private const double base_speed = 1.0 / 1500;
+        private const int teleport_multiplier = 40;
 
         private bool isMoving;
+        private bool teleport;
         private Vector2 target;
 
         private readonly Container player;
@@ -30,7 +32,7 @@ namespace osu.Game.Screens.Evast.SB
                 Origin = Anchor.Centre,
                 RelativePositionAxes = Axes.Both,
                 Position = new Vector2(0.5f),
-                Size = new Vector2(15),
+                Size = new Vector2(20),
                 Child = drawablePlayer = new Box
                 {
                     Anchor = Anchor.Centre,
@@ -53,6 +55,10 @@ namespace osu.Game.Screens.Evast.SB
                         isMoving = true;
                         expand();
                         return true;
+
+                    case Key.Space:
+                        teleport = true;
+                        return true;
                 };
             }
 
@@ -66,6 +72,10 @@ namespace osu.Game.Screens.Evast.SB
                 case Key.W:
                     isMoving = false;
                     collapse();
+                    return;
+
+                case Key.Space:
+                    teleport = false;
                     return;
             };
 
@@ -109,6 +119,14 @@ namespace osu.Game.Screens.Evast.SB
                     yDelta = Math.Sign(target.Y - player.Y) * Clock.ElapsedFrameTime * base_speed;
                 }
 
+                if (teleport)
+                {
+                    xDelta *= teleport_multiplier;
+                    yDelta *= teleport_multiplier;
+                    createTeleportOut(player.Position);
+                    teleport = false;
+                }
+
                 positionX = Math.Clamp(player.X + xDelta, 0, 1);
                 positionY = Math.Clamp(player.Y + yDelta, 0, 1);
 
@@ -121,6 +139,24 @@ namespace osu.Game.Screens.Evast.SB
         private void expand() => drawablePlayer.ScaleTo(new Vector2(1.4f, 0.6f), 400, Easing.Out);
 
         private void collapse() => drawablePlayer.ScaleTo(new Vector2(0.7f, 1.3f), 100, Easing.OutQuint).Then().ScaleTo(Vector2.One, 200, Easing.Out);
+
+        private void createTeleportOut(Vector2 position)
+        {
+            var circle = new Circle
+            {
+                Size = new Vector2(80),
+                RelativePositionAxes = Axes.Both,
+                Origin = Anchor.Centre,
+                Position = position,
+                Scale = Vector2.Zero,
+            };
+
+            AddInternal(circle);
+
+            circle.ScaleTo(1, 300, Easing.OutQuint);
+            circle.FadeOut(300, Easing.OutQuint);
+            circle.Expire();
+        }
 
         #endregion
     }
