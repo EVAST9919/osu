@@ -62,17 +62,7 @@ namespace osu.Game.Rulesets.Osu.Skinning
                     // Math.Max((150 / Velocity) * GameBase.SIXTY_FRAME_TIME, GameBase.SIXTY_FRAME_TIME);
 
                     if (sliderBallContent != null)
-                    {
-                        var size = sliderBallContent.Size;
-
-                        sliderBallContent.RelativeSizeAxes = Axes.Both;
-                        sliderBallContent.Size = Vector2.One;
-
-                        return new LegacySliderBall(sliderBallContent)
-                        {
-                            Size = size
-                        };
-                    }
+                        return new LegacySliderBall(sliderBallContent);
 
                     return null;
 
@@ -142,6 +132,12 @@ namespace osu.Game.Rulesets.Osu.Skinning
                                 return SkinUtils.As<TValue>(new BindableFloat(LEGACY_CIRCLE_RADIUS));
 
                             break;
+
+                        case OsuSkinConfiguration.HitCircleOverlayAboveNumber:
+                            // See https://osu.ppy.sh/help/wiki/Skinning/skin.ini#%5Bgeneral%5D
+                            // HitCircleOverlayAboveNumer (with typo) should still be supported for now.
+                            return source.GetConfig<OsuSkinConfiguration, TValue>(OsuSkinConfiguration.HitCircleOverlayAboveNumber) ??
+                                   source.GetConfig<OsuSkinConfiguration, TValue>(OsuSkinConfiguration.HitCircleOverlayAboveNumer);
                     }
 
                     break;
