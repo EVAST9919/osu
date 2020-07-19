@@ -31,7 +31,4 @@
     <PackageReference Include="NUnit" Version="3.12.0" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\osu-resources\osu.Game.Resources\osu.Game.Resources.csproj" />
-  </ItemGroup>
 </Project>

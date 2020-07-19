@@ -94,7 +94,7 @@ namespace osu.Game.Screens.Evast.NumbersGame
 
         public int GetValue() => (int)Math.Round(Math.Pow(2, Power));
 
-        protected override void OnNewBeat(int beatIndex, TimingControlPoint timingPoint, EffectControlPoint effectPoint, TrackAmplitudes amplitudes)
+        protected override void OnNewBeat(int beatIndex, TimingControlPoint timingPoint, EffectControlPoint effectPoint, ChannelAmplitudes amplitudes)
         {
             base.OnNewBeat(beatIndex, timingPoint, effectPoint, amplitudes);
 
