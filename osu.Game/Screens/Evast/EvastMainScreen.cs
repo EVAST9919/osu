@@ -20,6 +20,7 @@ namespace osu.Game.Screens.Evast
                 new Button("Particles", () => this.Push(new ParticlesSelectableScreen())),
                 new Button("Music Visualizers", () => this.Push(new MusicVisualizersSelectableScreen())),
                 new Button("APIv2 Helper", () => this.Push(new ApiV2HelperScreen())),
+                new Button("APIv2 Helper (public)", () => this.Push(new ApiV2PublicHelperScreen())),
             };
         }
     }

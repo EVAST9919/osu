@@ -106,6 +106,11 @@ namespace osu.Game.Screens.Evast.ApiHelper
 
         protected virtual Uri CreateUri() => new Uri("https://osu.ppy.sh/");
 
+        protected virtual void Connect(GetAPIDataRequest r, IAPIProvider api)
+        {
+            api.Queue(request);
+        }
+
         private void getData()
         {
             request?.Cancel();
@@ -128,7 +133,7 @@ namespace osu.Game.Screens.Evast.ApiHelper
                 loading.Hide();
             };
 
-            api.Queue(request);
+            Connect(request, api);
         }
     }
 }
