@@ -3,7 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Extensions.Color4Extensions;
@@ -15,6 +18,7 @@ using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Input.Events;
+using osu.Framework.Platform;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.Drawables;
 using osu.Game.Graphics;
@@ -22,6 +26,7 @@ using osu.Game.Graphics.Backgrounds;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Overlays;
+using osu.Game.Overlays.Notifications;
 using osuTK;
 using osuTK.Graphics;
 
@@ -30,6 +35,7 @@ namespace osu.Game.Screens.Select.Carousel
     public class DrawableCarouselBeatmap : DrawableCarouselItem, IHasContextMenu
     {
         private readonly BeatmapInfo beatmap;
+        private readonly BeatmapSetInfo beatmapSet;
 
         private Sprite background;
 
@@ -46,6 +52,12 @@ namespace osu.Game.Screens.Select.Carousel
         [Resolved]
         private BeatmapDifficultyManager difficultyManager { get; set; }
 
+        [Resolved]
+        private NotificationOverlay notifications { get; set; }
+
+        [Resolved]
+        private Storage storage { get; set; }
+
         private IBindable<StarDifficulty> starDifficultyBindable;
         private CancellationTokenSource starDifficultyCancellationSource;
 
@@ -53,6 +65,7 @@ namespace osu.Game.Screens.Select.Carousel
             : base(panel)
         {
             beatmap = panel.Beatmap;
+            beatmapSet = beatmap.BeatmapSet;
             Height *= 0.60f;
         }
 
@@ -201,6 +214,118 @@ namespace osu.Game.Screens.Select.Carousel
             base.ApplyState();
         }
 
+        private async void saveAudio()
+        {
+            string storagePath = storage.GetFullPath("");
+
+            string directory = @"D:\saved osu!songs";
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            var metadata = beatmapSet.Metadata;
+            var audio = metadata.AudioFile.Split('.');
+            var extension = audio.Last();
+
+            string audioName = string.Empty;
+
+            for (int i = 0; i < audio.Length - 1; i++)
+                audioName += audio[i];
+
+            if (beatmapSet.Files == null)
+            {
+                notifications?.Post(new SimpleNotification
+                {
+                    Text = "Can't find any files, sorry..",
+                    Icon = FontAwesome.Solid.Times,
+                });
+                return;
+            }
+
+            var filename = beatmapSet.Files.Find(f => f.Filename == metadata.AudioFile)?.FileInfo.StoragePath;
+            string localAudioPath = @"\files\" + filename;
+            string endName = metadata.Artist + " - " + metadata.Title + $".{extension}";
+
+            //just to be sure there are no invalid symbols
+            endName = string.Join("", endName.Split(Path.GetInvalidFileNameChars()));
+            endName = string.Join("", endName.Split(Path.GetInvalidPathChars()));
+
+            string finalFilePath = directory + @"\" + endName;
+
+            if (File.Exists(finalFilePath))
+            {
+                notifications?.Post(new SimpleNotification
+                {
+                    Text = $@"{endName} already exists!",
+                    Icon = FontAwesome.Solid.Times,
+                });
+                return;
+            }
+
+            await Task.Run(() => File.Copy(storagePath + localAudioPath, finalFilePath));
+            notifications?.Post(new ProgressCompletionNotification
+            {
+                Text = $@"{endName} has been successfully exported!",
+            });
+        }
+
+        private async void saveBackground()
+        {
+            string storagePath = storage.GetFullPath("");
+
+            string directory = @"D:\saved osu!backgrounds";
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            var metadata = beatmapSet.Metadata;
+            var bg = metadata.BackgroundFile.Split('.');
+            var extension = bg.Last();
+
+            string bgName = string.Empty;
+
+            for (int i = 0; i < bg.Length - 1; i++)
+                bgName += bg[i];
+
+            if (beatmapSet.Files == null)
+            {
+                notifications?.Post(new SimpleNotification
+                {
+                    Text = "Can't find any files, sorry..",
+                    Icon = FontAwesome.Solid.Times,
+                });
+                return;
+            }
+
+            var filename = beatmapSet.Files.Find(f => f.Filename == metadata.BackgroundFile)?.FileInfo.StoragePath;
+            string localBgPath = @"\files\" + filename;
+            string endName = metadata.Artist + " - " + metadata.Title + $".{extension}";
+
+            //just to be sure there are no invalid symbols
+            endName = string.Join("", endName.Split(Path.GetInvalidFileNameChars()));
+            endName = string.Join("", endName.Split(Path.GetInvalidPathChars()));
+
+            string finalFilePath = directory + @"\" + endName;
+
+            if (File.Exists(finalFilePath))
+            {
+                notifications?.Post(new SimpleNotification
+                {
+                    Text = $@"{endName} already exists!",
+                    Icon = FontAwesome.Solid.Times,
+                });
+                return;
+            }
+
+            await Task.Run(() => File.Copy(storagePath + localBgPath, finalFilePath));
+            notifications?.Post(new ProgressCompletionNotification
+            {
+                Text = $@"{endName} has been successfully exported!",
+            });
+        }
+
         public MenuItem[] ContextMenuItems
         {
             get
@@ -215,6 +340,9 @@ namespace osu.Game.Screens.Select.Carousel
 
                 if (hideRequested != null)
                     items.Add(new OsuMenuItem("Hide", MenuItemType.Destructive, () => hideRequested(beatmap)));
+
+                items.Add(new OsuMenuItem("Save audio as an mp3 file", MenuItemType.Standard, saveAudio));
+                items.Add(new OsuMenuItem("Save background (if exists)", MenuItemType.Standard, saveBackground));
 
                 if (beatmap.OnlineBeatmapID.HasValue && beatmapOverlay != null)
                     items.Add(new OsuMenuItem("Details", MenuItemType.Standard, () => beatmapOverlay.FetchAndShowBeatmap(beatmap.OnlineBeatmapID.Value)));
