@@ -132,21 +132,40 @@ namespace osu.Game.Screens.Select.Carousel
                 Directory.CreateDirectory(directory);
             }
 
-            BeatmapMetadata metadata = beatmapSet.Metadata;
-            string localAudioPath = @"\files\" + beatmapSet.Files?.Find(f => f.Filename == metadata.AudioFile).FileInfo.StoragePath;
-            string audioName = metadata.Artist + " - " + metadata.Title + ".mp3";
+            var metadata = beatmapSet.Metadata;
+            var audio = metadata.AudioFile.Split('.');
+            var extension = audio.Last();
+
+            string audioName = string.Empty;
+
+            for (int i = 0; i < audio.Length - 1; i++)
+                audioName += audio[i];
+
+            if (beatmapSet.Files == null)
+            {
+                notifications?.Post(new SimpleNotification
+                {
+                    Text = "Can't find any files, sorry..",
+                    Icon = FontAwesome.Solid.Times,
+                });
+                return;
+            }
+
+            var filename = beatmapSet.Files.Find(f => f.Filename == metadata.AudioFile)?.FileInfo.StoragePath;
+            string localAudioPath = @"\files\" + filename;
+            string endName = metadata.Artist + " - " + metadata.Title + $".{extension}";
 
             //just to be sure there are no invalid symbols
-            audioName = string.Join("", audioName.Split(Path.GetInvalidFileNameChars()));
-            audioName = string.Join("", audioName.Split(Path.GetInvalidPathChars()));
+            endName = string.Join("", endName.Split(Path.GetInvalidFileNameChars()));
+            endName = string.Join("", endName.Split(Path.GetInvalidPathChars()));
 
-            string finalFilePath = directory + @"\" + audioName;
+            string finalFilePath = directory + @"\" + endName;
 
             if (File.Exists(finalFilePath))
             {
                 notifications?.Post(new SimpleNotification
                 {
-                    Text = $@"{audioName} already exists!",
+                    Text = $@"{endName} already exists!",
                     Icon = FontAwesome.Solid.Times,
                 });
                 return;
@@ -155,7 +174,7 @@ namespace osu.Game.Screens.Select.Carousel
             await Task.Run(() => File.Copy(storagePath + localAudioPath, finalFilePath));
             notifications?.Post(new ProgressCompletionNotification
             {
-                Text = $@"{audioName} has been successfully exported!",
+                Text = $@"{endName} has been successfully exported!",
             });
         }
 
@@ -169,21 +188,40 @@ namespace osu.Game.Screens.Select.Carousel
                 Directory.CreateDirectory(directory);
             }
 
-            BeatmapMetadata metadata = beatmapSet.Metadata;
-            string localBgPath = @"\files\" + beatmapSet.Files?.Find(f => f.Filename == metadata.BackgroundFile).FileInfo.StoragePath;
-            string bgName = metadata.Artist + " - " + metadata.Title + ".png";
+            var metadata = beatmapSet.Metadata;
+            var bg = metadata.BackgroundFile.Split('.');
+            var extension = bg.Last();
+
+            string bgName = string.Empty;
+
+            for (int i = 0; i < bg.Length - 1; i++)
+                bgName += bg[i];
+
+            if (beatmapSet.Files == null)
+            {
+                notifications?.Post(new SimpleNotification
+                {
+                    Text = "Can't find any files, sorry..",
+                    Icon = FontAwesome.Solid.Times,
+                });
+                return;
+            }
+
+            var filename = beatmapSet.Files.Find(f => f.Filename == metadata.BackgroundFile)?.FileInfo.StoragePath;
+            string localBgPath = @"\files\" + filename;
+            string endName = metadata.Artist + " - " + metadata.Title + $".{extension}";
 
             //just to be sure there are no invalid symbols
-            bgName = string.Join("", bgName.Split(Path.GetInvalidFileNameChars()));
-            bgName = string.Join("", bgName.Split(Path.GetInvalidPathChars()));
+            endName = string.Join("", endName.Split(Path.GetInvalidFileNameChars()));
+            endName = string.Join("", endName.Split(Path.GetInvalidPathChars()));
 
-            string finalFilePath = directory + @"\" + bgName;
+            string finalFilePath = directory + @"\" + endName;
 
             if (File.Exists(finalFilePath))
             {
                 notifications?.Post(new SimpleNotification
                 {
-                    Text = $@"{bgName} already exists!",
+                    Text = $@"{endName} already exists!",
                     Icon = FontAwesome.Solid.Times,
                 });
                 return;
@@ -192,7 +230,7 @@ namespace osu.Game.Screens.Select.Carousel
             await Task.Run(() => File.Copy(storagePath + localBgPath, finalFilePath));
             notifications?.Post(new ProgressCompletionNotification
             {
-                Text = $@"{bgName} has been successfully exported!",
+                Text = $@"{endName} has been successfully exported!",
             });
         }
 
