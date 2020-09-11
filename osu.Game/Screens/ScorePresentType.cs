@@ -1,9 +1,11 @@
 // Copyright (c) ppy Pty Ltd <contact@ppy.sh>. Licensed under the MIT Licence.
 // See the LICENCE file in the repository root for full licence text.
 
-namespace osu.Game.Skinning
+namespace osu.Game.Screens
 {
-    public class DefaultBeatmapSkin : DefaultSkin, IBeatmapSkin
+    public enum ScorePresentType
     {
+        Results,
+        Gameplay
     }
 }
