@@ -41,14 +41,13 @@ namespace osu.Game.Screens.Evast.Pixels.Snake
 
         private class GeneralSettings : PlayerSettingsGroup
         {
-            protected override string Title => @"general";
-
             public readonly TriangleButton StopButton;
             public readonly TriangleButton RestartButton;
             public readonly TriangleButton PauseButton;
             public readonly TriangleButton ContinueButton;
 
             public GeneralSettings()
+                : base("general")
             {
                 Children = new Drawable[]
                 {

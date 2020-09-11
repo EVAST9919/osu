@@ -5,11 +5,10 @@ namespace osu.Game.Screens.Evast
 {
     public class SpeedSettings : PlayerSettingsGroup
     {
-        protected override string Title => @"speed";
-
         public readonly BindableDouble SpeedBindable;
 
         public SpeedSettings(double defaultValue)
+            : base("speed")
         {
             Child = new PlayerSliderBar<double>
             {

@@ -49,8 +49,6 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
 
         private class Settings : PlayerSettingsGroup
         {
-            protected override string Title => @"settings";
-
             public readonly BindableFloat MultiplierBindable;
             public readonly BindableInt SmoothnessBindable;
             public readonly BindableFloat WidthBindable;
@@ -59,6 +57,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
             public readonly BindableInt AmountBindable;
 
             public Settings(float multiplier, int smoothnessValue, float width, float spacing, int barsAmount, bool reverse)
+                : base("settings")
             {
                 Children = new Drawable[]
                 {

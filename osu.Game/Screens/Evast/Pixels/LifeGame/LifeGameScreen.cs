@@ -41,14 +41,13 @@ namespace osu.Game.Screens.Evast.Pixels.LifeGame
 
         private class GeneralSettings : PlayerSettingsGroup
         {
-            protected override string Title => @"general";
-
             public readonly TriangleButton ResetButton;
             public readonly TriangleButton StartButton;
             public readonly TriangleButton PauseButton;
             public readonly TriangleButton RandomButton;
 
             public GeneralSettings()
+                : base("general")
             {
                 Children = new Drawable[]
                 {
