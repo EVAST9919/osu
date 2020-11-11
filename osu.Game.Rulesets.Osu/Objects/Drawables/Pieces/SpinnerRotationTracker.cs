@@ -2,24 +2,26 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
+using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Input.Events;
 using osu.Framework.Utils;
+using osu.Game.Screens.Play;
 using osuTK;
 
 namespace osu.Game.Rulesets.Osu.Objects.Drawables.Pieces
 {
     public class SpinnerRotationTracker : CircularContainer
     {
-        private readonly Spinner spinner;
-
         public override bool IsPresent => true; // handle input when hidden
 
-        public SpinnerRotationTracker(Spinner s)
+        private readonly DrawableSpinner drawableSpinner;
+
+        public SpinnerRotationTracker(DrawableSpinner drawableSpinner)
         {
-            spinner = s;
+            this.drawableSpinner = drawableSpinner;
 
             RelativeSizeAxes = Axes.Both;
         }
@@ -62,7 +64,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables.Pieces
         /// <summary>
         /// Whether currently in the correct time range to allow spinning.
         /// </summary>
-        private bool isSpinnableTime => spinner.StartTime <= Time.Current && spinner.EndTime > Time.Current;
+        private bool isSpinnableTime => drawableSpinner.HitObject.StartTime <= Time.Current && drawableSpinner.HitObject.EndTime > Time.Current;
 
         protected override bool OnMouseMove(MouseMoveEvent e)
         {
@@ -76,6 +78,9 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables.Pieces
         private float currentRotation;
 
         private bool rotationTransferred;
+
+        [Resolved(canBeNull: true)]
+        private GameplayClock gameplayClock { get; set; }
 
         protected override void Update()
         {
@@ -126,7 +131,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables.Pieces
             currentRotation += angle;
             // rate has to be applied each frame, because it's not guaranteed to be constant throughout playback
             // (see: ModTimeRamp)
-            RateAdjustedRotation += (float)(Math.Abs(angle) * Clock.Rate);
+            RateAdjustedRotation += (float)(Math.Abs(angle) * (gameplayClock?.TrueGameplayRate ?? Clock.Rate));
         }
     }
 }

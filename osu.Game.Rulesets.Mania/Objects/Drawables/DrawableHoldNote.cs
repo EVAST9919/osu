@@ -229,21 +229,15 @@ namespace osu.Game.Rulesets.Mania.Objects.Drawables
             }
         }
 
-        protected override void UpdateStateTransforms(ArmedState state)
-        {
-            using (BeginDelayedSequence(HitObject.Duration, true))
-                base.UpdateStateTransforms(state);
-        }
-
         protected override void CheckForResult(bool userTriggered, double timeOffset)
         {
             if (Tail.AllJudged)
             {
-                ApplyResult(r => r.Type = HitResult.Perfect);
+                ApplyResult(r => r.Type = r.Judgement.MaxResult);
                 endHold();
             }
 
-            if (Tail.Result.Type == HitResult.Miss)
+            if (Tail.Judged && !Tail.IsHit)
                 HasBroken = true;
         }
 

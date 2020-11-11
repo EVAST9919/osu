@@ -51,6 +51,7 @@ using osu.Game.Screens.Select;
 using osu.Game.Updater;
 using osu.Game.Utils;
 using LogLevel = osu.Framework.Logging.LogLevel;
+using osu.Game.Users;
 
 namespace osu.Game
 {
@@ -94,6 +95,15 @@ namespace osu.Game
         /// Whether overlays should be able to be opened game-wide. Value is sourced from the current active screen.
         /// </summary>
         public readonly IBindable<OverlayActivation> OverlayActivationMode = new Bindable<OverlayActivation>();
+
+        /// <summary>
+        /// Whether the local user is currently interacting with the game in a way that should not be interrupted.
+        /// </summary>
+        /// <remarks>
+        /// This is exclusively managed by <see cref="Player"/>. If other components are mutating this state, a more
+        /// resilient method should be used to ensure correct state.
+        /// </remarks>
+        public Bindable<bool> LocalUserPlaying = new BindableBool();
 
         protected OsuScreenStack ScreenStack;
 
@@ -172,7 +182,7 @@ namespace osu.Game
 
             if (args?.Length > 0)
             {
-                var paths = args.Where(a => !a.StartsWith(@"-")).ToArray();
+                var paths = args.Where(a => !a.StartsWith('-')).ToArray();
                 if (paths.Length > 0)
                     Task.Run(() => Import(paths));
             }
@@ -269,7 +279,7 @@ namespace osu.Game
                     break;
 
                 case LinkAction.OpenUserProfile:
-                    if (long.TryParse(link.Argument, out long userId))
+                    if (int.TryParse(link.Argument, out int userId))
                         ShowUser(userId);
                     break;
 
@@ -280,7 +290,7 @@ namespace osu.Game
 
         public void OpenUrlExternally(string url) => waitForReady(() => externalLinkOpener, _ =>
         {
-            if (url.StartsWith("/"))
+            if (url.StartsWith('/'))
                 url = $"{API.Endpoint}{url}";
 
             externalLinkOpener.OpenUrlExternally(url);
@@ -312,7 +322,7 @@ namespace osu.Game
         /// Show a user's profile as an overlay.
         /// </summary>
         /// <param name="userId">The user to display.</param>
-        public void ShowUser(long userId) => waitForReady(() => userProfile, _ => userProfile.ShowUser(userId));
+        public void ShowUser(int userId) => waitForReady(() => userProfile, _ => userProfile.ShowUser(userId));
 
         /// <summary>
         /// Show a beatmap's set as an overlay, displaying the given beatmap.
@@ -538,6 +548,20 @@ namespace osu.Game
             ScoreManager.GetStableStorage = GetStorageForStableInstall;
             ScoreManager.PresentImport = items => PresentScore(items.First());
 
+            // make config aware of how to lookup skins for on-screen display purposes.
+            // if this becomes a more common thing, tracked settings should be reconsidered to allow local DI.
+            LocalConfig.LookupSkinName = id => SkinManager.GetAllUsableSkins().FirstOrDefault(s => s.ID == id)?.ToString() ?? "Unknown";
+
+            LocalConfig.LookupKeyBindings = l =>
+            {
+                var combinations = KeyBindingStore.GetReadableKeyCombinationsFor(l).ToArray();
+
+                if (combinations.Length == 0)
+                    return "none";
+
+                return string.Join(" or ", combinations);
+            };
+
             Container logoContainer;
             BackButton.Receptor receptor;
 
@@ -577,7 +601,8 @@ namespace osu.Game
                 rightFloatingOverlayContent = new Container { RelativeSizeAxes = Axes.Both },
                 leftFloatingOverlayContent = new Container { RelativeSizeAxes = Axes.Both },
                 topMostOverlayContent = new Container { RelativeSizeAxes = Axes.Both },
-                idleTracker
+                idleTracker,
+                new ConfineMouseTracker()
             });
 
             ScreenStack.ScreenPushed += screenPushed;
@@ -602,7 +627,12 @@ namespace osu.Game
 
             loadComponentSingleFile(volume = new VolumeOverlay(), leftFloatingOverlayContent.Add, true);
 
-            loadComponentSingleFile(new OnScreenDisplay(), Add, true);
+            var onScreenDisplay = new OnScreenDisplay();
+
+            onScreenDisplay.BeginTracking(this, frameworkConfig);
+            onScreenDisplay.BeginTracking(this, LocalConfig);
+
+            loadComponentSingleFile(onScreenDisplay, Add, true);
 
             loadComponentSingleFile(notifications.With(d =>
             {
@@ -651,7 +681,6 @@ namespace osu.Game
 
             loadComponentSingleFile(new AccountCreationOverlay(), topMostOverlayContent.Add, true);
             loadComponentSingleFile(new DialogOverlay(), topMostOverlayContent.Add, true);
-            loadComponentSingleFile(externalLinkOpener = new ExternalLinkOpener(), topMostOverlayContent.Add);
 
             chatOverlay.State.ValueChanged += state => channelManager.HighPollRate.Value = state.NewValue == Visibility.Visible;
 
@@ -862,6 +891,10 @@ namespace osu.Game
                 case GlobalAction.ToggleGameplayMouseButtons:
                     LocalConfig.Set(OsuSetting.MouseDisableButtons, !LocalConfig.Get<bool>(OsuSetting.MouseDisableButtons));
                     return true;
+
+                case GlobalAction.RandomSkin:
+                    SkinManager.SelectRandomSkin();
+                    return true;
             }
 
             return false;
@@ -947,12 +980,19 @@ namespace osu.Game
                     break;
             }
 
+            // reset on screen change for sanity.
+            LocalUserPlaying.Value = false;
+
             if (current is IOsuScreen currentOsuScreen)
+            {
                 OverlayActivationMode.UnbindFrom(currentOsuScreen.OverlayActivationMode);
+                API.Activity.UnbindFrom(currentOsuScreen.Activity);
+            }
 
             if (newScreen is IOsuScreen newOsuScreen)
             {
                 OverlayActivationMode.BindTo(newOsuScreen.OverlayActivationMode);
+                ((IBindable<UserActivity>)API.Activity).BindTo(newOsuScreen.Activity);
 
                 MusicController.AllowRateAdjustments = newOsuScreen.AllowRateAdjustments;
 

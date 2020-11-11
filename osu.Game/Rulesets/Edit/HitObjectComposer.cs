@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using osu.Framework.Allocation;
-using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Input;
@@ -14,7 +13,6 @@ using osu.Framework.Input.Events;
 using osu.Framework.Logging;
 using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.ControlPoints;
-using osu.Game.Overlays.Settings;
 using osu.Game.Rulesets.Configuration;
 using osu.Game.Rulesets.Edit.Tools;
 using osu.Game.Rulesets.Mods;
@@ -24,6 +22,7 @@ using osu.Game.Rulesets.UI;
 using osu.Game.Rulesets.UI.Scrolling;
 using osu.Game.Screens.Edit;
 using osu.Game.Screens.Edit.Components.RadioButtons;
+using osu.Game.Screens.Edit.Components.TernaryButtons;
 using osu.Game.Screens.Edit.Compose;
 using osu.Game.Screens.Edit.Compose.Components;
 using osuTK;
@@ -31,6 +30,11 @@ using osuTK.Input;
 
 namespace osu.Game.Rulesets.Edit
 {
+    /// <summary>
+    /// Top level container for editor compose mode.
+    /// Responsible for providing snapping and generally gluing components together.
+    /// </summary>
+    /// <typeparam name="TObject">The base type of supported objects.</typeparam>
     [Cached(Type = typeof(IPlacementHandler))]
     public abstract class HitObjectComposer<TObject> : HitObjectComposer, IPlacementHandler
         where TObject : HitObject
@@ -58,6 +62,8 @@ namespace osu.Game.Rulesets.Edit
 
         private RadioButtonCollection toolboxCollection;
 
+        private FillFlowContainer togglesCollection;
+
         protected HitObjectComposer(Ruleset ruleset)
         {
             Ruleset = ruleset;
@@ -70,7 +76,7 @@ namespace osu.Game.Rulesets.Edit
 
             try
             {
-                drawableRulesetWrapper = new DrawableEditRulesetWrapper<TObject>(CreateDrawableRuleset(Ruleset, EditorBeatmap.PlayableBeatmap))
+                drawableRulesetWrapper = new DrawableEditRulesetWrapper<TObject>(CreateDrawableRuleset(Ruleset, EditorBeatmap.PlayableBeatmap, new[] { Ruleset.GetAutoplayMod() }))
                 {
                     Clock = EditorClock,
                     ProcessCustomClock = false
@@ -78,67 +84,63 @@ namespace osu.Game.Rulesets.Edit
             }
             catch (Exception e)
             {
-                Logger.Error(e, "Could not load beatmap sucessfully!");
+                Logger.Error(e, "Could not load beatmap successfully!");
                 return;
             }
 
-            InternalChild = new GridContainer
+            const float toolbar_width = 200;
+
+            InternalChildren = new Drawable[]
             {
-                RelativeSizeAxes = Axes.Both,
-                Content = new[]
+                new Container
                 {
-                    new Drawable[]
+                    Name = "Content",
+                    Padding = new MarginPadding { Left = toolbar_width },
+                    RelativeSizeAxes = Axes.Both,
+                    Children = new Drawable[]
                     {
-                        new FillFlowContainer
-                        {
-                            Name = "Sidebar",
-                            RelativeSizeAxes = Axes.Both,
-                            Padding = new MarginPadding { Right = 10 },
-                            Spacing = new Vector2(10),
-                            Children = new Drawable[]
-                            {
-                                new ToolboxGroup("toolbox") { Child = toolboxCollection = new RadioButtonCollection { RelativeSizeAxes = Axes.X } },
-                                new ToolboxGroup("toggles")
-                                {
-                                    ChildrenEnumerable = Toggles.Select(b => new SettingsCheckbox
-                                    {
-                                        Bindable = b,
-                                        LabelText = b?.Description ?? "unknown"
-                                    })
-                                }
-                            }
-                        },
-                        new Container
-                        {
-                            Name = "Content",
-                            RelativeSizeAxes = Axes.Both,
-                            Masking = true,
-                            Children = new Drawable[]
-                            {
-                                // layers below playfield
-                                drawableRulesetWrapper.CreatePlayfieldAdjustmentContainer().WithChildren(new Drawable[]
-                                {
-                                    LayerBelowRuleset,
-                                    new EditorPlayfieldBorder { RelativeSizeAxes = Axes.Both }
-                                }),
-                                drawableRulesetWrapper,
-                                // layers above playfield
-                                drawableRulesetWrapper.CreatePlayfieldAdjustmentContainer()
-                                                      .WithChild(BlueprintContainer = CreateBlueprintContainer(HitObjects))
-                            }
-                        }
-                    },
+                        // layers below playfield
+                        drawableRulesetWrapper.CreatePlayfieldAdjustmentContainer().WithChild(LayerBelowRuleset),
+                        drawableRulesetWrapper,
+                        // layers above playfield
+                        drawableRulesetWrapper.CreatePlayfieldAdjustmentContainer()
+                                              .WithChild(BlueprintContainer = CreateBlueprintContainer(HitObjects))
+                    }
                 },
-                ColumnDimensions = new[]
+                new FillFlowContainer
                 {
-                    new Dimension(GridSizeMode.Absolute, 200),
-                }
+                    Name = "Sidebar",
+                    RelativeSizeAxes = Axes.Y,
+                    Width = toolbar_width,
+                    Padding = new MarginPadding { Right = 10 },
+                    Spacing = new Vector2(10),
+                    Children = new Drawable[]
+                    {
+                        new ToolboxGroup("toolbox (1-9)")
+                        {
+                            Child = toolboxCollection = new RadioButtonCollection { RelativeSizeAxes = Axes.X }
+                        },
+                        new ToolboxGroup("toggles (Q~P)")
+                        {
+                            Child = togglesCollection = new FillFlowContainer
+                            {
+                                RelativeSizeAxes = Axes.X,
+                                AutoSizeAxes = Axes.Y,
+                                Direction = FillDirection.Vertical,
+                                Spacing = new Vector2(0, 5),
+                            },
+                        }
+                    }
+                },
             };
 
             toolboxCollection.Items = CompositionTools
                                       .Prepend(new SelectTool())
                                       .Select(t => new RadioButton(t.Name, () => toolSelected(t), t.CreateIcon))
                                       .ToList();
+
+            TernaryStates = CreateTernaryButtons().ToArray();
+            togglesCollection.AddRange(TernaryStates.Select(b => new DrawableTernaryButton(b)));
 
             setSelectTool();
 
@@ -168,10 +170,14 @@ namespace osu.Game.Rulesets.Edit
         protected abstract IReadOnlyList<HitObjectCompositionTool> CompositionTools { get; }
 
         /// <summary>
-        /// A collection of toggles which will be displayed to the user.
-        /// The display name will be decided by <see cref="Bindable{T}.Description"/>.
+        /// A collection of states which will be displayed to the user in the toolbox.
         /// </summary>
-        protected virtual IEnumerable<BindableBool> Toggles => Enumerable.Empty<BindableBool>();
+        public TernaryButton[] TernaryStates { get; private set; }
+
+        /// <summary>
+        /// Create all ternary states required to be displayed to the user.
+        /// </summary>
+        protected virtual IEnumerable<TernaryButton> CreateTernaryButtons() => BlueprintContainer.TernaryStates;
 
         /// <summary>
         /// Construct a relevant blueprint container. This will manage hitobject selection/placement input handling and display logic.
@@ -198,9 +204,12 @@ namespace osu.Game.Rulesets.Edit
 
         protected override bool OnKeyDown(KeyDownEvent e)
         {
-            if (e.Key >= Key.Number1 && e.Key <= Key.Number9)
+            if (e.ControlPressed || e.AltPressed || e.SuperPressed)
+                return false;
+
+            if (checkLeftToggleFromKey(e.Key, out var leftIndex))
             {
-                var item = toolboxCollection.Items.ElementAtOrDefault(e.Key - Key.Number1);
+                var item = toolboxCollection.Items.ElementAtOrDefault(leftIndex);
 
                 if (item != null)
                 {
@@ -209,7 +218,82 @@ namespace osu.Game.Rulesets.Edit
                 }
             }
 
+            if (checkRightToggleFromKey(e.Key, out var rightIndex))
+            {
+                var item = togglesCollection.ElementAtOrDefault(rightIndex);
+
+                if (item is DrawableTernaryButton button)
+                {
+                    button.Button.Toggle();
+                    return true;
+                }
+            }
+
             return base.OnKeyDown(e);
+        }
+
+        private bool checkLeftToggleFromKey(Key key, out int index)
+        {
+            if (key < Key.Number1 || key > Key.Number9)
+            {
+                index = -1;
+                return false;
+            }
+
+            index = key - Key.Number1;
+            return true;
+        }
+
+        private bool checkRightToggleFromKey(Key key, out int index)
+        {
+            switch (key)
+            {
+                case Key.Q:
+                    index = 0;
+                    break;
+
+                case Key.W:
+                    index = 1;
+                    break;
+
+                case Key.E:
+                    index = 2;
+                    break;
+
+                case Key.R:
+                    index = 3;
+                    break;
+
+                case Key.T:
+                    index = 4;
+                    break;
+
+                case Key.Y:
+                    index = 5;
+                    break;
+
+                case Key.U:
+                    index = 6;
+                    break;
+
+                case Key.I:
+                    index = 7;
+                    break;
+
+                case Key.O:
+                    index = 8;
+                    break;
+
+                case Key.P:
+                    index = 9;
+                    break;
+
+                default:
+                    index = -1;
+                    break;
+            }
+
+            return index >= 0;
         }
 
         private void selectionChanged(object sender, NotifyCollectionChangedEventArgs changedArgs)

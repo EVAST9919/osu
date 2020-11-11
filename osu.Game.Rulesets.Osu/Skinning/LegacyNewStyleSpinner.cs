@@ -2,7 +2,6 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Allocation;
-using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
@@ -20,80 +19,113 @@ namespace osu.Game.Rulesets.Osu.Skinning
     /// Legacy skinned spinner with two main spinning layers, one fixed overlay and one final spinning overlay.
     /// No background layer.
     /// </summary>
-    public class LegacyNewStyleSpinner : CompositeDrawable
+    public class LegacyNewStyleSpinner : LegacySpinner
     {
+        private Sprite glow;
         private Sprite discBottom;
         private Sprite discTop;
         private Sprite spinningMiddle;
         private Sprite fixedMiddle;
 
-        private DrawableSpinner drawableSpinner;
+        private readonly Color4 glowColour = new Color4(3, 151, 255, 255);
 
-        private const float final_scale = 0.625f;
+        private Container scaleContainer;
 
         [BackgroundDependencyLoader]
-        private void load(ISkinSource source, DrawableHitObject drawableObject)
+        private void load(ISkinSource source)
         {
-            drawableSpinner = (DrawableSpinner)drawableObject;
-
-            Scale = new Vector2(final_scale);
-
-            InternalChildren = new Drawable[]
+            AddInternal(scaleContainer = new Container
             {
-                discBottom = new Sprite
+                Scale = new Vector2(SPRITE_SCALE),
+                Anchor = Anchor.Centre,
+                Origin = Anchor.Centre,
+                RelativeSizeAxes = Axes.Both,
+                Children = new Drawable[]
                 {
-                    Anchor = Anchor.Centre,
-                    Origin = Anchor.Centre,
-                    Texture = source.GetTexture("spinner-bottom")
-                },
-                discTop = new Sprite
-                {
-                    Anchor = Anchor.Centre,
-                    Origin = Anchor.Centre,
-                    Texture = source.GetTexture("spinner-top")
-                },
-                fixedMiddle = new Sprite
-                {
-                    Anchor = Anchor.Centre,
-                    Origin = Anchor.Centre,
-                    Texture = source.GetTexture("spinner-middle")
-                },
-                spinningMiddle = new Sprite
-                {
-                    Anchor = Anchor.Centre,
-                    Origin = Anchor.Centre,
-                    Texture = source.GetTexture("spinner-middle2")
+                    glow = new Sprite
+                    {
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        Texture = source.GetTexture("spinner-glow"),
+                        Blending = BlendingParameters.Additive,
+                        Colour = glowColour,
+                    },
+                    discBottom = new Sprite
+                    {
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        Texture = source.GetTexture("spinner-bottom")
+                    },
+                    discTop = new Sprite
+                    {
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        Texture = source.GetTexture("spinner-top")
+                    },
+                    fixedMiddle = new Sprite
+                    {
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        Texture = source.GetTexture("spinner-middle")
+                    },
+                    spinningMiddle = new Sprite
+                    {
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        Texture = source.GetTexture("spinner-middle2")
+                    }
                 }
-            };
+            });
         }
 
-        protected override void LoadComplete()
+        protected override void UpdateStateTransforms(DrawableHitObject drawableHitObject, ArmedState state)
         {
-            base.LoadComplete();
+            base.UpdateStateTransforms(drawableHitObject, state);
 
-            this.FadeOut();
-            drawableSpinner.State.BindValueChanged(updateStateTransforms, true);
-        }
+            switch (drawableHitObject)
+            {
+                case DrawableSpinner d:
+                    Spinner spinner = d.HitObject;
 
-        private void updateStateTransforms(ValueChangedEvent<ArmedState> state)
-        {
-            var spinner = (Spinner)drawableSpinner.HitObject;
+                    using (BeginAbsoluteSequence(spinner.StartTime - spinner.TimePreempt, true))
+                        this.FadeOut();
 
-            using (BeginAbsoluteSequence(spinner.StartTime - spinner.TimeFadeIn / 2, true))
-                this.FadeInFromZero(spinner.TimeFadeIn / 2);
+                    using (BeginAbsoluteSequence(spinner.StartTime - spinner.TimeFadeIn / 2, true))
+                        this.FadeInFromZero(spinner.TimeFadeIn / 2);
 
-            fixedMiddle.FadeColour(Color4.White);
-            using (BeginAbsoluteSequence(spinner.StartTime, true))
-                fixedMiddle.FadeColour(Color4.Red, spinner.Duration);
+                    using (BeginAbsoluteSequence(spinner.StartTime - spinner.TimePreempt, true))
+                    {
+                        fixedMiddle.FadeColour(Color4.White);
+
+                        using (BeginDelayedSequence(spinner.TimePreempt, true))
+                            fixedMiddle.FadeColour(Color4.Red, spinner.Duration);
+                    }
+
+                    if (state == ArmedState.Hit)
+                    {
+                        using (BeginAbsoluteSequence(d.HitStateUpdateTime))
+                            glow.FadeOut(300);
+                    }
+
+                    break;
+
+                case DrawableSpinnerBonusTick _:
+                    if (state == ArmedState.Hit)
+                        glow.FlashColour(Color4.White, 200);
+
+                    break;
+            }
         }
 
         protected override void Update()
         {
             base.Update();
-            spinningMiddle.Rotation = discTop.Rotation = drawableSpinner.RotationTracker.Rotation;
+            spinningMiddle.Rotation = discTop.Rotation = DrawableSpinner.RotationTracker.Rotation;
             discBottom.Rotation = discTop.Rotation / 3;
 
-            Scale = new Vector2(final_scale * (0.8f + (float)Interpolation.ApplyEasing(Easing.Out, drawableSpinner.Progress) * 0.2f));
+            glow.Alpha = DrawableSpinner.Progress;
+
+            scaleContainer.Scale = new Vector2(SPRITE_SCALE * (0.8f + (float)Interpolation.ApplyEasing(Easing.Out, DrawableSpinner.Progress) * 0.2f));
         }
     }
 }
