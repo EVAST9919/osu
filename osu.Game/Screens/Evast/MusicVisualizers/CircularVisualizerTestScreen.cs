@@ -68,7 +68,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                     new PlayerSliderBar<float>
                     {
                         LabelText = "Amplitude Multiplier",
-                        Bindable = MultiplierBindable = new BindableFloat(multiplier)
+                        Current = MultiplierBindable = new BindableFloat(multiplier)
                         {
                             Default = multiplier,
                             MinValue = 0,
@@ -78,7 +78,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                     new PlayerSliderBar<int>
                     {
                         LabelText = "Smoothness Value",
-                        Bindable = SmoothnessBindable = new BindableInt(smoothnessValue)
+                        Current = SmoothnessBindable = new BindableInt(smoothnessValue)
                         {
                             Default = smoothnessValue,
                             MinValue = 1,
@@ -88,7 +88,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                     new PlayerSliderBar<float>
                     {
                         LabelText = "Bar Width",
-                        Bindable = WidthBindable = new BindableFloat(width)
+                        Current = WidthBindable = new BindableFloat(width)
                         {
                             Default = width,
                             MinValue = 1,
@@ -98,7 +98,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                     new PlayerSliderBar<float>
                     {
                         LabelText = "Circle Size",
-                        Bindable = SizeBindable = new BindableFloat(circleSize)
+                        Current = SizeBindable = new BindableFloat(circleSize)
                         {
                             Default = circleSize,
                             MinValue = 0,
@@ -108,7 +108,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                     new PlayerSliderBar<int>
                     {
                         LabelText = "Bars Amount",
-                        Bindable = AmountBindable = new BindableInt(barsAmount)
+                        Current = AmountBindable = new BindableInt(barsAmount)
                         {
                             Default = barsAmount,
                             MinValue = 1,
@@ -118,7 +118,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                     new PlayerSliderBar<float>
                     {
                         LabelText = "Degree Value",
-                        Bindable = DegreeBindable = new BindableFloat(degreeValue)
+                        Current = DegreeBindable = new BindableFloat(degreeValue)
                         {
                             Default = degreeValue,
                             MinValue = 0,

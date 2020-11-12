@@ -13,7 +13,7 @@ namespace osu.Game.Screens.Evast
             Child = new PlayerSliderBar<double>
             {
                 LabelText = "Update delay",
-                Bindable = SpeedBindable = new BindableDouble(defaultValue)
+                Current = SpeedBindable = new BindableDouble(defaultValue)
                 {
                     Default = defaultValue,
                     MinValue = 5,
