@@ -41,7 +41,6 @@ namespace osu.Game.Screens.Select.Carousel
         private const float height = MAX_HEIGHT * 0.6f;
 
         private readonly BeatmapInfo beatmap;
-        private readonly BeatmapSetInfo beatmapSet;
 
         private Sprite background;
 
