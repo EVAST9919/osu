@@ -110,7 +110,7 @@ namespace osu.Game.Screens.Edit.Compose.Components
         /// </summary>
         protected virtual void OnOperationBegan()
         {
-            ChangeHandler.BeginChange();
+            ChangeHandler?.BeginChange();
         }
 
         /// <summary>
@@ -118,7 +118,7 @@ namespace osu.Game.Screens.Edit.Compose.Components
         /// </summary>
         protected virtual void OnOperationEnded()
         {
-            ChangeHandler.EndChange();
+            ChangeHandler?.EndChange();
         }
 
         #region User Input Handling
@@ -328,7 +328,7 @@ namespace osu.Game.Screens.Edit.Compose.Components
                 if (h.Samples.Any(s => s.Name == sampleName))
                     continue;
 
-                h.Samples.Add(new HitSampleInfo { Name = sampleName });
+                h.Samples.Add(new HitSampleInfo(sampleName));
             }
 
             EditorBeatmap.EndChange();

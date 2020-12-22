@@ -51,7 +51,7 @@ using osu.Game.Screens.Select;
 using osu.Game.Updater;
 using osu.Game.Utils;
 using LogLevel = osu.Framework.Logging.LogLevel;
-using osu.Game.Users;
+using System.IO;
 
 namespace osu.Game
 {
@@ -420,10 +420,20 @@ namespace osu.Game
                         break;
 
                     case ScorePresentType.Results:
-                        screen.Push(new SoloResultsScreen(databasedScore.ScoreInfo));
+                        screen.Push(new SoloResultsScreen(databasedScore.ScoreInfo, false));
                         break;
                 }
             }, validScreens: new[] { typeof(PlaySongSelect) });
+        }
+
+        public override Task Import(Stream stream, string filename)
+        {
+            // encapsulate task as we don't want to begin the import process until in a ready state.
+            var importTask = new Task(async () => await base.Import(stream, filename));
+
+            waitForReady(() => this, _ => importTask.Start());
+
+            return importTask;
         }
 
         protected virtual Loader CreateLoader() => new Loader();
@@ -463,7 +473,7 @@ namespace osu.Game
 
         #endregion
 
-        private ScheduledDelegate performFromMainMenuTask;
+        private PerformFromMenuRunner performFromMainMenuTask;
 
         /// <summary>
         /// Perform an action only after returning to a specific screen as indicated by <paramref name="validScreens"/>.
@@ -474,34 +484,7 @@ namespace osu.Game
         public void PerformFromScreen(Action<IScreen> action, IEnumerable<Type> validScreens = null)
         {
             performFromMainMenuTask?.Cancel();
-
-            validScreens ??= Enumerable.Empty<Type>();
-            validScreens = validScreens.Append(typeof(MainMenu));
-
-            CloseAllOverlays(false);
-
-            // we may already be at the target screen type.
-            if (validScreens.Contains(ScreenStack.CurrentScreen?.GetType()) && !Beatmap.Disabled)
-            {
-                action(ScreenStack.CurrentScreen);
-                return;
-            }
-
-            // find closest valid target
-            IScreen screen = ScreenStack.CurrentScreen;
-
-            while (screen != null)
-            {
-                if (validScreens.Contains(screen.GetType()))
-                {
-                    screen.MakeCurrent();
-                    break;
-                }
-
-                screen = screen.GetParentScreen();
-            }
-
-            performFromMainMenuTask = Schedule(() => PerformFromScreen(action, validScreens));
+            Add(performFromMainMenuTask = new PerformFromMenuRunner(action, validScreens, () => ScreenStack.CurrentScreen));
         }
 
         /// <summary>
@@ -992,7 +975,7 @@ namespace osu.Game
             if (newScreen is IOsuScreen newOsuScreen)
             {
                 OverlayActivationMode.BindTo(newOsuScreen.OverlayActivationMode);
-                ((IBindable<UserActivity>)API.Activity).BindTo(newOsuScreen.Activity);
+                API.Activity.BindTo(newOsuScreen.Activity);
 
                 MusicController.AllowRateAdjustments = newOsuScreen.AllowRateAdjustments;
 

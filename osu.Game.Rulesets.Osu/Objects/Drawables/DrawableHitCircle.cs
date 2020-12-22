@@ -12,14 +12,14 @@ using osu.Framework.Input.Bindings;
 using osu.Game.Rulesets.Judgements;
 using osu.Game.Rulesets.Objects.Drawables;
 using osu.Game.Rulesets.Osu.Judgements;
-using osu.Game.Rulesets.Osu.Objects.Drawables.Pieces;
+using osu.Game.Rulesets.Osu.Skinning.Default;
 using osu.Game.Rulesets.Scoring;
 using osu.Game.Skinning;
 using osuTK;
 
 namespace osu.Game.Rulesets.Osu.Objects.Drawables
 {
-    public class DrawableHitCircle : DrawableOsuHitObject, IDrawableHitObjectWithProxiedApproach
+    public class DrawableHitCircle : DrawableOsuHitObject
     {
         public OsuAction? HitAction => HitArea.HitAction;
         protected virtual OsuSkinComponents CirclePieceComponent => OsuSkinComponents.HitCircle;
@@ -30,6 +30,11 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
 
         private Container scaleContainer;
         private InputManager inputManager;
+
+        public DrawableHitCircle()
+            : this(null)
+        {
+        }
 
         public DrawableHitCircle([CanBeNull] HitCircle h = null)
             : base(h)
@@ -175,6 +180,8 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
                     this.Delay(800).FadeOut();
                     break;
             }
+
+            Expire();
         }
 
         public Drawable ProxiedLayer => ApproachCircle;

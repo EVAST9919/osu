@@ -30,6 +30,7 @@ using osu.Game.Database;
 using osu.Game.Input;
 using osu.Game.Input.Bindings;
 using osu.Game.IO;
+using osu.Game.Online.RealtimeMultiplayer;
 using osu.Game.Online.Spectator;
 using osu.Game.Overlays;
 using osu.Game.Resources;
@@ -78,6 +79,7 @@ namespace osu.Game
         protected IAPIProvider API;
 
         private SpectatorStreamingClient spectatorStreaming;
+        private StatefulMultiplayerClient multiplayerClient;
 
         protected MenuCursorContainer MenuCursorContainer;
 
@@ -194,9 +196,24 @@ namespace osu.Game
             dependencies.Cache(SkinManager = new SkinManager(Storage, contextFactory, Host, Audio, new NamespacedResourceStore<byte[]>(Resources, "Skins/Legacy")));
             dependencies.CacheAs<ISkinSource>(SkinManager);
 
+            // needs to be done here rather than inside SkinManager to ensure thread safety of CurrentSkinInfo.
+            SkinManager.ItemRemoved.BindValueChanged(weakRemovedInfo =>
+            {
+                if (weakRemovedInfo.NewValue.TryGetTarget(out var removedInfo))
+                {
+                    Schedule(() =>
+                    {
+                        // check the removed skin is not the current user choice. if it is, switch back to default.
+                        if (removedInfo.ID == SkinManager.CurrentSkinInfo.Value.ID)
+                            SkinManager.CurrentSkinInfo.Value = SkinInfo.Default;
+                    });
+                }
+            });
+
             dependencies.CacheAs(API ??= new APIAccess(LocalConfig));
 
             dependencies.CacheAs(spectatorStreaming = new SpectatorStreamingClient());
+            dependencies.CacheAs(multiplayerClient = new RealtimeMultiplayerClient());
 
             var defaultBeatmap = new DummyWorkingBeatmap(Audio, Textures);
 
@@ -263,6 +280,7 @@ namespace osu.Game
             if (API is APIAccess apiAccess)
                 AddInternal(apiAccess);
             AddInternal(spectatorStreaming);
+            AddInternal(multiplayerClient);
 
             AddInternal(RulesetConfigCache);
 
@@ -378,6 +396,17 @@ namespace osu.Game
             {
                 if (importer.HandledExtensions.Contains(extension))
                     await importer.Import(paths);
+            }
+        }
+
+        public virtual async Task Import(Stream stream, string filename)
+        {
+            var extension = Path.GetExtension(filename)?.ToLowerInvariant();
+
+            foreach (var importer in fileImporters)
+            {
+                if (importer.HandledExtensions.Contains(extension))
+                    await importer.Import(stream, Path.GetFileNameWithoutExtension(filename));
             }
         }
 

@@ -7,19 +7,20 @@ using JetBrains.Annotations;
 using osuTK;
 using osu.Framework.Graphics;
 using osu.Game.Rulesets.Objects.Drawables;
-using osu.Game.Rulesets.Osu.Objects.Drawables.Pieces;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics.Containers;
+using osu.Game.Audio;
 using osu.Game.Rulesets.Objects;
 using osu.Game.Rulesets.Osu.Skinning;
+using osu.Game.Rulesets.Osu.Skinning.Default;
 using osu.Game.Rulesets.Osu.UI;
 using osuTK.Graphics;
 using osu.Game.Skinning;
 
 namespace osu.Game.Rulesets.Osu.Objects.Drawables
 {
-    public class DrawableSlider : DrawableOsuHitObject, IDrawableHitObjectWithProxiedApproach
+    public class DrawableSlider : DrawableOsuHitObject
     {
         public new Slider HitObject => (Slider)base.HitObject;
 
@@ -40,6 +41,12 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         private Container<DrawableSliderTail> tailContainer;
         private Container<DrawableSliderTick> tickContainer;
         private Container<DrawableSliderRepeat> repeatContainer;
+        private PausableSkinnableSound slidingSample;
+
+        public DrawableSlider()
+            : this(null)
+        {
+        }
 
         public DrawableSlider([CanBeNull] Slider s = null)
             : base(s)
@@ -63,6 +70,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
                     Alpha = 0
                 },
                 headContainer = new Container<DrawableSliderHead> { RelativeSizeAxes = Axes.Both },
+                slidingSample = new PausableSkinnableSound { Looping = true }
             };
 
             PositionBindable.BindValueChanged(_ => Position = HitObject.StackedPosition);
@@ -73,47 +81,41 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
             {
                 foreach (var drawableHitObject in NestedHitObjects)
                     drawableHitObject.AccentColour.Value = colour.NewValue;
+                updateBallTint();
             }, true);
 
             Tracking.BindValueChanged(updateSlidingSample);
         }
 
-        protected override void OnApply(HitObject hitObject)
+        protected override void OnApply()
         {
-            base.OnApply(hitObject);
+            base.OnApply();
 
             // Ensure that the version will change after the upcoming BindTo().
             pathVersion.Value = int.MaxValue;
             PathVersion.BindTo(HitObject.Path.Version);
         }
 
-        protected override void OnFree(HitObject hitObject)
+        protected override void OnFree()
         {
-            base.OnFree(hitObject);
+            base.OnFree();
 
             PathVersion.UnbindFrom(HitObject.Path.Version);
-        }
 
-        private PausableSkinnableSound slidingSample;
+            slidingSample.Samples = null;
+        }
 
         protected override void LoadSamples()
         {
             base.LoadSamples();
 
-            slidingSample?.Expire();
-            slidingSample = null;
-
             var firstSample = HitObject.Samples.FirstOrDefault();
 
             if (firstSample != null)
             {
-                var clone = HitObject.SampleControlPoint.ApplyTo(firstSample);
-                clone.Name = "sliderslide";
+                var clone = HitObject.SampleControlPoint.ApplyTo(firstSample).With("sliderslide");
 
-                AddInternal(slidingSample = new PausableSkinnableSound(clone)
-                {
-                    Looping = true
-                });
+                slidingSample.Samples = new ISampleInfo[] { clone };
             }
         }
 
@@ -159,10 +161,10 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         {
             base.ClearNestedHitObjects();
 
-            headContainer.Clear();
-            tailContainer.Clear();
-            repeatContainer.Clear();
-            tickContainer.Clear();
+            headContainer.Clear(false);
+            tailContainer.Clear(false);
+            repeatContainer.Clear(false);
+            tickContainer.Clear(false);
         }
 
         protected override DrawableHitObject CreateNestedHitObject(HitObject hitObject)
@@ -173,27 +175,16 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
                     return new DrawableSliderTail(tail);
 
                 case SliderHeadCircle head:
-                    return new DrawableSliderHead(HitObject, head)
-                    {
-                        OnShake = Shake,
-                        CheckHittable = (d, t) => CheckHittable?.Invoke(d, t) ?? true
-                    };
+                    return new DrawableSliderHead(head);
 
                 case SliderTick tick:
-                    return new DrawableSliderTick(tick) { Position = tick.Position - HitObject.Position };
+                    return new DrawableSliderTick(tick);
 
                 case SliderRepeat repeat:
-                    return new DrawableSliderRepeat(repeat, this) { Position = repeat.Position - HitObject.Position };
+                    return new DrawableSliderRepeat(repeat);
             }
 
             return base.CreateNestedHitObject(hitObject);
-        }
-
-        protected override void UpdateInitialTransforms()
-        {
-            base.UpdateInitialTransforms();
-
-            Body.FadeInFromZero(HitObject.TimeFadeIn);
         }
 
         public readonly Bindable<bool> Tracking = new Bindable<bool>();
@@ -241,7 +232,15 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
         {
             base.ApplySkin(skin, allowFallback);
 
-            bool allowBallTint = skin.GetConfig<OsuSkinConfiguration, bool>(OsuSkinConfiguration.AllowSliderBallTint)?.Value ?? false;
+            updateBallTint();
+        }
+
+        private void updateBallTint()
+        {
+            if (CurrentSkin == null)
+                return;
+
+            bool allowBallTint = CurrentSkin.GetConfig<OsuSkinConfiguration, bool>(OsuSkinConfiguration.AllowSliderBallTint)?.Value ?? false;
             Ball.AccentColour = allowBallTint ? AccentColour.Value : Color4.White;
         }
 
@@ -250,7 +249,7 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
             if (userTriggered || Time.Current < HitObject.EndTime)
                 return;
 
-            ApplyResult(r => r.Type = r.Judgement.MaxResult);
+            ApplyResult(r => r.Type = NestedHitObjects.Any(h => h.Result.IsHit) ? r.Judgement.MaxResult : r.Judgement.MinResult);
         }
 
         public override void PlaySamples()
@@ -259,6 +258,13 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
             // this can only be done after we stop using LegacyLastTick.
             if (TailCircle.IsHit)
                 base.PlaySamples();
+        }
+
+        protected override void UpdateInitialTransforms()
+        {
+            base.UpdateInitialTransforms();
+
+            Body.FadeInFromZero(HitObject.TimeFadeIn);
         }
 
         protected override void UpdateStartTimeStateTransforms()
@@ -282,13 +288,13 @@ namespace osu.Game.Rulesets.Osu.Objects.Drawables
             {
                 case ArmedState.Hit:
                     Ball.ScaleTo(HitObject.Scale * 1.4f, fade_out_time, Easing.Out);
+                    if (sliderBody?.SnakingOut.Value == true)
+                        Body.FadeOut(40); // short fade to allow for any body colour to smoothly disappear.
                     break;
             }
 
-            this.FadeOut(fade_out_time, Easing.OutQuint);
+            this.FadeOut(fade_out_time, Easing.OutQuint).Expire();
         }
-
-        public Drawable ProxiedLayer => HeadCircle.ProxiedLayer;
 
         public override bool ReceivePositionalInputAt(Vector2 screenSpacePos) => sliderBody?.ReceivePositionalInputAt(screenSpacePos) ?? base.ReceivePositionalInputAt(screenSpacePos);
 

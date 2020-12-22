@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Logging;
@@ -24,9 +25,11 @@ namespace osu.Game.Screens.Multi.Play
         public Action Exited;
 
         [Resolved(typeof(Room), nameof(Room.RoomID))]
-        private Bindable<int?> roomId { get; set; }
+        protected Bindable<int?> RoomId { get; private set; }
 
-        private readonly PlaylistItem playlistItem;
+        protected readonly PlaylistItem PlaylistItem;
+
+        protected int? Token { get; private set; }
 
         [Resolved]
         private IAPIProvider api { get; set; }
@@ -34,32 +37,31 @@ namespace osu.Game.Screens.Multi.Play
         [Resolved]
         private IBindable<RulesetInfo> ruleset { get; set; }
 
-        public TimeshiftPlayer(PlaylistItem playlistItem)
+        public TimeshiftPlayer(PlaylistItem playlistItem, bool allowPause = true)
+            : base(allowPause)
         {
-            this.playlistItem = playlistItem;
+            PlaylistItem = playlistItem;
         }
-
-        private int? token;
 
         [BackgroundDependencyLoader]
         private void load()
         {
-            token = null;
+            Token = null;
 
             bool failed = false;
 
             // Sanity checks to ensure that TimeshiftPlayer matches the settings for the current PlaylistItem
-            if (Beatmap.Value.BeatmapInfo.OnlineBeatmapID != playlistItem.Beatmap.Value.OnlineBeatmapID)
+            if (Beatmap.Value.BeatmapInfo.OnlineBeatmapID != PlaylistItem.Beatmap.Value.OnlineBeatmapID)
                 throw new InvalidOperationException("Current Beatmap does not match PlaylistItem's Beatmap");
 
-            if (ruleset.Value.ID != playlistItem.Ruleset.Value.ID)
+            if (ruleset.Value.ID != PlaylistItem.Ruleset.Value.ID)
                 throw new InvalidOperationException("Current Ruleset does not match PlaylistItem's Ruleset");
 
-            if (!playlistItem.RequiredMods.All(m => Mods.Value.Any(m.Equals)))
+            if (!PlaylistItem.RequiredMods.All(m => Mods.Value.Any(m.Equals)))
                 throw new InvalidOperationException("Current Mods do not match PlaylistItem's RequiredMods");
 
-            var req = new CreateRoomScoreRequest(roomId.Value ?? 0, playlistItem.ID, Game.VersionHash);
-            req.Success += r => token = r.ID;
+            var req = new CreateRoomScoreRequest(RoomId.Value ?? 0, PlaylistItem.ID, Game.VersionHash);
+            req.Success += r => Token = r.ID;
             req.Failure += e =>
             {
                 failed = true;
@@ -75,7 +77,7 @@ namespace osu.Game.Screens.Multi.Play
 
             api.Queue(req);
 
-            while (!failed && !token.HasValue)
+            while (!failed && !Token.HasValue)
                 Thread.Sleep(1000);
         }
 
@@ -91,23 +93,40 @@ namespace osu.Game.Screens.Multi.Play
 
         protected override ResultsScreen CreateResults(ScoreInfo score)
         {
-            Debug.Assert(roomId.Value != null);
-            return new TimeshiftResultsScreen(score, roomId.Value.Value, playlistItem);
+            Debug.Assert(RoomId.Value != null);
+            return new TimeshiftResultsScreen(score, RoomId.Value.Value, PlaylistItem, true);
         }
 
-        protected override ScoreInfo CreateScore()
+        protected override Score CreateScore()
         {
             var score = base.CreateScore();
-            score.TotalScore = (int)Math.Round(ScoreProcessor.GetStandardisedScore());
-
-            Debug.Assert(token != null);
-
-            var request = new SubmitRoomScoreRequest(token.Value, roomId.Value ?? 0, playlistItem.ID, score);
-            request.Success += s => score.OnlineScoreID = s.ID;
-            request.Failure += e => Logger.Error(e, "Failed to submit score");
-            api.Queue(request);
-
+            score.ScoreInfo.TotalScore = (int)Math.Round(ScoreProcessor.GetStandardisedScore());
             return score;
+        }
+
+        protected override async Task SubmitScore(Score score)
+        {
+            await base.SubmitScore(score);
+
+            Debug.Assert(Token != null);
+
+            var tcs = new TaskCompletionSource<bool>();
+            var request = new SubmitRoomScoreRequest(Token.Value, RoomId.Value ?? 0, PlaylistItem.ID, score.ScoreInfo);
+
+            request.Success += s =>
+            {
+                score.ScoreInfo.OnlineScoreID = s.ID;
+                tcs.SetResult(true);
+            };
+
+            request.Failure += e =>
+            {
+                Logger.Error(e, "Failed to submit score");
+                tcs.SetResult(false);
+            };
+
+            api.Queue(request);
+            await tcs.Task;
         }
 
         protected override void Dispose(bool isDisposing)
