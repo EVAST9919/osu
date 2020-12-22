@@ -14,13 +14,12 @@ namespace osu.Game.Screens.Evast.RayMarching
     {
         private const int width = 1000;
         private const int height = 500;
-        private const float fov = 1.4f;
+        private const float fov = 1f;
 
         private readonly int rayCount;
 
         private readonly Container objectsContainer;
         private readonly Container raysContainer;
-        private readonly Container fovContainer;
         private readonly Circle player;
 
         private readonly Bindable<Vector2> viewTarget = new Bindable<Vector2>(Vector2.Zero);
@@ -47,10 +46,6 @@ namespace osu.Game.Screens.Evast.RayMarching
                 {
                     RelativeSizeAxes = Axes.Both
                 },
-                fovContainer = new Container
-                {
-                    RelativeSizeAxes = Axes.Both
-                },
                 player = new Circle
                 {
                     Origin = Anchor.Centre,
@@ -72,17 +67,10 @@ namespace osu.Game.Screens.Evast.RayMarching
         private void updateRays()
         {
             raysContainer.Clear();
-            fovContainer.Clear();
 
             var playerAngle = RayMarchingExtensions.RayAngle(player.Position, viewTarget.Value);
             var initialAngle = playerAngle - fov / 2;
             var angleOffset = fov / rayCount;
-
-            fovContainer.AddRange(new Drawable[]
-            {
-                new Line(player.Position, initialAngle, width),
-                new Line(player.Position, initialAngle + fov, width)
-            });
 
             float[] newRays = new float[rayCount];
 
@@ -92,16 +80,8 @@ namespace osu.Game.Screens.Evast.RayMarching
 
                 newRays[i] = (float)Math.Min(castRay(rayAngle), width);
 
-                if (i % 3 == 0)
-                {
-                    raysContainer.AddRange(new Drawable[]
-                    {
-                        new Line(player.Position, rayAngle, newRays[i])
-                        {
-                            Colour = Color4.Red
-                        }
-                    });
-                }
+                if (i % 4 == 0)
+                    raysContainer.Add(new Line(player.Position, rayAngle, newRays[i]));
             }
 
             Rays.Value = newRays;
@@ -167,7 +147,8 @@ namespace osu.Game.Screens.Evast.RayMarching
                 {
                     Origin = Anchor.Centre,
                     Size = new Vector2(random.Next(20, 100)),
-                    Position = new Vector2(random.Next(50, width - 50), random.Next(50, height - 50))
+                    Position = new Vector2(random.Next(50, width - 50), random.Next(50, height - 50)),
+                    Alpha = 0.3f
                 };
             }
             else
@@ -176,7 +157,8 @@ namespace osu.Game.Screens.Evast.RayMarching
                 {
                     Origin = Anchor.Centre,
                     Size = new Vector2(random.Next(20, 100)),
-                    Position = new Vector2(random.Next(100, width - 100), random.Next(100, height - 100))
+                    Position = new Vector2(random.Next(100, width - 100), random.Next(100, height - 100)),
+                    Alpha = 0.3f
                 };
             }
         }
@@ -187,7 +169,7 @@ namespace osu.Game.Screens.Evast.RayMarching
             {
                 Origin = Anchor.CentreLeft;
                 Width = distance;
-                Height = 1;
+                Height = 0.1f;
                 Position = source;
                 Rotation = (float)(angle * 180 / Math.PI);
                 EdgeSmoothness = Vector2.One;
