@@ -12,21 +12,25 @@ namespace osu.Game.Screens.Evast.RayMarching
 {
     public class RayMarchingPlayerContainer : Container
     {
+        private const int width = 1000;
+        private const int height = 500;
         private const float fov = 1.4f;
-        private const int ray_count = 150;
+
+        private readonly int rayCount;
 
         private readonly Container objectsContainer;
-        private readonly Container circlesContainer;
+        private readonly Container raysContainer;
         private readonly Container fovContainer;
         private readonly Circle player;
 
         private readonly Bindable<Vector2> viewTarget = new Bindable<Vector2>(Vector2.Zero);
+        public readonly Bindable<float[]> Rays = new Bindable<float[]>();
 
-        public RayMarchingPlayerContainer()
+        public RayMarchingPlayerContainer(int rayCount)
         {
-            Anchor = Anchor.Centre;
-            Origin = Anchor.Centre;
-            Size = new Vector2(1000, 500);
+            this.rayCount = rayCount;
+
+            Size = new Vector2(width, height);
             Masking = true;
             Children = new Drawable[]
             {
@@ -39,11 +43,11 @@ namespace osu.Game.Screens.Evast.RayMarching
                 {
                     RelativeSizeAxes = Axes.Both
                 },
-                fovContainer = new Container
+                raysContainer = new Container
                 {
                     RelativeSizeAxes = Axes.Both
                 },
-                circlesContainer = new Container
+                fovContainer = new Container
                 {
                     RelativeSizeAxes = Axes.Both
                 },
@@ -51,7 +55,7 @@ namespace osu.Game.Screens.Evast.RayMarching
                 {
                     Origin = Anchor.Centre,
                     Size = new Vector2(15),
-                    Position = new Vector2(100, 250)
+                    Position = new Vector2(100, height / 2)
                 },
             };
 
@@ -67,33 +71,40 @@ namespace osu.Game.Screens.Evast.RayMarching
 
         private void updateRays()
         {
-            circlesContainer.Clear();
+            raysContainer.Clear();
             fovContainer.Clear();
 
             var playerAngle = RayMarchingExtensions.RayAngle(player.Position, viewTarget.Value);
             var initialAngle = playerAngle - fov / 2;
-            var angleOffset = fov / ray_count;
+            var angleOffset = fov / rayCount;
 
             fovContainer.AddRange(new Drawable[]
             {
-                new Line(player.Position, initialAngle, 2000),
-                new Line(player.Position, initialAngle + fov, 2000)
+                new Line(player.Position, initialAngle, width),
+                new Line(player.Position, initialAngle + fov, width)
             });
 
-            for (int i = 0; i < ray_count; i++)
+            float[] newRays = new float[rayCount];
+
+            for (int i = 0; i < rayCount; i++)
             {
                 var rayAngle = initialAngle + i * angleOffset;
 
-                var distance = castRay(rayAngle);
+                newRays[i] = (float)Math.Min(castRay(rayAngle), width);
 
-                circlesContainer.AddRange(new Drawable[]
+                if (i % 3 == 0)
                 {
-                    new Line(player.Position, rayAngle, Math.Min((float)distance, 2000))
+                    raysContainer.AddRange(new Drawable[]
                     {
-                        Colour = Color4.Red
-                    }
-                });
+                        new Line(player.Position, rayAngle, newRays[i])
+                        {
+                            Colour = Color4.Red
+                        }
+                    });
+                }
             }
+
+            Rays.Value = newRays;
         }
 
         private double castRay(double angle)
@@ -102,7 +113,7 @@ namespace osu.Game.Screens.Evast.RayMarching
             double sum = 0;
             double closest = getClosest(player.Position);
 
-            while (!Precision.AlmostEquals(closest, 0, 0.1) && closest < 1000)
+            while (!Precision.AlmostEquals(closest, 0, 0.1) && closest < width)
             {
                 sum += closest;
                 sourcePosition = RayMarchingExtensions.PositionOnASphere(sourcePosition, closest, angle);
@@ -114,7 +125,7 @@ namespace osu.Game.Screens.Evast.RayMarching
 
         private double getClosest(Vector2 input)
         {
-            double min = 10000;
+            double min = width;
 
             foreach (var s in objectsContainer)
             {
@@ -156,7 +167,7 @@ namespace osu.Game.Screens.Evast.RayMarching
                 {
                     Origin = Anchor.Centre,
                     Size = new Vector2(random.Next(20, 100)),
-                    Position = new Vector2(random.Next(50, 950), random.Next(50, 450))
+                    Position = new Vector2(random.Next(50, width - 50), random.Next(50, height - 50))
                 };
             }
             else
@@ -165,7 +176,7 @@ namespace osu.Game.Screens.Evast.RayMarching
                 {
                     Origin = Anchor.Centre,
                     Size = new Vector2(random.Next(20, 100)),
-                    Position = new Vector2(random.Next(100, 900), random.Next(100, 400))
+                    Position = new Vector2(random.Next(100, width - 100), random.Next(100, height - 100))
                 };
             }
         }
