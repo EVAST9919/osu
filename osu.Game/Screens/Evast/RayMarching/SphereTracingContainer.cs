@@ -12,8 +12,6 @@ namespace osu.Game.Screens.Evast.RayMarching
 {
     public class SphereTracingContainer : Container
     {
-        private const int max_iterations = 40;
-
         private readonly Pin source;
         private readonly Pin target;
         private readonly Container objectsContainer;
@@ -66,13 +64,11 @@ namespace osu.Game.Screens.Evast.RayMarching
         {
             spheresContainer.Clear();
 
-            var currentIteration = 0;
-
             var sourcePosition = source.Position;
             var angle = RayMarchingExtensions.RayAngle(source.Position, target.Position);
             double closest = getClosest(source.Position);
 
-            while (!Precision.AlmostEquals(closest, 0, 0.1) && currentIteration < max_iterations)
+            while (!Precision.AlmostEquals(closest, 0, 0.1) && closest < 1000)
             {
                 spheresContainer.Add(new SphereTracer
                 {
@@ -82,8 +78,6 @@ namespace osu.Game.Screens.Evast.RayMarching
 
                 sourcePosition = RayMarchingExtensions.PositionOnASphere(sourcePosition, closest, angle);
                 closest = getClosest(sourcePosition);
-
-                currentIteration++;
             }
         }
 
@@ -169,7 +163,7 @@ namespace osu.Game.Screens.Evast.RayMarching
                 Child = new Box
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Colour = Color4.White.Opacity(0.4f)
+                    Colour = Color4.White.Opacity(0.1f)
                 };
             }
         }
