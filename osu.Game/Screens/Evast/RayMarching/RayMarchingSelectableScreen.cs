@@ -10,6 +10,7 @@ namespace osu.Game.Screens.Evast.RayMarching
             {
                 new Button("Basic distance", () => this.Push(new RayMarchingDistanceScreen())),
                 new Button("Sphere tracing", () => this.Push(new SphereTracingScreen())),
+                new Button("Renderer", () => this.Push(new RendererScreen())),
             };
         }
     }
