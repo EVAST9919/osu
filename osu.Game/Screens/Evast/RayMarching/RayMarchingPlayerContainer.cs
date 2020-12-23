@@ -7,6 +7,7 @@ using osu.Framework.Input.Events;
 using System;
 using osu.Framework.Utils;
 using osu.Framework.Bindables;
+using osuTK.Input;
 
 namespace osu.Game.Screens.Evast.RayMarching
 {
@@ -15,6 +16,7 @@ namespace osu.Game.Screens.Evast.RayMarching
         private const int width = 1000;
         private const int height = 500;
         private const float fov = 1f;
+        private const float view_distance = 800;
 
         private readonly int rayCount;
 
@@ -22,8 +24,12 @@ namespace osu.Game.Screens.Evast.RayMarching
         private readonly Container raysContainer;
         private readonly Circle player;
 
-        private readonly Bindable<Vector2> viewTarget = new Bindable<Vector2>(Vector2.Zero);
+        private readonly Bindable<Vector2> viewTarget = new Bindable<Vector2>(new Vector2(width - 100, height / 2f));
         public readonly Bindable<float[]> Rays = new Bindable<float[]>();
+
+        private int forwardDirection;
+        private int sideDirection;
+        private int rotationDirection;
 
         public RayMarchingPlayerContainer(int rayCount)
         {
@@ -87,6 +93,37 @@ namespace osu.Game.Screens.Evast.RayMarching
             Rays.Value = newRays;
         }
 
+        protected override void Update()
+        {
+            base.Update();
+
+            if (forwardDirection != 0)
+            {
+                var angle = RayMarchingExtensions.RayAngle(player.Position, viewTarget.Value) + (forwardDirection == 1 ? 0 : Math.PI);
+                var distanceDiff = Time.Elapsed / 10;
+
+                player.Position = RayMarchingExtensions.PositionOnASphere(player.Position, distanceDiff, angle);
+                viewTarget.Value = RayMarchingExtensions.PositionOnASphere(viewTarget.Value, distanceDiff, angle);
+            }
+
+            if (sideDirection != 0)
+            {
+                var angle = RayMarchingExtensions.RayAngle(player.Position, viewTarget.Value) + (sideDirection * Math.PI / 2);
+                var distanceDiff = Time.Elapsed / 10;
+
+                player.Position = RayMarchingExtensions.PositionOnASphere(player.Position, distanceDiff, angle);
+                viewTarget.Value = RayMarchingExtensions.PositionOnASphere(viewTarget.Value, distanceDiff, angle);
+            }
+
+            if (rotationDirection != 0)
+            {
+                var angle = RayMarchingExtensions.RayAngle(player.Position, viewTarget.Value);
+                angle += rotationDirection * Time.Elapsed / 500;
+
+                viewTarget.Value = RayMarchingExtensions.PositionOnASphere(player.Position, view_distance, angle);
+            }
+        }
+
         private double castRay(double angle)
         {
             var sourcePosition = player.Position;
@@ -122,13 +159,62 @@ namespace osu.Game.Screens.Evast.RayMarching
             return min;
         }
 
-        protected override bool OnHover(HoverEvent e) => true;
-
-        protected override bool OnMouseMove(MouseMoveEvent e)
+        protected override bool OnKeyDown(KeyDownEvent e)
         {
-            base.OnMouseMove(e);
-            viewTarget.Value = ToLocalSpace(e.CurrentState.Mouse.Position);
-            return true;
+            if (!e.Repeat)
+            {
+                switch (e.Key)
+                {
+                    case Key.W:
+                        forwardDirection = 1;
+                        return true;
+
+                    case Key.S:
+                        forwardDirection = -1;
+                        return true;
+
+                    case Key.A:
+                        sideDirection = -1;
+                        return true;
+
+                    case Key.D:
+                        sideDirection = 1;
+                        return true;
+
+                    case Key.Q:
+                        rotationDirection = -1;
+                        return true;
+
+                    case Key.E:
+                        rotationDirection = 1;
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        protected override void OnKeyUp(KeyUpEvent e)
+        {
+            base.OnKeyUp(e);
+
+            switch (e.Key)
+            {
+                case Key.W:
+                case Key.S:
+                    forwardDirection = 0;
+                    return;
+
+                case Key.A:
+                case Key.D:
+                    sideDirection = 0;
+                    return;
+
+                case Key.Q:
+                case Key.E:
+                    rotationDirection = 0;
+                    return;
+            }
         }
 
         private void populateObjects(int count)
