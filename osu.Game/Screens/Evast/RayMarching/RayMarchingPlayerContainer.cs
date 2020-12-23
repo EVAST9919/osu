@@ -15,7 +15,7 @@ namespace osu.Game.Screens.Evast.RayMarching
     {
         private const int width = 1000;
         private const int height = 500;
-        private const float fov = 1f;
+        private const float fov = 0.8f;
         private const float view_distance = 800;
 
         private readonly int rayCount;
@@ -118,7 +118,7 @@ namespace osu.Game.Screens.Evast.RayMarching
             if (rotationDirection != 0)
             {
                 var angle = RayMarchingExtensions.RayAngle(player.Position, viewTarget.Value);
-                angle += rotationDirection * Time.Elapsed / 500;
+                angle += rotationDirection * Time.Elapsed / 700;
 
                 viewTarget.Value = RayMarchingExtensions.PositionOnASphere(player.Position, view_distance, angle);
             }

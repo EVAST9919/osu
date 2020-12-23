@@ -9,7 +9,7 @@ namespace osu.Game.Screens.Evast.RayMarching
 {
     public class RendererScreen : EvastVisualScreen
     {
-        private const int ray_count = 300;
+        private const int ray_count = 400;
 
         public override bool CursorVisible => true;
 
@@ -76,7 +76,7 @@ namespace osu.Game.Screens.Evast.RayMarching
             {
                 for (int i = 0; i < ray_count; i++)
                 {
-                    drawableRays[i].Height = 1 - rays[i] / 1000;
+                    drawableRays[i].Height = 1 - rays[i] / 1500;
                     drawableRays[i].Colour = Color4.White.Opacity(1 - rays[i] / 1000);
                 }
             }
