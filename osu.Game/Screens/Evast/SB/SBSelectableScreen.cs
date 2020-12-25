@@ -1,15 +1,13 @@
-﻿using osu.Framework.Screens;
+﻿using System.Collections.Generic;
+using osu.Framework.Screens;
 
 namespace osu.Game.Screens.Evast.SB
 {
     public class SBSelectableScreen : EvastSelectableScreen
     {
-        public SBSelectableScreen()
+        protected override IReadOnlyList<Button> GetButtons() => new[]
         {
-            Buttons = new[]
-            {
-                new Button("Player", () => this.Push(new SBPlayerScreen()))
-            };
-        }
+            new Button("Player", () => this.Push(new SBPlayerScreen()))
+        };
     }
 }

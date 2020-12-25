@@ -1,17 +1,15 @@
-﻿using osu.Framework.Screens;
+﻿using System.Collections.Generic;
+using osu.Framework.Screens;
 
 namespace osu.Game.Screens.Evast.RayMarching
 {
     public class RayMarchingSelectableScreen : EvastSelectableScreen
     {
-        public RayMarchingSelectableScreen()
+        protected override IReadOnlyList<Button> GetButtons() => new[]
         {
-            Buttons = new[]
-            {
-                new Button("Basic distance", () => this.Push(new RayMarchingDistanceScreen())),
-                new Button("Sphere tracing", () => this.Push(new SphereTracingScreen())),
-                new Button("Renderer", () => this.Push(new RendererScreen())),
-            };
-        }
+            new Button("Basic distance", () => this.Push(new RayMarchingDistanceScreen())),
+            new Button("Sphere tracing", () => this.Push(new SphereTracingScreen())),
+            new Button("Renderer", () => this.Push(new RendererScreen()))
+        };
     }
 }

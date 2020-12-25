@@ -21,30 +21,17 @@ namespace osu.Game.Screens.Evast
             {
                 Anchor = Anchor.TopCentre,
                 Origin = Anchor.TopCentre,
-                RelativeSizeAxes = Axes.Both,
+                RelativeSizeAxes = Axes.Both
             });
+
+            foreach (var b in GetButtons())
+                buttonSystem.AddButton(b);
         }
 
-        protected IEnumerable<Button> Buttons
-        {
-            get => buttonSystem.Buttons;
-            set
-            {
-                if (buttonSystem.Buttons == value)
-                    return;
-
-                foreach (var b in value)
-                    buttonSystem.AddButton(b);
-            }
-        }
+        protected abstract IReadOnlyList<Button> GetButtons();
 
         protected class ButtonSystem : OsuScrollContainer
         {
-            public IEnumerable<Button> Buttons
-            {
-                get => buttons.Children;
-            }
-
             private readonly FillFlowContainer<Button> buttons;
 
             private const int spacing = 10;
