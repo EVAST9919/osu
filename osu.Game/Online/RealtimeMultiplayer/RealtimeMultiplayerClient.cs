@@ -19,8 +19,6 @@ namespace osu.Game.Online.RealtimeMultiplayer
 {
     public class RealtimeMultiplayerClient : StatefulMultiplayerClient
     {
-        private const string endpoint = "https://spectator.ppy.sh/multiplayer";
-
         public override IBindable<bool> IsConnected => isConnected;
 
         private readonly Bindable<bool> isConnected = new Bindable<bool>();
@@ -30,6 +28,13 @@ namespace osu.Game.Online.RealtimeMultiplayer
         private IAPIProvider api { get; set; } = null!;
 
         private HubConnection? connection;
+
+        private readonly string endpoint;
+
+        public RealtimeMultiplayerClient(EndpointConfiguration endpoints)
+        {
+            endpoint = endpoints.MultiplayerEndpointUrl;
+        }
 
         [BackgroundDependencyLoader]
         private void load()
@@ -122,7 +127,7 @@ namespace osu.Game.Online.RealtimeMultiplayer
         protected override Task<MultiplayerRoom> JoinRoom(long roomId)
         {
             if (!isConnected.Value)
-                return Task.FromCanceled<MultiplayerRoom>(CancellationToken.None);
+                return Task.FromCanceled<MultiplayerRoom>(new CancellationToken(true));
 
             return connection.InvokeAsync<MultiplayerRoom>(nameof(IMultiplayerServer.JoinRoom), roomId);
         }
@@ -130,7 +135,11 @@ namespace osu.Game.Online.RealtimeMultiplayer
         public override async Task LeaveRoom()
         {
             if (!isConnected.Value)
+            {
+                // even if not connected, make sure the local room state can be cleaned up.
+                await base.LeaveRoom();
                 return;
+            }
 
             if (Room == null)
                 return;

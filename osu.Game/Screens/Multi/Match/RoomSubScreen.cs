@@ -4,12 +4,16 @@
 using System;
 using System.Linq;
 using osu.Framework.Allocation;
+using osu.Framework.Audio;
+using osu.Framework.Audio.Sample;
 using osu.Framework.Bindables;
 using osu.Framework.Screens;
 using osu.Game.Audio;
 using osu.Game.Beatmaps;
 using osu.Game.Online.Multiplayer;
+using osu.Game.Overlays;
 using osu.Game.Rulesets.Mods;
+using osu.Game.Screens.Play;
 
 namespace osu.Game.Screens.Multi.Match
 {
@@ -20,13 +24,27 @@ namespace osu.Game.Screens.Multi.Match
 
         public override bool DisallowExternalBeatmapRulesetChanges => true;
 
+        private SampleChannel sampleStart;
+
         [Resolved(typeof(Room), nameof(Room.Playlist))]
         protected BindableList<PlaylistItem> Playlist { get; private set; }
 
         [Resolved]
+        private MusicController music { get; set; }
+
+        [Resolved]
         private BeatmapManager beatmapManager { get; set; }
 
+        [Resolved(canBeNull: true)]
+        protected Multiplayer Multiplayer { get; private set; }
+
         private IBindable<WeakReference<BeatmapSetInfo>> managerUpdated;
+
+        [BackgroundDependencyLoader]
+        private void load(AudioManager audio)
+        {
+            sampleStart = audio.Samples.Get(@"SongSelect/confirm-selection");
+        }
 
         protected override void LoadComplete()
         {
@@ -37,6 +55,40 @@ namespace osu.Game.Screens.Multi.Match
 
             managerUpdated = beatmapManager.ItemUpdated.GetBoundCopy();
             managerUpdated.BindValueChanged(beatmapUpdated);
+        }
+
+        public override void OnEntering(IScreen last)
+        {
+            base.OnEntering(last);
+            beginHandlingTrack();
+        }
+
+        public override void OnSuspending(IScreen next)
+        {
+            endHandlingTrack();
+            base.OnSuspending(next);
+        }
+
+        public override void OnResuming(IScreen last)
+        {
+            base.OnResuming(last);
+            beginHandlingTrack();
+        }
+
+        public override bool OnExiting(IScreen next)
+        {
+            RoomManager?.PartRoom();
+            Mods.Value = Array.Empty<Mod>();
+
+            endHandlingTrack();
+
+            return base.OnExiting(next);
+        }
+
+        protected void StartPlay(Func<Player> player)
+        {
+            sampleStart?.Play();
+            Multiplayer?.Push(new PlayerLoader(player));
         }
 
         private void selectedItemChanged()
@@ -63,12 +115,42 @@ namespace osu.Game.Screens.Multi.Match
             Beatmap.Value = beatmapManager.GetWorkingBeatmap(localBeatmap);
         }
 
-        public override bool OnExiting(IScreen next)
+        private void beginHandlingTrack()
         {
-            RoomManager?.PartRoom();
-            Mods.Value = Array.Empty<Mod>();
+            Beatmap.BindValueChanged(applyLoopingToTrack, true);
+        }
 
-            return base.OnExiting(next);
+        private void endHandlingTrack()
+        {
+            Beatmap.ValueChanged -= applyLoopingToTrack;
+            cancelTrackLooping();
+        }
+
+        private void applyLoopingToTrack(ValueChangedEvent<WorkingBeatmap> _ = null)
+        {
+            if (!this.IsCurrentScreen())
+                return;
+
+            var track = Beatmap.Value?.Track;
+
+            if (track != null)
+            {
+                track.RestartPoint = Beatmap.Value.Metadata.PreviewTime;
+                track.Looping = true;
+
+                music?.EnsurePlayingSomething();
+            }
+        }
+
+        private void cancelTrackLooping()
+        {
+            var track = Beatmap?.Value?.Track;
+
+            if (track != null)
+            {
+                track.Looping = false;
+                track.RestartPoint = 0;
+            }
         }
     }
 }

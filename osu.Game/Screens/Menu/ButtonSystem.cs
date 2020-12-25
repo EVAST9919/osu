@@ -124,6 +124,7 @@ namespace osu.Game.Screens.Menu
         private void load(AudioManager audio, IdleTracker idleTracker, GameHost host)
         {
             buttonsPlay.Add(new Button(@"more", @"button-generic-select", OsuIcon.Dice, new Color4(138, 129, 208, 255), () => OnMore?.Invoke()));
+
             buttonsPlay.ForEach(b => b.VisibleState = ButtonSystemState.Play);
 
             buttonsTopLevel.Add(new Button(@"play", @"button-play-select", OsuIcon.Logo, new Color4(102, 68, 204, 255), () => State = ButtonSystemState.Play, WEDGE_WIDTH, Key.P));

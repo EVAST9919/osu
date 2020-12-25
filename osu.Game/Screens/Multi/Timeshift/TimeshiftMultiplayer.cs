@@ -3,6 +3,8 @@
 
 using osu.Framework.Logging;
 using osu.Framework.Screens;
+using osu.Game.Graphics.UserInterface;
+using osu.Game.Online.Multiplayer;
 using osu.Game.Screens.Multi.Components;
 using osu.Game.Screens.Multi.Lounge;
 using osu.Game.Screens.Multi.Match;
@@ -44,8 +46,17 @@ namespace osu.Game.Screens.Multi.Timeshift
             Logger.Log($"Polling adjusted (listing: {timeshiftManager.TimeBetweenListingPolls.Value}, selection: {timeshiftManager.TimeBetweenSelectionPolls.Value})");
         }
 
+        protected override Room CreateNewRoom()
+        {
+            return new Room { Name = { Value = $"{API.LocalUser}'s awesome playlist" } };
+        }
+
+        protected override string ScreenTitle => "Playlists";
+
         protected override RoomManager CreateRoomManager() => new TimeshiftRoomManager();
 
         protected override LoungeSubScreen CreateLounge() => new TimeshiftLoungeSubScreen();
+
+        protected override OsuButton CreateNewMultiplayerGameButton() => new CreateTimeshiftRoomButton();
     }
 }

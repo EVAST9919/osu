@@ -5,8 +5,11 @@ using System.Diagnostics;
 using System.Linq;
 using JetBrains.Annotations;
 using osu.Framework.Allocation;
+using osu.Framework.Audio;
+using osu.Framework.Audio.Sample;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
+using osu.Game.Extensions;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Backgrounds;
 using osu.Game.Online.API;
@@ -30,7 +33,11 @@ namespace osu.Game.Screens.Multi.RealtimeMultiplayer.Match
         [Resolved]
         private OsuColour colours { get; set; }
 
+        private SampleChannel sampleReadyCount;
+
         private readonly ButtonWithTrianglesExposed button;
+
+        private int countReady;
 
         public RealtimeReadyButton()
         {
@@ -41,6 +48,12 @@ namespace osu.Game.Screens.Multi.RealtimeMultiplayer.Match
                 Enabled = { Value = true },
                 Action = onClick
             };
+        }
+
+        [BackgroundDependencyLoader]
+        private void load(AudioManager audio)
+        {
+            sampleReadyCount = audio.Samples.Get(@"SongSelect/select-difficulty");
         }
 
         protected override void OnRoomChanged()
@@ -59,6 +72,10 @@ namespace osu.Game.Screens.Multi.RealtimeMultiplayer.Match
 
             Debug.Assert(Room != null);
 
+            int newCountReady = Room.Users.Count(u => u.State == MultiplayerUserState.Ready);
+
+            string countText = $"({newCountReady} / {Room.Users.Count} ready)";
+
             switch (localUser.State)
             {
                 case MultiplayerUserState.Idle:
@@ -69,18 +86,32 @@ namespace osu.Game.Screens.Multi.RealtimeMultiplayer.Match
                 case MultiplayerUserState.Ready:
                     if (Room?.Host?.Equals(localUser) == true)
                     {
-                        int countReady = Room.Users.Count(u => u.State == MultiplayerUserState.Ready);
-                        button.Text = $"Start match ({countReady} / {Room.Users.Count} ready)";
+                        button.Text = $"Start match {countText}";
                         updateButtonColour(true);
                     }
                     else
                     {
-                        button.Text = "Waiting for host...";
+                        button.Text = $"Waiting for host... {countText}";
                         updateButtonColour(false);
                     }
 
                     break;
             }
+
+            if (newCountReady != countReady)
+            {
+                countReady = newCountReady;
+                Scheduler.AddOnce(playSound);
+            }
+        }
+
+        private void playSound()
+        {
+            if (sampleReadyCount == null)
+                return;
+
+            sampleReadyCount.Frequency.Value = 0.77f + countReady * 0.06f;
+            sampleReadyCount.Play();
         }
 
         private void updateButtonColour(bool green)
@@ -105,13 +136,13 @@ namespace osu.Game.Screens.Multi.RealtimeMultiplayer.Match
                 return;
 
             if (localUser.State == MultiplayerUserState.Idle)
-                Client.ChangeState(MultiplayerUserState.Ready);
+                Client.ChangeState(MultiplayerUserState.Ready).CatchUnobservedExceptions(true);
             else
             {
                 if (Room?.Host?.Equals(localUser) == true)
-                    Client.StartMatch();
+                    Client.StartMatch().CatchUnobservedExceptions(true);
                 else
-                    Client.ChangeState(MultiplayerUserState.Idle);
+                    Client.ChangeState(MultiplayerUserState.Idle).CatchUnobservedExceptions(true);
             }
         }
 

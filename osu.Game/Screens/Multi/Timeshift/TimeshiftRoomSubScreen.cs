@@ -15,7 +15,6 @@ using osu.Game.Screens.Multi.Match;
 using osu.Game.Screens.Multi.Match.Components;
 using osu.Game.Screens.Multi.Play;
 using osu.Game.Screens.Multi.Ranking;
-using osu.Game.Screens.Play;
 using osu.Game.Screens.Select;
 using osu.Game.Users;
 using Footer = osu.Game.Screens.Multi.Match.Components.Footer;
@@ -26,7 +25,7 @@ namespace osu.Game.Screens.Multi.Timeshift
     {
         public override string Title { get; }
 
-        public override string ShortTitle => "room";
+        public override string ShortTitle => "playlist";
 
         [Resolved(typeof(Room), nameof(Room.RoomID))]
         private Bindable<int?> roomId { get; set; }
@@ -41,7 +40,7 @@ namespace osu.Game.Screens.Multi.Timeshift
 
         public TimeshiftRoomSubScreen(Room room)
         {
-            Title = room.RoomID.Value == null ? "New room" : room.Name.Value;
+            Title = room.RoomID.Value == null ? "New playlist" : room.Name.Value;
             Activity.Value = new UserActivity.InLobby(room);
         }
 
@@ -220,12 +219,9 @@ namespace osu.Game.Screens.Multi.Timeshift
             }, true);
         }
 
-        private void onStart()
+        private void onStart() => StartPlay(() => new TimeshiftPlayer(SelectedItem.Value)
         {
-            multiplayer?.Push(new PlayerLoader(() => new TimeshiftPlayer(SelectedItem.Value)
-            {
-                Exited = () => leaderboard.RefreshScores()
-            }));
-        }
+            Exited = () => leaderboard.RefreshScores()
+        });
     }
 }

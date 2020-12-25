@@ -2,8 +2,10 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Linq;
 using osu.Framework.Allocation;
+using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Screens;
@@ -14,8 +16,8 @@ using osu.Game.Screens.Multi.Match;
 using osu.Game.Screens.Multi.Match.Components;
 using osu.Game.Screens.Multi.RealtimeMultiplayer.Match;
 using osu.Game.Screens.Multi.RealtimeMultiplayer.Participants;
-using osu.Game.Screens.Play;
 using osu.Game.Users;
+using ParticipantsList = osu.Game.Screens.Multi.RealtimeMultiplayer.Participants.ParticipantsList;
 
 namespace osu.Game.Screens.Multi.RealtimeMultiplayer
 {
@@ -24,19 +26,18 @@ namespace osu.Game.Screens.Multi.RealtimeMultiplayer
     {
         public override string Title { get; }
 
-        public override string ShortTitle => "match";
-
-        [Resolved(canBeNull: true)]
-        private Multiplayer multiplayer { get; set; }
+        public override string ShortTitle => "room";
 
         [Resolved]
         private StatefulMultiplayerClient client { get; set; }
 
         private RealtimeMatchSettingsOverlay settingsOverlay;
 
+        private IBindable<bool> isConnected;
+
         public RealtimeMatchSubScreen(Room room)
         {
-            Title = room.RoomID.Value == null ? "New match" : room.Name.Value;
+            Title = room.RoomID.Value == null ? "New room" : room.Name.Value;
             Activity.Value = new UserActivity.InLobby(room);
         }
 
@@ -102,7 +103,7 @@ namespace osu.Game.Screens.Multi.RealtimeMultiplayer
                                                                     new Drawable[] { new ParticipantsListHeader() },
                                                                     new Drawable[]
                                                                     {
-                                                                        new Participants.ParticipantsList
+                                                                        new ParticipantsList
                                                                         {
                                                                             RelativeSizeAxes = Axes.Both
                                                                         },
@@ -173,6 +174,13 @@ namespace osu.Game.Screens.Multi.RealtimeMultiplayer
             Playlist.BindCollectionChanged(onPlaylistChanged, true);
 
             client.LoadRequested += onLoadRequested;
+
+            isConnected = client.IsConnected.GetBoundCopy();
+            isConnected.BindValueChanged(connected =>
+            {
+                if (!connected.NewValue)
+                    Schedule(this.Exit);
+            }, true);
         }
 
         public override bool OnBackButton()
@@ -188,7 +196,14 @@ namespace osu.Game.Screens.Multi.RealtimeMultiplayer
 
         private void onPlaylistChanged(object sender, NotifyCollectionChangedEventArgs e) => SelectedItem.Value = Playlist.FirstOrDefault();
 
-        private void onLoadRequested() => multiplayer?.Push(new PlayerLoader(() => new RealtimePlayer(SelectedItem.Value)));
+        private void onLoadRequested()
+        {
+            Debug.Assert(client.Room != null);
+
+            int[] userIds = client.Room.Users.Where(u => u.State >= MultiplayerUserState.WaitingForLoad).Select(u => u.UserID).ToArray();
+
+            StartPlay(() => new RealtimePlayer(SelectedItem.Value, userIds));
+        }
 
         protected override void Dispose(bool isDisposing)
         {

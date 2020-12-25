@@ -9,7 +9,6 @@ using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Screens;
-using osu.Game.Beatmaps;
 using osu.Game.Beatmaps.Drawables;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.UserInterface;
@@ -22,7 +21,6 @@ using osu.Game.Screens.Multi.Components;
 using osu.Game.Screens.Multi.Lounge;
 using osu.Game.Screens.Multi.Lounge.Components;
 using osu.Game.Screens.Multi.Match;
-using osu.Game.Screens.Multi.Match.Components;
 using osu.Game.Users;
 using osuTK;
 
@@ -61,7 +59,7 @@ namespace osu.Game.Screens.Multi
         private OsuGameBase game { get; set; }
 
         [Resolved]
-        private IAPIProvider api { get; set; }
+        protected IAPIProvider API { get; private set; }
 
         [Resolved(CanBeNull = true)]
         private OsuLogo logo { get; set; }
@@ -129,13 +127,19 @@ namespace osu.Game.Screens.Multi
                             screenStack = new MultiplayerSubScreenStack { RelativeSizeAxes = Axes.Both }
                         }
                     },
-                    new Header(screenStack),
-                    createButton = new CreateRoomButton
+                    new Header(ScreenTitle, screenStack),
+                    createButton = CreateNewMultiplayerGameButton().With(button =>
                     {
-                        Anchor = Anchor.TopRight,
-                        Origin = Anchor.TopRight,
-                        Action = () => OpenNewRoom()
-                    },
+                        button.Anchor = Anchor.TopRight;
+                        button.Origin = Anchor.TopRight;
+                        button.Size = new Vector2(150, Header.HEIGHT - 20);
+                        button.Margin = new MarginPadding
+                        {
+                            Top = 10,
+                            Right = 10 + HORIZONTAL_OVERFLOW_PADDING,
+                        };
+                        button.Action = () => OpenNewRoom();
+                    }),
                     RoomManager = CreateRoomManager()
                 }
             };
@@ -151,7 +155,7 @@ namespace osu.Game.Screens.Multi
         [BackgroundDependencyLoader(true)]
         private void load(IdleTracker idleTracker)
         {
-            apiState.BindTo(api.State);
+            apiState.BindTo(API.State);
             apiState.BindValueChanged(onlineStateChanged, true);
 
             if (idleTracker != null)
@@ -199,7 +203,10 @@ namespace osu.Game.Screens.Multi
             this.FadeIn();
             waves.Show();
 
-            beginHandlingTrack();
+            if (loungeSubScreen.IsCurrentScreen())
+                loungeSubScreen.OnEntering(last);
+            else
+                loungeSubScreen.MakeCurrent();
         }
 
         public override void OnResuming(IScreen last)
@@ -207,9 +214,8 @@ namespace osu.Game.Screens.Multi
             this.FadeIn(250);
             this.ScaleTo(1, 250, Easing.OutSine);
 
+            screenStack.CurrentScreen?.OnResuming(last);
             base.OnResuming(last);
-
-            beginHandlingTrack();
 
             UpdatePollingRate(isIdle.Value);
         }
@@ -219,7 +225,7 @@ namespace osu.Game.Screens.Multi
             this.ScaleTo(1.1f, 250, Easing.InSine);
             this.FadeOut(250);
 
-            endHandlingTrack();
+            screenStack.CurrentScreen?.OnSuspending(next);
 
             UpdatePollingRate(isIdle.Value);
         }
@@ -232,11 +238,7 @@ namespace osu.Game.Screens.Multi
 
             this.Delay(WaveContainer.DISAPPEAR_DURATION).FadeOut();
 
-            if (screenStack.CurrentScreen != null)
-                loungeSubScreen.MakeCurrent();
-
-            endHandlingTrack();
-
+            screenStack.CurrentScreen?.OnExiting(next);
             base.OnExiting(next);
             return false;
         }
@@ -273,18 +275,7 @@ namespace osu.Game.Screens.Multi
         /// Creates a new room.
         /// </summary>
         /// <returns>The created <see cref="Room"/>.</returns>
-        protected virtual Room CreateNewRoom() => new Room { Name = { Value = $"{api.LocalUser}'s awesome room" } };
-
-        private void beginHandlingTrack()
-        {
-            Beatmap.BindValueChanged(updateTrack, true);
-        }
-
-        private void endHandlingTrack()
-        {
-            cancelLooping();
-            Beatmap.ValueChanged -= updateTrack;
-        }
+        protected abstract Room CreateNewRoom();
 
         private void screenPushed(IScreen lastScreen, IScreen newScreen)
         {
@@ -322,46 +313,17 @@ namespace osu.Game.Screens.Multi
 
             UpdatePollingRate(isIdle.Value);
             createButton.FadeTo(newScreen is LoungeSubScreen ? 1 : 0, 200);
-
-            updateTrack();
         }
 
         protected IScreen CurrentSubScreen => screenStack.CurrentScreen;
 
-        private void updateTrack(ValueChangedEvent<WorkingBeatmap> _ = null)
-        {
-            if (screenStack.CurrentScreen is RoomSubScreen)
-            {
-                var track = Beatmap.Value?.Track;
-
-                if (track != null)
-                {
-                    track.RestartPoint = Beatmap.Value.Metadata.PreviewTime;
-                    track.Looping = true;
-
-                    music?.EnsurePlayingSomething();
-                }
-            }
-            else
-            {
-                cancelLooping();
-            }
-        }
-
-        private void cancelLooping()
-        {
-            var track = Beatmap?.Value?.Track;
-
-            if (track != null)
-            {
-                track.Looping = false;
-                track.RestartPoint = 0;
-            }
-        }
+        protected abstract string ScreenTitle { get; }
 
         protected abstract RoomManager CreateRoomManager();
 
         protected abstract LoungeSubScreen CreateLounge();
+
+        protected abstract OsuButton CreateNewMultiplayerGameButton();
 
         private class MultiplayerWaveContainer : WaveContainer
         {
@@ -383,27 +345,6 @@ namespace osu.Game.Screens.Multi
             private class BackgroundSprite : UpdateableBeatmapBackgroundSprite
             {
                 protected override double TransformDuration => 200;
-            }
-        }
-
-        public class CreateRoomButton : PurpleTriangleButton
-        {
-            public CreateRoomButton()
-            {
-                Size = new Vector2(150, Header.HEIGHT - 20);
-                Margin = new MarginPadding
-                {
-                    Top = 10,
-                    Right = 10 + HORIZONTAL_OVERFLOW_PADDING,
-                };
-            }
-
-            [BackgroundDependencyLoader]
-            private void load()
-            {
-                Triangles.TriangleScale = 1.5f;
-
-                Text = "Create room";
             }
         }
     }
