@@ -43,8 +43,9 @@ namespace osu.Game.Screens.Menu
         public Action OnSolo;
         public Action OnSettings;
         public Action OnMultiplayer;
-        public Action OnTimeshift;
         public Action OnMore;
+        public Action OnPlaylists;
+
         public const float BUTTON_WIDTH = 140f;
         public const float WEDGE_WIDTH = 20;
 
@@ -124,7 +125,6 @@ namespace osu.Game.Screens.Menu
         private void load(AudioManager audio, IdleTracker idleTracker, GameHost host)
         {
             buttonsPlay.Add(new Button(@"more", @"button-generic-select", OsuIcon.Dice, new Color4(138, 129, 208, 255), () => OnMore?.Invoke()));
-
             buttonsPlay.ForEach(b => b.VisibleState = ButtonSystemState.Play);
 
             buttonsTopLevel.Add(new Button(@"play", @"button-play-select", OsuIcon.Logo, new Color4(102, 68, 204, 255), () => State = ButtonSystemState.Play, WEDGE_WIDTH, Key.P));
@@ -173,7 +173,7 @@ namespace osu.Game.Screens.Menu
             OnMultiplayer?.Invoke();
         }
 
-        private void onTimeshift()
+        private void onPlaylists()
         {
             if (!api.IsLoggedIn)
             {
@@ -191,7 +191,7 @@ namespace osu.Game.Screens.Menu
                 return;
             }
 
-            OnTimeshift?.Invoke();
+            OnPlaylists?.Invoke();
         }
 
         private void updateIdleState(bool isIdle)

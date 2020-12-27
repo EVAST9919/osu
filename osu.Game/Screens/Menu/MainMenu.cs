@@ -17,8 +17,8 @@ using osu.Game.Online.API;
 using osu.Game.Overlays;
 using osu.Game.Screens.Backgrounds;
 using osu.Game.Screens.Edit;
-using osu.Game.Screens.Multi.RealtimeMultiplayer;
-using osu.Game.Screens.Multi.Timeshift;
+using osu.Game.Screens.OnlinePlay.Multiplayer;
+using osu.Game.Screens.OnlinePlay.Playlists;
 using osu.Game.Screens.Select;
 using osu.Game.Screens.Evast;
 
@@ -106,9 +106,10 @@ namespace osu.Game.Screens.Menu
                                 this.Push(new Editor());
                             },
                             OnSolo = onSolo,
-                            OnMultiplayer = () => this.Push(new RealtimeMultiplayer()),
-                            OnTimeshift = () => this.Push(new TimeshiftMultiplayer()),
+
                             OnMore = delegate { this.Push(new EvastMainScreen()); },
+                            OnMultiplayer = () => this.Push(new Multiplayer()),
+                            OnPlaylists = () => this.Push(new Playlists()),
                             OnExit = confirmAndExit,
                         }
                     }
