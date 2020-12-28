@@ -52,18 +52,18 @@ namespace osu.Game.Overlays.Settings
                     Spacing = new Vector2(5),
                     Padding = new MarginPadding { Bottom = 10 },
                 },
-                new OsuSpriteText
-                {
-                    Anchor = Anchor.TopCentre,
-                    Origin = Anchor.TopCentre,
-                    Text = game.Name,
-                    Font = OsuFont.GetFont(size: 18, weight: FontWeight.Bold),
-                },
-                new BuildDisplay(game.Version, DebugUtils.IsDebugBuild)
-                {
-                    Anchor = Anchor.TopCentre,
-                    Origin = Anchor.TopCentre,
-                }
+                //new OsuSpriteText
+                //{
+                //    Anchor = Anchor.TopCentre,
+                //    Origin = Anchor.TopCentre,
+                //    Text = game.Name,
+                //    Font = OsuFont.GetFont(size: 18, weight: FontWeight.Bold),
+                //},
+                //new BuildDisplay(game.Version, DebugUtils.IsDebugBuild)
+                //{
+                //    Anchor = Anchor.TopCentre,
+                //    Origin = Anchor.TopCentre,
+                //}
             };
         }
 
