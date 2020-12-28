@@ -29,7 +29,7 @@ namespace osu.Game.Screens
         private OsuScreen loadableScreen;
         private ShaderPrecompiler precompiler;
 
-        private IntroSequence introSequence;
+        //private IntroSequence introSequence;
         private LoadingSpinner spinner;
         private ScheduledDelegate spinnerShow;
 
@@ -43,20 +43,22 @@ namespace osu.Game.Screens
 
         private IntroScreen getIntroSequence()
         {
-            if (introSequence == IntroSequence.Random)
-                introSequence = (IntroSequence)RNG.Next(0, (int)IntroSequence.Random);
+            return new IntroCircles();
 
-            switch (introSequence)
-            {
-                case IntroSequence.Circles:
-                    return new IntroCircles();
+            //if (introSequence == IntroSequence.Random)
+            //    introSequence = (IntroSequence)RNG.Next(0, (int)IntroSequence.Random);
 
-                case IntroSequence.Welcome:
-                    return new IntroWelcome();
+            //switch (introSequence)
+            //{
+            //    case IntroSequence.Circles:
+            //        return new IntroCircles();
 
-                default:
-                    return new IntroTriangles();
-            }
+            //    case IntroSequence.Welcome:
+            //        return new IntroWelcome();
+
+            //    default:
+            //        return new IntroTriangles();
+            //}
         }
 
         protected virtual ShaderPrecompiler CreateShaderPrecompiler() => new ShaderPrecompiler();
@@ -105,7 +107,7 @@ namespace osu.Game.Screens
         private void load(OsuGameBase game, OsuConfigManager config)
         {
             showDisclaimer = game.IsDeployedBuild;
-            introSequence = config.Get<IntroSequence>(OsuSetting.IntroSequence);
+            //introSequence = config.Get<IntroSequence>(OsuSetting.IntroSequence);
         }
 
         /// <summary>
