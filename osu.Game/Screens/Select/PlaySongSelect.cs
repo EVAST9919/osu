@@ -20,7 +20,7 @@ namespace osu.Game.Screens.Select
     public class PlaySongSelect : SongSelect
     {
         private bool removeAutoModOnResume;
-        private OsuScreen player;
+        //private OsuScreen player;
 
         [Resolved(CanBeNull = true)]
         private NotificationOverlay notifications { get; set; }
@@ -46,7 +46,7 @@ namespace osu.Game.Screens.Select
         {
             base.OnResuming(last);
 
-            player = null;
+            //player = null;
 
             if (removeAutoModOnResume)
             {
@@ -76,37 +76,44 @@ namespace osu.Game.Screens.Select
 
         protected override bool OnStart()
         {
-            if (player != null) return false;
-
-            // Ctrl+Enter should start map with autoplay enabled.
-            if (GetContainingInputManager().CurrentState?.Keyboard.ControlPressed == true)
+            notifications?.Post(new SimpleNotification
             {
-                var auto = Ruleset.Value.CreateInstance().GetAutoplayMod();
-                var autoType = auto?.GetType();
-
-                var mods = Mods.Value;
-
-                if (autoType == null)
-                {
-                    notifications?.Post(new SimpleNotification
-                    {
-                        Text = "The current ruleset doesn't have an autoplay mod avalaible!"
-                    });
-                    return false;
-                }
-
-                if (mods.All(m => m.GetType() != autoType))
-                {
-                    Mods.Value = mods.Append(auto).ToArray();
-                    removeAutoModOnResume = true;
-                }
-            }
-
-            SampleConfirm?.Play();
-
-            this.Push(player = new PlayerLoader(() => new Player()));
+                Text = "Please use official lazer release to play beatmaps!"
+            });
 
             return true;
+
+            //if (player != null) return false;
+
+            //// Ctrl+Enter should start map with autoplay enabled.
+            //if (GetContainingInputManager().CurrentState?.Keyboard.ControlPressed == true)
+            //{
+            //    var auto = Ruleset.Value.CreateInstance().GetAutoplayMod();
+            //    var autoType = auto?.GetType();
+
+            //    var mods = Mods.Value;
+
+            //    if (autoType == null)
+            //    {
+            //        notifications?.Post(new SimpleNotification
+            //        {
+            //            Text = "The current ruleset doesn't have an autoplay mod avalaible!"
+            //        });
+            //        return false;
+            //    }
+
+            //    if (mods.All(m => m.GetType() != autoType))
+            //    {
+            //        Mods.Value = mods.Append(auto).ToArray();
+            //        removeAutoModOnResume = true;
+            //    }
+            //}
+
+            //SampleConfirm?.Play();
+
+            //this.Push(player = new PlayerLoader(() => new Player()));
+
+            //return true;
         }
     }
 }
