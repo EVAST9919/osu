@@ -13,10 +13,13 @@ namespace osu.Game.Screens.Evast.RayMarching
     public class RealRendererContainer : CompositeDrawable
     {
         private const int ray_count = 200;
-        private const int sphere_radius = 60;
+        private const int sphere_radius = 50;
+        private const int camera_distance = 200;
 
-        private readonly Bindable<Vector3> cameraPosition = new Bindable<Vector3>(new Vector3(0, 100, 100));
-        private readonly Bindable<Vector3> spherePosition = new Bindable<Vector3>(new Vector3(200, 100, 100)); // also target
+        private readonly Bindable<Vector3> cameraPosition = new Bindable<Vector3>(new Vector3(300, 100, 100));
+        private readonly Bindable<Vector3> spherePosition = new Bindable<Vector3>(new Vector3(500, 100, 100)); // also target
+        private readonly Bindable<Vector3> sphere2Position = new Bindable<Vector3>(new Vector3(500, 100, 150));
+        private readonly Bindable<Vector3> sphere3Position = new Bindable<Vector3>(new Vector3(500, 100, 200));
 
         private readonly PerspectiveView perspective;
 
@@ -85,7 +88,7 @@ namespace osu.Game.Screens.Evast.RayMarching
                     var xAngle = initialXAngle + j * offset;
                     var distance = castRay(xAngle, yAngle);
 
-                    perspective.Pixels[i, j].Colour = distance.HasValue ? Color4.White.Opacity(1 - (float)distance.Value / 500) : Color4.Black;
+                    perspective.Pixels[i, j].Colour = distance.HasValue ? Color4.White.Opacity(1 - Interpolation.ValueAt((float)distance.Value, 0f, 1f, camera_distance - sphere_radius * 2, camera_distance + sphere_radius * 2)) : Color4.Black;
                 }
             }
         }
@@ -94,19 +97,30 @@ namespace osu.Game.Screens.Evast.RayMarching
         {
             var sourcePosition = cameraPosition.Value;
             double sum = 0;
-            double closest = RayMarchingExtensions.DistanceToSphere(sourcePosition, spherePosition.Value, sphere_radius);
+            double closest = getClosest(sourcePosition);
 
             while (!Precision.AlmostEquals(closest, 0, 0.1) && closest < 500)
             {
                 sum += closest;
                 sourcePosition = RayMarchingExtensions.PositionOnASphere(sourcePosition, closest, xAngle, yAngle);
-                closest = RayMarchingExtensions.DistanceToSphere(sourcePosition, spherePosition.Value, sphere_radius);
+                closest = getClosest(sourcePosition);
             }
 
             if (closest > 500)
                 return null;
 
             return sum;
+        }
+
+        private double getClosest(Vector3 input)
+        {
+            double min = 10000;
+
+            min = Math.Min(min, RayMarchingExtensions.DistanceToSphere(input, spherePosition.Value, sphere_radius));
+            min = Math.Min(min, RayMarchingExtensions.DistanceToSphere(input, sphere2Position.Value, 40));
+            min = Math.Min(min, RayMarchingExtensions.DistanceToSphere(input, sphere3Position.Value, 35));
+
+            return min;
         }
 
         private class PerspectiveView : CompositeDrawable
