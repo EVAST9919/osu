@@ -34,27 +34,34 @@ namespace osu.Desktop.Overlays
                     Direction = FillDirection.Vertical,
                     Children = new Drawable[]
                     {
-                        new FillFlowContainer
+                        new OsuSpriteText
                         {
-                            AutoSizeAxes = Axes.Both,
-                            Direction = FillDirection.Horizontal,
-                            Spacing = new Vector2(5),
                             Anchor = Anchor.TopCentre,
                             Origin = Anchor.TopCentre,
-                            Children = new Drawable[]
-                            {
-                                new OsuSpriteText
-                                {
-                                    Font = OsuFont.GetFont(weight: FontWeight.Bold),
-                                    Text = game.Name
-                                },
-                                new OsuSpriteText
-                                {
-                                    Colour = DebugUtils.IsDebugBuild ? colours.Red : Color4.White,
-                                    Text = game.Version
-                                },
-                            }
+                            Font = OsuFont.GetFont(weight: FontWeight.Bold),
+                            Text = "Use official client to play beatmaps"
                         },
+                        //new FillFlowContainer
+                        //{
+                        //    AutoSizeAxes = Axes.Both,
+                        //    Direction = FillDirection.Horizontal,
+                        //    Spacing = new Vector2(5),
+                        //    Anchor = Anchor.TopCentre,
+                        //    Origin = Anchor.TopCentre,
+                        //    Children = new Drawable[]
+                        //    {
+                        //        new OsuSpriteText
+                        //        {
+                        //            Font = OsuFont.GetFont(weight: FontWeight.Bold),
+                        //            Text = game.Name
+                        //        },
+                        //        new OsuSpriteText
+                        //        {
+                        //            Colour = DebugUtils.IsDebugBuild ? colours.Red : Color4.White,
+                        //            Text = game.Version
+                        //        },
+                        //    }
+                        //},
                         new OsuSpriteText
                         {
                             Anchor = Anchor.TopCentre,

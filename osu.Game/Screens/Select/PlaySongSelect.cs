@@ -78,7 +78,7 @@ namespace osu.Game.Screens.Select
         {
             notifications?.Post(new SimpleNotification
             {
-                Text = "Please use official lazer release to play beatmaps!"
+                Text = "Please use official client to play beatmaps!"
             });
 
             return true;
