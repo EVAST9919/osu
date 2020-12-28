@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using osu.Framework.Screens;
+using osu.Game.Screens.Evast.RayMarching;
 
-namespace osu.Game.Screens.Evast.RayMarching
+namespace osu.Game.Screens.Evast
 {
     public class RayMarchingSelectableScreen : EvastSelectableScreen
     {

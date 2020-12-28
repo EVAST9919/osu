@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using osu.Framework.Screens;
+using osu.Game.Screens.Evast.Particles;
 
-namespace osu.Game.Screens.Evast.Particles
+namespace osu.Game.Screens.Evast
 {
     public class ParticlesSelectableScreen : EvastSelectableScreen
     {
