@@ -1,9 +1,9 @@
 ﻿using osuTK;
 using osuTK.Graphics;
 using osu.Framework.Extensions.Color4Extensions;
-using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Bindables;
 
 namespace osu.Game.Screens.Evast.Pixels
 {
@@ -18,7 +18,7 @@ namespace osu.Game.Screens.Evast.Pixels
         protected readonly int XCount;
         protected readonly int YCount;
 
-        public PixelField(int xCount, int yCount, int pixelSize = 15)
+        public PixelField(int xCount, int yCount, int pixelSize = 15, int spacing = 2)
         {
             XCount = xCount;
             YCount = yCount;
@@ -26,52 +26,17 @@ namespace osu.Game.Screens.Evast.Pixels
 
             Pixels = new Pixel[xCount, yCount];
 
-            Size = new Vector2(xCount * pixelSize, yCount * pixelSize);
+            Size = new Vector2(xCount * pixelSize + spacing * (xCount - 1), yCount * pixelSize + spacing * (yCount - 1));
 
             for (int y = 0; y < yCount; y++)
             {
                 for (int x = 0; x < xCount; x++)
                 {
                     Pixels[x, y] = CreateNewPixel(pixelSize);
-                    Pixels[x, y].Position = new Vector2(x * pixelSize, y * pixelSize);
+                    Pixels[x, y].Position = new Vector2(x * pixelSize + spacing * x, y * pixelSize + spacing * y);
 
                     Add(Pixels[x, y]);
                 }
-            }
-
-            for (int x = 0; x <= xCount; x++)
-            {
-                Add(new Container
-                {
-                    Anchor = Anchor.TopLeft,
-                    Origin = Anchor.TopLeft,
-                    RelativeSizeAxes = Axes.Y,
-                    Width = 2,
-                    Position = new Vector2(x * pixelSize - 1, 0),
-                    Child = new Box
-                    {
-                        RelativeSizeAxes = Axes.Both,
-                        Colour = Color4.Gray,
-                    }
-                });
-            }
-
-            // horizontal lines
-            for (int y = 0; y <= yCount; y++)
-            {
-                Add(new Container
-                {
-                    Anchor = Anchor.TopLeft,
-                    Origin = Anchor.TopLeft,
-                    RelativeSizeAxes = Axes.X,
-                    Height = 2,
-                    Position = new Vector2(0, y * pixelSize - 1),
-                    Child = new Box
-                    {
-                        RelativeSizeAxes = Axes.Both,
-                        Colour = Color4.Gray,
-                    }
-                });
             }
         }
 
@@ -138,32 +103,25 @@ namespace osu.Game.Screens.Evast.Pixels
                 Scheduler.AddDelayed(NewUpdate, UpdateDelay);
         }
 
-        protected class Pixel : Container
+        protected class Pixel : Box
         {
-            protected readonly Box Background;
-
-            private bool isActive;
-            public bool IsActive
-            {
-                set
-                {
-                    if (isActive == value)
-                        return;
-                    isActive = value;
-
-                    Background.Colour = isActive ? Color4.White : Color4.Black.Opacity(170);
-                }
-                get { return isActive; }
-            }
+            public readonly BindableBool IsActive = new BindableBool();
 
             public Pixel(int size)
             {
                 Size = new Vector2(size);
-                Child = Background = new Box
-                {
-                    RelativeSizeAxes = Axes.Both,
-                    Colour = Color4.Black.Opacity(170),
-                };
+                Colour = Color4.Black.Opacity(170);
+            }
+
+            protected override void LoadComplete()
+            {
+                base.LoadComplete();
+                IsActive.BindValueChanged(_ => OnActiveChanged(), true);
+            }
+
+            protected virtual void OnActiveChanged()
+            {
+                Colour = IsActive.Value ? Color4.White : Color4.Black.Opacity(170);
             }
         }
     }

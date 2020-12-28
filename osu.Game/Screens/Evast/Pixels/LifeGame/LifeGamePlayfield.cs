@@ -43,12 +43,12 @@ namespace osu.Game.Screens.Evast.Pixels.LifeGame
 
                     if (!previousIterationMap[x, y] && nearbyCellsAmount == 3)
                     {
-                        Pixels[x, y].IsActive = true;
+                        Pixels[x, y].IsActive.Value = true;
                         continue;
                     }
 
                     if (previousIterationMap[x, y] && !(nearbyCellsAmount == 2 || nearbyCellsAmount == 3))
-                        Pixels[x, y].IsActive = false;
+                        Pixels[x, y].IsActive.Value = false;
                 }
             }
         }
@@ -57,7 +57,7 @@ namespace osu.Game.Screens.Evast.Pixels.LifeGame
         {
             for (int y = 0; y < YCount; y++)
                 for (int x = 0; x < XCount; x++)
-                    Pixels[x, y].IsActive = RNG.NextBool();
+                    Pixels[x, y].IsActive.Value = RNG.NextBool();
         }
 
         private void resetMap()
@@ -71,14 +71,14 @@ namespace osu.Game.Screens.Evast.Pixels.LifeGame
         {
             for (int y = 0; y < YCount; y++)
                 for (int x = 0; x < XCount; x++)
-                    Pixels[x, y].IsActive = false;
+                    Pixels[x, y].IsActive.Value = false;
         }
 
         private bool fieldIsEmpty()
         {
             for (int y = 0; y < YCount; y++)
                 for (int x = 0; x < XCount; x++)
-                    if (Pixels[x, y].IsActive)
+                    if (Pixels[x, y].IsActive.Value)
                         return false;
 
             return true;
@@ -171,18 +171,19 @@ namespace osu.Game.Screens.Evast.Pixels.LifeGame
         {
             for (int y = 0; y < YCount; y++)
                 for (int x = 0; x < XCount; x++)
-                    previousIterationMap[x, y] = Pixels[x, y].IsActive;
+                    previousIterationMap[x, y] = Pixels[x, y].IsActive.Value;
         }
 
         private class Cell : Pixel
         {
-            public Cell(int size) : base(size)
+            public Cell(int size)
+                : base(size)
             {
             }
 
             protected override bool OnClick(ClickEvent e)
             {
-                IsActive = !IsActive;
+                IsActive.Toggle();
                 return base.OnClick(e);
             }
         }

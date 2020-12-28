@@ -1,15 +1,17 @@
 ﻿using osuTK.Graphics;
 using osuTK.Input;
-using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Input.Events;
 using osu.Framework.Utils;
+using osu.Framework.Bindables;
 
 namespace osu.Game.Screens.Evast.Pixels.Snake
 {
     public class SnakePlayfield : PixelField
     {
         protected override Pixel CreateNewPixel(int size) => new SnakePixel(size);
+
+        private SnakePixel getSnakePixel(int x, int y) => Pixels[x, y] as SnakePixel;
 
         public SnakePlayfield()
             : base(20, 20, 25)
@@ -26,16 +28,18 @@ namespace osu.Game.Screens.Evast.Pixels.Snake
         protected override void OnStop()
         {
             base.OnStop();
+
             hasFailed = false;
 
             for (int y = 0; y < YCount; y++)
+            {
                 for (int x = 0; x < XCount; x++)
-                    (Pixels[x, y] as SnakePixel).Steps = 0;
-
-            for (int y = 0; y < YCount; y++)
-                for (int x = 0; x < XCount; x++)
-                    if ((Pixels[x, y] as SnakePixel).IsFood)
-                        (Pixels[x, y] as SnakePixel).IsFood = false;
+                {
+                    var pixel = getSnakePixel(x, y);
+                    pixel.Steps = 0;
+                    pixel.IsFood.Value = false;
+                }
+            }
         }
 
         protected override void OnRestart()
@@ -73,8 +77,8 @@ namespace osu.Game.Screens.Evast.Pixels.Snake
 
             for (int y = 0; y < YCount; y++)
                 for (int x = 0; x < XCount; x++)
-                    if (Pixels[x, y].IsActive)
-                        (Pixels[x, y] as SnakePixel).Steps--;
+                    if (getSnakePixel(x, y).IsActive.Value)
+                        getSnakePixel(x, y).Steps--;
 
             newMove();
         }
@@ -105,26 +109,28 @@ namespace osu.Game.Screens.Evast.Pixels.Snake
                     break;
             }
 
-            if ((Pixels[headX, headY] as SnakePixel).Steps > 0)
+            var head = getSnakePixel(headX, headY);
+
+            if (head.Steps > 0)
             {
-                Pixels[headX, headY].FadeColour(Color4.Red);
+                head.FadeColour(Color4.Red);
                 onFail();
                 return;
             }
 
-            if ((Pixels[headX, headY] as SnakePixel).IsFood)
+            if (head.IsFood.Value)
             {
                 placeFood();
 
                 for (int y = 0; y < YCount; y++)
                     for (int x = 0; x < XCount; x++)
-                        if (Pixels[x, y].IsActive)
-                            (Pixels[x, y] as SnakePixel).Steps++;
+                        if (getSnakePixel(x, y).IsActive.Value)
+                            getSnakePixel(x, y).Steps++;
 
                 snakeLength++;
             }
 
-            (Pixels[headX, headY] as SnakePixel).SetActive(snakeLength);
+            head.SetActive(snakeLength);
         }
 
         private void placeFood()
@@ -132,13 +138,13 @@ namespace osu.Game.Screens.Evast.Pixels.Snake
             int x = RNG.Next(XCount);
             int y = RNG.Next(YCount);
 
-            if (Pixels[x, y].IsActive || (Pixels[x, y] as SnakePixel).IsFood)
+            if (getSnakePixel(x, y).IsActive.Value || getSnakePixel(x, y).IsFood.Value)
             {
                 placeFood();
                 return;
             }
 
-            (Pixels[x, y] as SnakePixel).IsFood = true;
+            getSnakePixel(x, y).IsFood.Value = true;
         }
 
         private void setHead(int x, int y)
@@ -191,22 +197,7 @@ namespace osu.Game.Screens.Evast.Pixels.Snake
 
         private class SnakePixel : Pixel
         {
-            public SnakePixel(int size)
-                : base(size)
-            {
-            }
-
-            private bool isFood;
-            public bool IsFood
-            {
-                get => isFood;
-                set
-                {
-                    isFood = value;
-
-                    Background.Colour = isFood ? Color4.Green : Color4.Black.Opacity(170);
-                }
-            }
+            public readonly BindableBool IsFood = new BindableBool();
 
             private int steps;
             public int Steps
@@ -215,15 +206,36 @@ namespace osu.Game.Screens.Evast.Pixels.Snake
                 set
                 {
                     steps = value;
-
-                    IsActive &= steps != 0;
+                    IsActive.Value &= steps != 0;
                 }
+            }
+
+            public SnakePixel(int size)
+                : base(size)
+            {
+            }
+
+            protected override void LoadComplete()
+            {
+                base.LoadComplete();
+                IsFood.BindValueChanged(_ => OnActiveChanged(), true);
+            }
+
+            protected override void OnActiveChanged()
+            {
+                if (IsFood.Value)
+                {
+                    Colour = Color4.Green;
+                    return;
+                }
+
+                base.OnActiveChanged();
             }
 
             public void SetActive(int steps)
             {
-                isFood = false;
-                IsActive = true;
+                IsFood.Value = false;
+                IsActive.Value = true;
                 this.steps = steps;
             }
         }
