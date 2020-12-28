@@ -9,7 +9,7 @@ namespace osu.Game.Screens.Evast.RayMarching
 {
     public class RendererScreen : EvastVisualScreen
     {
-        private const int ray_count = 400;
+        private const int ray_count = 1000;
 
         public override bool CursorVisible => true;
 
@@ -33,7 +33,7 @@ namespace osu.Game.Screens.Evast.RayMarching
 
         private class PerspectiveView : CompositeDrawable
         {
-            private const int size_multiplier = 2;
+            private const float size_multiplier = 1;
 
             private readonly Box[] drawableRays = new Box[ray_count];
 

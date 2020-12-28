@@ -76,7 +76,7 @@ namespace osu.Game.Screens.Evast.RayMarching
                     Position = sourcePosition
                 });
 
-                sourcePosition = RayMarchingExtensions.PositionOnASphere(sourcePosition, closest, angle);
+                sourcePosition = RayMarchingExtensions.PositionOnACircle(sourcePosition, closest, angle);
                 closest = getClosest(sourcePosition);
             }
         }

@@ -19,10 +19,10 @@ namespace osu.Game.Screens.Evast.RayMarching
 
         public static double RayAngle(Vector2 source, Vector2 target) => Math.Atan2(target.Y - source.Y, target.X - source.X);
 
-        public static Vector2 PositionOnASphere(Vector2 input, double distance, double angle)
+        public static Vector2 PositionOnACircle(Vector2 position, double distance, double angle)
         {
-            var x = distance * Math.Cos(angle) + input.X;
-            var y = distance * Math.Sin(angle) + input.Y;
+            var x = distance * Math.Cos(angle) + position.X;
+            var y = distance * Math.Sin(angle) + position.Y;
             return new Vector2((float)x, (float)y);
         }
     }

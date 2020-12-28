@@ -102,8 +102,8 @@ namespace osu.Game.Screens.Evast.RayMarching
                 var angle = RayMarchingExtensions.RayAngle(player.Position, viewTarget.Value) + (forwardDirection == 1 ? 0 : Math.PI);
                 var distanceDiff = Time.Elapsed / 10;
 
-                player.Position = RayMarchingExtensions.PositionOnASphere(player.Position, distanceDiff, angle);
-                viewTarget.Value = RayMarchingExtensions.PositionOnASphere(viewTarget.Value, distanceDiff, angle);
+                player.Position = RayMarchingExtensions.PositionOnACircle(player.Position, distanceDiff, angle);
+                viewTarget.Value = RayMarchingExtensions.PositionOnACircle(viewTarget.Value, distanceDiff, angle);
             }
 
             if (sideDirection != 0)
@@ -111,8 +111,8 @@ namespace osu.Game.Screens.Evast.RayMarching
                 var angle = RayMarchingExtensions.RayAngle(player.Position, viewTarget.Value) + (sideDirection * Math.PI / 2);
                 var distanceDiff = Time.Elapsed / 10;
 
-                player.Position = RayMarchingExtensions.PositionOnASphere(player.Position, distanceDiff, angle);
-                viewTarget.Value = RayMarchingExtensions.PositionOnASphere(viewTarget.Value, distanceDiff, angle);
+                player.Position = RayMarchingExtensions.PositionOnACircle(player.Position, distanceDiff, angle);
+                viewTarget.Value = RayMarchingExtensions.PositionOnACircle(viewTarget.Value, distanceDiff, angle);
             }
 
             if (rotationDirection != 0)
@@ -120,7 +120,7 @@ namespace osu.Game.Screens.Evast.RayMarching
                 var angle = RayMarchingExtensions.RayAngle(player.Position, viewTarget.Value);
                 angle += rotationDirection * Time.Elapsed / 700;
 
-                viewTarget.Value = RayMarchingExtensions.PositionOnASphere(player.Position, view_distance, angle);
+                viewTarget.Value = RayMarchingExtensions.PositionOnACircle(player.Position, view_distance, angle);
             }
         }
 
@@ -133,7 +133,7 @@ namespace osu.Game.Screens.Evast.RayMarching
             while (!Precision.AlmostEquals(closest, 0, 0.1) && closest < width)
             {
                 sum += closest;
-                sourcePosition = RayMarchingExtensions.PositionOnASphere(sourcePosition, closest, angle);
+                sourcePosition = RayMarchingExtensions.PositionOnACircle(sourcePosition, closest, angle);
                 closest = getClosest(sourcePosition);
             }
 
