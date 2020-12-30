@@ -154,11 +154,11 @@ namespace osu.Game.Screens.Menu
 
         private void onMultiplayer()
         {
-            if (!api.IsLoggedIn)
+            if (api.State.Value != APIState.Online)
             {
                 notifications?.Post(new SimpleNotification
                 {
-                    Text = "You gotta be logged in to multi 'yo!",
+                    Text = "You gotta be online to multi 'yo!",
                     Icon = FontAwesome.Solid.Globe,
                     Activated = () =>
                     {
@@ -175,11 +175,11 @@ namespace osu.Game.Screens.Menu
 
         private void onPlaylists()
         {
-            if (!api.IsLoggedIn)
+            if (api.State.Value != APIState.Online)
             {
                 notifications?.Post(new SimpleNotification
                 {
-                    Text = "You gotta be logged in to multi 'yo!",
+                    Text = "You gotta be online to view playlists 'yo!",
                     Icon = FontAwesome.Solid.Globe,
                     Activated = () =>
                     {

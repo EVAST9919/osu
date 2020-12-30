@@ -17,7 +17,8 @@ namespace osu.Game.Screens.Evast.RayMarching
         private const int camera_distance = 200;
 
         private readonly Bindable<Vector3> cameraPosition = new Bindable<Vector3>(new Vector3(300, 100, 100));
-        private readonly Bindable<Vector3> spherePosition = new Bindable<Vector3>(new Vector3(500, 100, 100)); // also target
+        private readonly Bindable<Vector3> cameraTarget = new Bindable<Vector3>(new Vector3(500, 100, 100));
+        private readonly Bindable<Vector3> spherePosition = new Bindable<Vector3>(new Vector3(500, 100, 100));
         private readonly Bindable<Vector3> sphere2Position = new Bindable<Vector3>(new Vector3(500, 100, 150));
         private readonly Bindable<Vector3> sphere3Position = new Bindable<Vector3>(new Vector3(500, 100, 200));
 
@@ -76,8 +77,8 @@ namespace osu.Game.Screens.Evast.RayMarching
         private void updateView()
         {
             var offset = 1f / ray_count;
-            var initialXAngle = RayMarchingExtensions.RayAngle(new Vector2(cameraPosition.Value.X, cameraPosition.Value.Z), new Vector2(spherePosition.Value.X, spherePosition.Value.Z)) - 0.5f;
-            //var initialYAngle = RayMarchingExtensions.RayAngle(new Vector2(cameraPosition.Value.X, cameraPosition.Value.Y), new Vector2(spherePosition.Value.X, spherePosition.Value.Y)) / 2 - 0.25f;
+            var initialXAngle = RayMarchingExtensions.RayAngle(new Vector2(cameraPosition.Value.X, cameraPosition.Value.Z), new Vector2(cameraTarget.Value.X, cameraTarget.Value.Z)) - 0.5f;
+            //var initialYAngle = RayMarchingExtensions.RayAngle(new Vector2(cameraPosition.Value.X, cameraPosition.Value.Y), new Vector2(cameraTarget.Value.X, cameraTarget.Value.Y)) / 2 - 0.25f;
 
             for (int i = 0; i < ray_count; i++)
             {
