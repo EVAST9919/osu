@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using osu.Game.Graphics.Sprites;
 using osu.Game.Graphics;
+using osu.Framework.Input.Events;
 
 namespace osu.Game.Screens.Evast.RayMarching
 {
@@ -79,6 +80,8 @@ namespace osu.Game.Screens.Evast.RayMarching
                 }
             };
 
+            perspective.DragInvoked += onDrag;
+
             spheres = new[]
             {
                 new Sphere(new Vector3(500, 100, 50), 50),
@@ -116,6 +119,11 @@ namespace osu.Game.Screens.Evast.RayMarching
                     Alpha = 0.5f
                 });
             }
+        }
+
+        private void onDrag(Vector2 delta)
+        {
+            cameraPosition.Value = new Vector3(cameraPosition.Value.X + delta.X, cameraPosition.Value.Y, cameraPosition.Value.Z);
         }
 
         private void cameraPositionChanged()
@@ -174,6 +182,8 @@ namespace osu.Game.Screens.Evast.RayMarching
 
         private class PerspectiveView : CompositeDrawable
         {
+            public event Action<Vector2> DragInvoked;
+
             public readonly Box[,] Pixels;
 
             public PerspectiveView(int rayCount)
@@ -201,6 +211,14 @@ namespace osu.Game.Screens.Evast.RayMarching
                         });
                     }
                 }
+            }
+
+            protected override bool OnDragStart(DragStartEvent e) => true;
+
+            protected override void OnDrag(DragEvent e)
+            {
+                base.OnDrag(e);
+                DragInvoked?.Invoke(e.Delta);
             }
         }
 
