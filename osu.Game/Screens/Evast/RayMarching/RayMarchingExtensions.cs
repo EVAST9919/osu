@@ -17,8 +17,20 @@ namespace osu.Game.Screens.Evast.RayMarching
 
         public static double DistanceToSphere(Vector3 input, Vector3 spherePosition, double sphereRadius) => Vector3.Distance(spherePosition, input) - sphereRadius;
 
+        /// <summary>
+        /// Returns position on a sphere.
+        /// </summary>
+        /// <param name="position">Sphere position</param>
+        /// <param name="radius">Sphere radius</param>
+        /// <param name="theta">Angle around Z axis (vertical)</param>
+        /// <param name="phi">Angle around Y axis (horizontal)</param>
+        /// <returns>Position on s sphere</returns>
         public static Vector3 PositionOnASphere(Vector3 position, double radius, double theta, double phi)
         {
+            // These are adjustments to meet my personal expectations.
+            phi = -phi;
+            phi += Math.PI / 2;
+
             var x = radius * Math.Cos(theta) * Math.Sin(phi);
             var y = radius * Math.Sin(theta) * Math.Sin(phi);
             var z = radius * Math.Cos(phi);
