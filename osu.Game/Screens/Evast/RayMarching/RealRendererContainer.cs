@@ -128,13 +128,15 @@ namespace osu.Game.Screens.Evast.RayMarching
 
         private void cameraPositionChanged()
         {
-            var offset = 1f / ray_count;
-            var initialXAngle = RayMarchingExtensions.RayAngle(new Vector2(cameraPosition.Value.X, cameraPosition.Value.Z), new Vector2(cameraTarget.Value.X, cameraTarget.Value.Z)) + 0.5f;
+            var offset = fov / ray_count;
+
+            var topViewAngle = RayMarchingExtensions.RayAngle(new Vector2(cameraPosition.Value.X, -cameraPosition.Value.Z), new Vector2(cameraTarget.Value.X, -cameraTarget.Value.Z));
+            var initialXAngle = topViewAngle + fov / 2;
             //var initialYAngle = RayMarchingExtensions.RayAngle(new Vector2(cameraPosition.Value.X, cameraPosition.Value.Y), new Vector2(cameraTarget.Value.X, cameraTarget.Value.Y)) / 2 - 0.25f;
 
             for (int i = 0; i < ray_count; i++)
             {
-                var yAngle = Math.PI / 2 - 0.5f + i * offset;// initialYAngle + i * yOffset;
+                var yAngle = Math.PI / 2 - fov / 2 + i * offset;// initialYAngle + i * yOffset;
 
                 for (int j = 0; j < ray_count; j++)
                 {
@@ -147,7 +149,7 @@ namespace osu.Game.Screens.Evast.RayMarching
 
             top.CameraPosition = new Vector2(cameraPosition.Value.X * view_multiplier, -cameraPosition.Value.Z * view_multiplier);
             side.CameraPosition = new Vector2(cameraPosition.Value.X * view_multiplier, -cameraPosition.Value.Y * view_multiplier);
-            top.ViewAngle = (float)RayMarchingExtensions.RayAngle(new Vector2(cameraPosition.Value.X, cameraPosition.Value.Z), new Vector2(cameraTarget.Value.X, cameraTarget.Value.Z));
+            top.ViewAngle = (float)topViewAngle;
             side.ViewAngle = (float)RayMarchingExtensions.RayAngle(new Vector2(cameraPosition.Value.X, -cameraPosition.Value.Y), new Vector2(cameraTarget.Value.X, -cameraTarget.Value.Y));
         }
 
