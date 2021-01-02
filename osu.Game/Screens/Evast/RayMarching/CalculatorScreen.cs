@@ -30,14 +30,16 @@ namespace osu.Game.Screens.Evast.RayMarching
 
             private readonly BindableDouble theta = new BindableDouble
             {
-                MinValue = 0,
-                MaxValue = 2 * Math.PI
+                MinValue = -2 * Math.PI,
+                MaxValue = 2 * Math.PI,
+                Value = 0
             };
 
             private readonly BindableDouble phi = new BindableDouble
             {
-                MinValue = 0,
-                MaxValue = 2 * Math.PI
+                MinValue = -2 * Math.PI,
+                MaxValue = 2 * Math.PI,
+                Value = 0
             };
 
             private readonly OsuSpriteText result;
@@ -217,7 +219,6 @@ namespace osu.Game.Screens.Evast.RayMarching
                             Anchor = Anchor.Centre,
                             Origin = Anchor.Centre,
                             Size = new Vector2(radius * 2),
-                            Colour = Color4.White,
                             Alpha = 0.5f
                         },
                         point = new Circle

@@ -18,10 +18,14 @@ namespace osu.Game.Screens.Evast.RayMarching
     {
         private const float fov = 1f;
         private const float view_multiplier = 0.25f;
-        private const int ray_count = 100;
-        private const int camera_distance = 200;
+        private const int ray_count = 75;
+        private const int camera_distance = 300;
+        private const float max_visible_distance = 800;
 
-        private readonly Bindable<Vector3> cameraPosition = new Bindable<Vector3>(new Vector3(300, 100, 100));
+        private double phi;
+        private double theta;
+
+        private readonly Bindable<Vector3> cameraPosition = new Bindable<Vector3>();
         private readonly Bindable<Vector3> cameraTarget = new Bindable<Vector3>(new Vector3(500, 100, 100));
 
         private readonly IEnumerable<Sphere> spheres;
@@ -29,6 +33,9 @@ namespace osu.Game.Screens.Evast.RayMarching
         private readonly TopView top;
         private readonly SideView side;
         private readonly PerspectiveView perspective;
+        private readonly OsuSpriteText phiText;
+        private readonly OsuSpriteText thetaText;
+        private readonly OsuSpriteText cameraText;
 
         public RealRendererContainer()
         {
@@ -73,7 +80,37 @@ namespace osu.Game.Screens.Evast.RayMarching
                     {
                         new Container
                         {
-                            RelativeSizeAxes = Axes.Both
+                            RelativeSizeAxes = Axes.Both,
+                            Children = new Drawable[]
+                            {
+                                new Box
+                                {
+                                    RelativeSizeAxes = Axes.Both,
+                                    Colour = Color4.Black
+                                },
+                                new FillFlowContainer
+                                {
+                                    Margin = new MarginPadding(5),
+                                    AutoSizeAxes = Axes.Both,
+                                    Direction = FillDirection.Vertical,
+                                    Spacing = new Vector2(0, 5),
+                                    Children = new[]
+                                    {
+                                        phiText = new OsuSpriteText
+                                        {
+                                            Font = OsuFont.GetFont()
+                                        },
+                                        thetaText = new OsuSpriteText
+                                        {
+                                            Font = OsuFont.GetFont()
+                                        },
+                                        cameraText = new OsuSpriteText
+                                        {
+                                            Font = OsuFont.GetFont()
+                                        }
+                                    }
+                                }
+                            }
                         },
                         perspective = new PerspectiveView(ray_count)
                     }
@@ -85,8 +122,8 @@ namespace osu.Game.Screens.Evast.RayMarching
             spheres = new[]
             {
                 new Sphere(new Vector3(500, 100, 50), 50),
-                new Sphere(new Vector3(500, 200, 150), 40),
-                new Sphere(new Vector3(550, 100, 200), 35)
+                new Sphere(new Vector3(500, 200, 100), 50),
+                new Sphere(new Vector3(500, 100, 150), 50)
             };
         }
 
@@ -94,7 +131,7 @@ namespace osu.Game.Screens.Evast.RayMarching
         {
             base.LoadComplete();
             updateSideViews();
-            cameraPosition.BindValueChanged(_ => cameraPositionChanged(), true);
+            updateRender();
         }
 
         private void updateSideViews()
@@ -123,50 +160,58 @@ namespace osu.Game.Screens.Evast.RayMarching
 
         private void onDrag(Vector2 delta)
         {
-            cameraPosition.Value = new Vector3(cameraPosition.Value.X + delta.X, cameraPosition.Value.Y, cameraPosition.Value.Z);
+            phi += delta.X / 500;
+            theta += delta.Y / 500;
+            updateRender();
         }
 
-        private void cameraPositionChanged()
+        private void updateRender()
         {
+            cameraPosition.Value = RayMarchingExtensions.PositionOnASphere(cameraTarget.Value, camera_distance, theta, phi + Math.PI);
+
             var offset = fov / ray_count;
 
-            var topViewAngle = RayMarchingExtensions.RayAngle(new Vector2(cameraPosition.Value.X, -cameraPosition.Value.Z), new Vector2(cameraTarget.Value.X, -cameraTarget.Value.Z));
-            var initialXAngle = topViewAngle + fov / 2;
-            //var initialYAngle = RayMarchingExtensions.RayAngle(new Vector2(cameraPosition.Value.X, cameraPosition.Value.Y), new Vector2(cameraTarget.Value.X, cameraTarget.Value.Y)) / 2 - 0.25f;
+            var initialPhi = phi - fov / 2;
+            var initialTheta = theta + fov / 2;
 
             for (int i = 0; i < ray_count; i++)
             {
-                var yAngle = Math.PI / 2 - fov / 2 + i * offset;// initialYAngle + i * yOffset;
+                var rayPhi = initialPhi + i * offset;
 
                 for (int j = 0; j < ray_count; j++)
                 {
-                    var xAngle = initialXAngle - j * offset;
-                    var distance = castRay(xAngle, yAngle);
+                    var rayTheta = initialTheta - j * offset;
+                    var distance = castRay(rayTheta, rayPhi);
 
                     perspective.Pixels[i, j].Colour = distance.HasValue ? Color4.White.Opacity(1 - Interpolation.ValueAt((float)distance.Value, 0f, 1f, camera_distance - 100, camera_distance + 100)) : Color4.Black;
+                    //perspective.Pixels[i, j].Colour = distance.HasValue ? Color4.White : Color4.Black;
                 }
             }
 
             top.CameraPosition = new Vector2(cameraPosition.Value.X * view_multiplier, -cameraPosition.Value.Z * view_multiplier);
             side.CameraPosition = new Vector2(cameraPosition.Value.X * view_multiplier, -cameraPosition.Value.Y * view_multiplier);
-            top.ViewAngle = (float)topViewAngle;
-            side.ViewAngle = (float)RayMarchingExtensions.RayAngle(new Vector2(cameraPosition.Value.X, -cameraPosition.Value.Y), new Vector2(cameraTarget.Value.X, -cameraTarget.Value.Y));
+            top.ViewAngle = (float)phi;
+            side.ViewAngle = (float)theta;
+
+            phiText.Text = $"phi: {phi: 0.00}";
+            thetaText.Text = $"theta: {theta: 0.00}";
+            cameraText.Text = $"camera: ({cameraPosition.Value.X:0.00}, {cameraPosition.Value.Y:0.00}, {cameraPosition.Value.Z:0.00})";
         }
 
-        private double? castRay(double xAngle, double yAngle)
+        private double? castRay(double theta, double phi)
         {
             var sourcePosition = cameraPosition.Value;
-            double sum = 0;
             double closest = getClosest(sourcePosition);
+            double sum = closest;
 
-            while (!Precision.AlmostEquals(closest, 0, 0.1) && closest < 500)
+            while (!Precision.AlmostEquals(closest, 0, 0.1) && closest < max_visible_distance)
             {
-                sum += closest;
-                sourcePosition = RayMarchingExtensions.PositionOnASphere(sourcePosition, closest, xAngle, yAngle);
+                sourcePosition = RayMarchingExtensions.PositionOnASphere(sourcePosition, closest, theta, phi);
                 closest = getClosest(sourcePosition);
+                sum += closest;
             }
 
-            if (closest > 500)
+            if (closest > max_visible_distance)
                 return null;
 
             return sum;
@@ -239,16 +284,12 @@ namespace osu.Game.Screens.Evast.RayMarching
                 }
             }
 
-            private float viewAngle;
-
             public float ViewAngle
             {
-                get => viewAngle;
                 set
                 {
-                    viewAngle = value;
-                    topLine.Angle = value - fov / 2;
-                    bottomLine.Angle = value + fov / 2;
+                    topLine.Angle = -(value - fov / 2);
+                    bottomLine.Angle = -(value + fov / 2);
                 }
             }
 
@@ -418,9 +459,9 @@ namespace osu.Game.Screens.Evast.RayMarching
 
         private class Sphere
         {
-            public Vector3 Position { get; private set; }
+            public Vector3 Position { get; set; }
 
-            public float Radius { get; private set; }
+            public float Radius { get; set; }
 
             public Sphere(Vector3 position, float radius)
             {
