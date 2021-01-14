@@ -2,23 +2,17 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using osu.Framework.Allocation;
-using osu.Framework.Development;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
-using osu.Framework.Graphics.Sprites;
-using osu.Framework.Graphics.Textures;
-using osu.Game;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Sprites;
-using osuTK;
-using osuTK.Graphics;
 
 namespace osu.Desktop.Overlays
 {
     public class VersionManager : VisibilityContainer
     {
         [BackgroundDependencyLoader]
-        private void load(OsuColour colours, TextureStore textures, OsuGameBase game)
+        private void load(OsuColour colours)
         {
             AutoSizeAxes = Axes.Both;
             Anchor = Anchor.BottomCentre;
@@ -41,27 +35,6 @@ namespace osu.Desktop.Overlays
                             Font = OsuFont.GetFont(weight: FontWeight.Bold),
                             Text = "Use official client to play beatmaps"
                         },
-                        //new FillFlowContainer
-                        //{
-                        //    AutoSizeAxes = Axes.Both,
-                        //    Direction = FillDirection.Horizontal,
-                        //    Spacing = new Vector2(5),
-                        //    Anchor = Anchor.TopCentre,
-                        //    Origin = Anchor.TopCentre,
-                        //    Children = new Drawable[]
-                        //    {
-                        //        new OsuSpriteText
-                        //        {
-                        //            Font = OsuFont.GetFont(weight: FontWeight.Bold),
-                        //            Text = game.Name
-                        //        },
-                        //        new OsuSpriteText
-                        //        {
-                        //            Colour = DebugUtils.IsDebugBuild ? colours.Red : Color4.White,
-                        //            Text = game.Version
-                        //        },
-                        //    }
-                        //},
                         new OsuSpriteText
                         {
                             Anchor = Anchor.TopCentre,
@@ -69,13 +42,7 @@ namespace osu.Desktop.Overlays
                             Font = OsuFont.Numeric.With(size: 12),
                             Colour = colours.Yellow,
                             Text = @"Evast's Build"
-                        },
-                        new Sprite
-                        {
-                            Anchor = Anchor.TopCentre,
-                            Origin = Anchor.TopCentre,
-                            Texture = textures.Get(@"Menu/dev-build-footer"),
-                        },
+                        }
                     }
                 }
             };

@@ -9,6 +9,7 @@ using osu.Framework.Screens;
 using osu.Game.Graphics;
 using osu.Game.Overlays;
 using osu.Game.Overlays.Notifications;
+using osu.Game.Rulesets.Mods;
 using osu.Game.Scoring;
 using osu.Game.Screens.Play;
 using osu.Game.Screens.Ranking;
@@ -42,6 +43,8 @@ namespace osu.Game.Screens.Select
 
         protected override BeatmapDetailArea CreateBeatmapDetailArea() => new PlayBeatmapDetailArea();
 
+        private ModAutoplay getAutoplayMod() => Ruleset.Value.CreateInstance().GetAutoplayMod();
+
         public override void OnResuming(IScreen last)
         {
             base.OnResuming(last);
@@ -50,10 +53,10 @@ namespace osu.Game.Screens.Select
 
             if (removeAutoModOnResume)
             {
-                var autoType = Ruleset.Value.CreateInstance().GetAutoplayMod()?.GetType();
+                var autoType = getAutoplayMod()?.GetType();
 
                 if (autoType != null)
-                    ModSelect.DeselectTypes(new[] { autoType }, true);
+                    Mods.Value = Mods.Value.Where(m => m.GetType() != autoType).ToArray();
 
                 removeAutoModOnResume = false;
             }

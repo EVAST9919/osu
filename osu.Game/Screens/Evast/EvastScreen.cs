@@ -9,19 +9,17 @@ using osu.Game.Beatmaps;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Backgrounds;
 using osu.Game.Graphics.Sprites;
-using osu.Game.Screens.Backgrounds;
+using osu.Game.Screens.Play;
 using osuTK;
 using osuTK.Graphics;
 
 namespace osu.Game.Screens.Evast
 {
-    public class EvastScreen : OsuScreen
+    public class EvastScreen : ScreenWithBeatmapBackground
     {
         private const int blur = 20;
 
         protected virtual bool ShowCardOnBeatmapChange => true;
-
-        protected override BackgroundScreen CreateBackground() => new BackgroundScreenBeatmap();
 
         protected float DimValue
         {
@@ -59,12 +57,12 @@ namespace osu.Game.Screens.Evast
 
         private void onBeatmapChange(ValueChangedEvent<WorkingBeatmap> beatmap)
         {
-            if (Background is BackgroundScreenBeatmap backgroundModeBeatmap)
+            ApplyToBackground(backgroundModeBeatmap =>
             {
                 backgroundModeBeatmap.Beatmap = beatmap.NewValue;
                 backgroundModeBeatmap.BlurAmount.Value = blur;
                 backgroundModeBeatmap.FadeTo(1, 250);
-            }
+            });
 
             if (!ShowCardOnBeatmapChange)
                 return;
