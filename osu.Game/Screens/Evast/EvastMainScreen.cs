@@ -11,7 +11,7 @@ namespace osu.Game.Screens.Evast
         protected override IReadOnlyList<Button> GetButtons() => new[]
         {
             new Button("2048", () => this.Push(new NumbersGameScreen())),
-            new Button("Ray Marching", () => this.Push(new RayMarchingSelectableScreen())),
+            new Button("Render", () => this.Push(new RayMarchingSelectableScreen())),
             new Button("Shape & Beats", () => this.Push(new SBSelectableScreen())),
             new Button("Pixel Games", () => this.Push(new PixelsSelectableScreen())),
             new Button("Particles", () => this.Push(new ParticlesSelectableScreen())),

@@ -8,10 +8,10 @@ namespace osu.Game.Screens.Evast
     {
         protected override IReadOnlyList<Button> GetButtons() => new[]
         {
-            new Button("Basic distance", () => this.Push(new RayMarchingDistanceScreen())),
+            new Button("2D distance", () => this.Push(new RayMarchingDistanceScreen())),
             new Button("Sphere tracing", () => this.Push(new SphereTracingScreen())),
             new Button("Fake Renderer", () => this.Push(new RendererScreen())),
-            new Button("Real Renderer", () => this.Push(new RealRendererScreen())),
+            new Button("Ray marching", () => this.Push(new RealRendererScreen())),
             new Button("Calculators", () => this.Push(new CalculatorScreen()))
         };
     }
