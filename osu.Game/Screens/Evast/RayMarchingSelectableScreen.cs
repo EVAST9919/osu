@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using osu.Framework.Screens;
 using osu.Game.Screens.Evast.RayMarching;
+using osu.Game.Screens.Evast.RayMarching.SimpleRender;
 
 namespace osu.Game.Screens.Evast
 {
@@ -12,6 +13,7 @@ namespace osu.Game.Screens.Evast
             new Button("Sphere tracing", () => this.Push(new SphereTracingScreen())),
             new Button("Fake Renderer", () => this.Push(new RendererScreen())),
             new Button("Ray marching", () => this.Push(new RealRendererScreen())),
+            new Button("DONUT", () => this.Push(new SimpleRendererScreen())),
             new Button("Calculators", () => this.Push(new CalculatorScreen()))
         };
     }
