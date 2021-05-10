@@ -108,6 +108,7 @@ namespace osu.Game.Screens.Menu
                                 this.Push(new Editor());
                             },
                             OnSolo = loadSoloSongSelect,
+                            OnMore = () => this.Push(new EvastMainScreen()),
                             OnMultiplayer = () => this.Push(new Multiplayer()),
                             OnPlaylists = () => this.Push(new Playlists()),
                             OnExit = confirmAndExit,
