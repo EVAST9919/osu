@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Linq;
 using NUnit.Framework;
 using osu.Framework.Allocation;
@@ -74,6 +75,8 @@ namespace osu.Game.Tests.Visual.Gameplay
                 switch (args.Action)
                 {
                     case NotifyCollectionChangedAction.Add:
+                        Debug.Assert(args.NewItems != null);
+
                         foreach (int user in args.NewItems)
                         {
                             if (user == api.LocalUser.Value.Id)
@@ -83,6 +86,8 @@ namespace osu.Game.Tests.Visual.Gameplay
                         break;
 
                     case NotifyCollectionChangedAction.Remove:
+                        Debug.Assert(args.OldItems != null);
+
                         foreach (int user in args.OldItems)
                         {
                             if (user == api.LocalUser.Value.Id)
@@ -199,27 +204,27 @@ namespace osu.Game.Tests.Visual.Gameplay
                 return;
             }
 
-            if (replayHandler.NextFrame != null)
-            {
-                var lastFrame = replay.Frames.LastOrDefault();
+            if (!replayHandler.HasFrames)
+                return;
 
-                // this isn't perfect as we basically can't be aware of the rate-of-send here (the streamer is not sending data when not being moved).
-                // in gameplay playback, the case where NextFrame is null would pause gameplay and handle this correctly; it's strictly a test limitation / best effort implementation.
-                if (lastFrame != null)
-                    latency = Math.Max(latency, Time.Current - lastFrame.Time);
+            var lastFrame = replay.Frames.LastOrDefault();
 
-                latencyDisplay.Text = $"latency: {latency:N1}";
+            // this isn't perfect as we basically can't be aware of the rate-of-send here (the streamer is not sending data when not being moved).
+            // in gameplay playback, the case where NextFrame is null would pause gameplay and handle this correctly; it's strictly a test limitation / best effort implementation.
+            if (lastFrame != null)
+                latency = Math.Max(latency, Time.Current - lastFrame.Time);
 
-                double proposedTime = Time.Current - latency + Time.Elapsed;
+            latencyDisplay.Text = $"latency: {latency:N1}";
 
-                // this will either advance by one or zero frames.
-                double? time = replayHandler.SetFrameFromTime(proposedTime);
+            double proposedTime = Time.Current - latency + Time.Elapsed;
 
-                if (time == null)
-                    return;
+            // this will either advance by one or zero frames.
+            double? time = replayHandler.SetFrameFromTime(proposedTime);
 
-                manualClock.CurrentTime = time.Value;
-            }
+            if (time == null)
+                return;
+
+            manualClock.CurrentTime = time.Value;
         }
 
         [TearDownSteps]
@@ -298,7 +303,7 @@ namespace osu.Game.Tests.Visual.Gameplay
 
             internal class TestKeyBindingContainer : KeyBindingContainer<TestAction>
             {
-                public override IEnumerable<KeyBinding> DefaultKeyBindings => new[]
+                public override IEnumerable<IKeyBinding> DefaultKeyBindings => new[]
                 {
                     new KeyBinding(InputKey.MouseLeft, TestAction.Down),
                 };
