@@ -3,8 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
+using osu.Framework.Extensions.EnumExtensions;
 using osu.Framework.Extensions.IEnumerableExtensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -16,6 +18,7 @@ using osu.Game.Overlays.Notifications;
 using osu.Game.Rulesets.Mods;
 using osu.Game.Rulesets.UI;
 using osu.Game.Screens.Play.HUD;
+using osu.Game.Skinning;
 using osuTK;
 
 namespace osu.Game.Screens.Play
@@ -32,11 +35,12 @@ namespace osu.Game.Screens.Play
         /// </summary>
         public float TopScoringElementsHeight { get; private set; }
 
+        /// <summary>
+        /// The total height of all the bottom of screen scoring elements.
+        /// </summary>
+        public float BottomScoringElementsHeight { get; private set; }
+
         public readonly KeyCounterDisplay KeyCounter;
-        public readonly SkinnableScoreCounter ScoreCounter;
-        public readonly SkinnableAccuracyCounter AccuracyCounter;
-        public readonly SkinnableHealthDisplay HealthDisplay;
-        public readonly SongProgress Progress;
         public readonly ModDisplay ModDisplay;
         public readonly HoldForMenuButton HoldToQuit;
         public readonly PlayerSettingsOverlay PlayerSettingsOverlay;
@@ -59,14 +63,14 @@ namespace osu.Game.Screens.Play
 
         private static bool hasShownNotificationOnce;
 
-        public Action<double> RequestSeek;
-
         private readonly FillFlowContainer bottomRightElements;
         private readonly FillFlowContainer topRightElements;
 
         internal readonly IBindable<bool> IsBreakTime = new Bindable<bool>();
 
         private bool holdingForHUD;
+
+        private readonly SkinnableTargetContainer mainComponents;
 
         private IEnumerable<Drawable> hideTargets => new Drawable[] { visibilityContainer, KeyCounter, topRightElements };
 
@@ -83,36 +87,9 @@ namespace osu.Game.Screens.Play
                 visibilityContainer = new Container
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Child = new GridContainer
+                    Child = mainComponents = new SkinnableTargetContainer(SkinnableTarget.MainHUDComponents)
                     {
                         RelativeSizeAxes = Axes.Both,
-                        Content = new[]
-                        {
-                            new Drawable[]
-                            {
-                                new Container
-                                {
-                                    RelativeSizeAxes = Axes.Both,
-                                    Children = new Drawable[]
-                                    {
-                                        HealthDisplay = CreateHealthDisplay(),
-                                        AccuracyCounter = CreateAccuracyCounter(),
-                                        ScoreCounter = CreateScoreCounter(),
-                                        CreateComboCounter(),
-                                        CreateHitErrorDisplayOverlay(),
-                                    }
-                                },
-                            },
-                            new Drawable[]
-                            {
-                                Progress = CreateProgress(),
-                            }
-                        },
-                        RowDimensions = new[]
-                        {
-                            new Dimension(),
-                            new Dimension(GridSizeMode.AutoSize)
-                        }
                     },
                 },
                 topRightElements = new FillFlowContainer
@@ -154,10 +131,6 @@ namespace osu.Game.Screens.Play
             if (drawableRuleset != null)
             {
                 BindDrawableRuleset(drawableRuleset);
-
-                Progress.Objects = drawableRuleset.Objects;
-                Progress.RequestSeek = time => RequestSeek(time);
-                Progress.ReferenceClock = drawableRuleset.FrameStableClock;
             }
 
             ModDisplay.Current.Value = mods;
@@ -184,7 +157,6 @@ namespace osu.Game.Screens.Play
         {
             base.LoadComplete();
 
-            ShowHealthbar.BindValueChanged(healthBar => HealthDisplay.FadeTo(healthBar.NewValue ? 1 : 0, FADE_DURATION, FADE_EASING), true);
             ShowHud.BindValueChanged(visible => hideTargets.ForEach(d => d.FadeTo(visible.NewValue ? 1 : 0, FADE_DURATION, FADE_EASING)));
 
             IsBreakTime.BindValueChanged(_ => updateVisibility());
@@ -197,12 +169,41 @@ namespace osu.Game.Screens.Play
         {
             base.Update();
 
-            // HACK: for now align with the accuracy counter.
-            // this is done for the sake of hacky legacy skins which extend the health bar to take up the full screen area.
-            // it only works with the default skin due to padding offsetting it *just enough* to coexist.
-            topRightElements.Y = TopScoringElementsHeight = ToLocalSpace(AccuracyCounter.Drawable.ScreenSpaceDrawQuad.BottomRight).Y;
+            Vector2? lowestTopScreenSpace = null;
+            Vector2? highestBottomScreenSpace = null;
 
-            bottomRightElements.Y = -Progress.Height;
+            // LINQ cast can be removed when IDrawable interface includes Anchor / RelativeSizeAxes.
+            foreach (var element in mainComponents.Components.Cast<Drawable>())
+            {
+                // for now align top-right components with the bottom-edge of the lowest top-anchored hud element.
+                if (element.Anchor.HasFlagFast(Anchor.TopRight) || (element.Anchor.HasFlagFast(Anchor.y0) && element.RelativeSizeAxes == Axes.X))
+                {
+                    // health bars are excluded for the sake of hacky legacy skins which extend the health bar to take up the full screen area.
+                    if (element is LegacyHealthDisplay)
+                        continue;
+
+                    var bottomRight = element.ScreenSpaceDrawQuad.BottomRight;
+                    if (lowestTopScreenSpace == null || bottomRight.Y > lowestTopScreenSpace.Value.Y)
+                        lowestTopScreenSpace = bottomRight;
+                }
+                // and align bottom-right components with the top-edge of the highest bottom-anchored hud element.
+                else if (element.Anchor.HasFlagFast(Anchor.BottomRight) || (element.Anchor.HasFlagFast(Anchor.y2) && element.RelativeSizeAxes == Axes.X))
+                {
+                    var topLeft = element.ScreenSpaceDrawQuad.TopLeft;
+                    if (highestBottomScreenSpace == null || topLeft.Y < highestBottomScreenSpace.Value.Y)
+                        highestBottomScreenSpace = topLeft;
+                }
+            }
+
+            if (lowestTopScreenSpace.HasValue)
+                topRightElements.Y = TopScoringElementsHeight = MathHelper.Clamp(ToLocalSpace(lowestTopScreenSpace.Value).Y, 0, DrawHeight - topRightElements.DrawHeight);
+            else
+                topRightElements.Y = 0;
+
+            if (highestBottomScreenSpace.HasValue)
+                bottomRightElements.Y = BottomScoringElementsHeight = -MathHelper.Clamp(DrawHeight - ToLocalSpace(highestBottomScreenSpace.Value).Y, 0, DrawHeight - bottomRightElements.DrawHeight);
+            else
+                bottomRightElements.Y = 0;
         }
 
         private void updateVisibility()
@@ -258,52 +259,33 @@ namespace osu.Game.Screens.Play
             (drawableRuleset as ICanAttachKeyCounter)?.Attach(KeyCounter);
 
             replayLoaded.BindTo(drawableRuleset.HasReplayLoaded);
-
-            Progress.BindDrawableRuleset(drawableRuleset);
         }
 
-        protected SkinnableAccuracyCounter CreateAccuracyCounter() => new SkinnableAccuracyCounter();
-
-        protected SkinnableScoreCounter CreateScoreCounter() => new SkinnableScoreCounter();
-
-        protected SkinnableComboCounter CreateComboCounter() => new SkinnableComboCounter();
-
-        protected SkinnableHealthDisplay CreateHealthDisplay() => new SkinnableHealthDisplay();
-
-        protected virtual FailingLayer CreateFailingLayer() => new FailingLayer
+        protected FailingLayer CreateFailingLayer() => new FailingLayer
         {
             ShowHealth = { BindTarget = ShowHealthbar }
         };
 
-        protected virtual KeyCounterDisplay CreateKeyCounter() => new KeyCounterDisplay
+        protected KeyCounterDisplay CreateKeyCounter() => new KeyCounterDisplay
         {
             Anchor = Anchor.BottomRight,
             Origin = Anchor.BottomRight,
         };
 
-        protected virtual SongProgress CreateProgress() => new SongProgress
-        {
-            Anchor = Anchor.BottomLeft,
-            Origin = Anchor.BottomLeft,
-            RelativeSizeAxes = Axes.X,
-        };
-
-        protected virtual HoldForMenuButton CreateHoldForMenuButton() => new HoldForMenuButton
+        protected HoldForMenuButton CreateHoldForMenuButton() => new HoldForMenuButton
         {
             Anchor = Anchor.BottomRight,
             Origin = Anchor.BottomRight,
         };
 
-        protected virtual ModDisplay CreateModsContainer() => new ModDisplay
+        protected ModDisplay CreateModsContainer() => new ModDisplay
         {
             Anchor = Anchor.TopRight,
             Origin = Anchor.TopRight,
             AutoSizeAxes = Axes.Both,
         };
 
-        protected virtual HitErrorDisplay CreateHitErrorDisplayOverlay() => new HitErrorDisplay(drawableRuleset?.FirstAvailableHitWindows);
-
-        protected virtual PlayerSettingsOverlay CreatePlayerSettingsOverlay() => new PlayerSettingsOverlay();
+        protected PlayerSettingsOverlay CreatePlayerSettingsOverlay() => new PlayerSettingsOverlay();
 
         public bool OnPressed(GlobalAction action)
         {
