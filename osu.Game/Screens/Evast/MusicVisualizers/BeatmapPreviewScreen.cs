@@ -12,7 +12,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
         {
             AddRangeInternal(new Drawable[]
             {
-                new SpaceParticlesContainer(),
+                new ParticlesContainer(),
                 new ParallaxContainer
                 {
                     ParallaxAmount = -0.0025f,

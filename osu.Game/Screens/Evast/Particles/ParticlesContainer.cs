@@ -3,44 +3,28 @@ using osu.Game.Screens.Evast.Helpers;
 
 namespace osu.Game.Screens.Evast.Particles
 {
-    public abstract class ParticlesContainer : CurrentRateContainer
+    public class ParticlesContainer : CurrentRateContainer
     {
-        /// <summary>
-        /// Number of milliseconds between addition of a new particle.
-        /// </summary>
-        private const float time_between_updates = 50;
+        private ParticlesDrawable particles;
 
-        /// <summary>
-        /// Maximum allowed amount of particles which can be shown at once.
-        /// </summary>
-        protected virtual int MaxParticlesCount => 350;
-
-        protected ParticlesContainer()
+        public ParticlesContainer()
         {
-            Anchor = Anchor.Centre;
-            Origin = Anchor.Centre;
             RelativeSizeAxes = Axes.Both;
+            Add(particles = new ParticlesDrawable());
         }
 
         protected override void LoadComplete()
         {
             base.LoadComplete();
-            generateParticles(true);
-        }
-
-        private void generateParticles(bool firstLoad)
-        {
-            var currentParticlesCount = Children.Count;
-
-            if (currentParticlesCount < MaxParticlesCount)
+            IsKiai.BindValueChanged(kiai =>
             {
-                for (int i = 0; i < MaxParticlesCount - currentParticlesCount; i++)
-                    Add(CreateParticle(firstLoad));
-            }
-
-            Scheduler.AddDelayed(() => generateParticles(false), time_between_updates);
+                if (kiai.NewValue)
+                {
+                    particles.SetRandomDirection();
+                }
+                else
+                    particles.Direction.Value = MoveDirection.Forward;
+            });
         }
-
-        protected abstract Drawable CreateParticle(bool firstLoad);
     }
 }

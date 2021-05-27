@@ -4,7 +4,7 @@
     {
         public SpaceParticlesScreen()
         {
-            AddInternal(new SpaceParticlesContainer());
+            AddInternal(new ParticlesContainer());
         }
     }
 }

@@ -25,7 +25,7 @@ namespace osu.Game.Screens.Evast.NumbersGame
         {
             AddRangeInternal(new Drawable[]
             {
-                new SpaceParticlesContainer(),
+                new ParticlesContainer(),
                 new Container
                 {
                     RelativeSizeAxes = Axes.Both,

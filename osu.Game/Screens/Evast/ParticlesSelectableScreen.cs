@@ -8,8 +8,7 @@ namespace osu.Game.Screens.Evast
     {
         protected override IReadOnlyList<Button> GetButtons() => new[]
         {
-            new Button("Space Particles", () => this.Push(new SpaceParticlesScreen())),
-            new Button("Horizontal Particles", () => this.Push(new HorizontalParticlesScreen()))
+            new Button("Space Particles", () => this.Push(new SpaceParticlesScreen()))
         };
     }
 }
