@@ -1,17 +1,8 @@
 ﻿using osu.Framework.Allocation;
 using osu.Framework.Bindables;
-using osu.Framework.Extensions.Color4Extensions;
-using osu.Framework.Graphics;
-using osu.Framework.Graphics.Containers;
-using osu.Framework.Graphics.Shapes;
 using osu.Framework.Screens;
 using osu.Game.Beatmaps;
-using osu.Game.Graphics;
-using osu.Game.Graphics.Backgrounds;
-using osu.Game.Graphics.Sprites;
 using osu.Game.Screens.Play;
-using osuTK;
-using osuTK.Graphics;
 
 namespace osu.Game.Screens.Evast
 {
@@ -37,9 +28,6 @@ namespace osu.Game.Screens.Evast
             Beatmap.BindValueChanged(b => updateComponentFromBeatmap(b.NewValue));
         }
 
-        private bool firstChange = true;
-        private BeatmapCard lastCard;
-
         private void updateComponentFromBeatmap(WorkingBeatmap beatmap)
         {
             ApplyToBackground(b =>
@@ -49,99 +37,18 @@ namespace osu.Game.Screens.Evast
                 b.BlurAmount.Value = blur;
                 b.Alpha = 1 - DimValue;
             });
-
-            if (!ShowCardOnBeatmapChange)
-                return;
-
-            if (firstChange)
-            {
-                firstChange = false;
-                return;
-            }
-
-            var card = new BeatmapCard(beatmap)
-            {
-                Origin = Anchor.TopCentre,
-                RelativePositionAxes = Axes.X,
-                X = -0.1f,
-                Margin = new MarginPadding { Top = 20 },
-                Depth = -float.MaxValue
-            };
-
-            LoadComponentAsync(card, loaded =>
-            {
-                if (lastCard != null)
-                    lastCard.MoveToX(1.2f, 600, Easing.OutQuint).Expire();
-
-                lastCard = card;
-                AddInternal(lastCard);
-                lastCard.MoveToX(0.5f, 700, Easing.OutElastic).Delay(2000).MoveToX(1.2f, 600, Easing.InQuint).Expire();
-            });
         }
 
         public override void OnEntering(IScreen last)
         {
             base.OnEntering(last);
-            firstChange = true;
             updateComponentFromBeatmap(Beatmap.Value);
         }
 
         public override void OnResuming(IScreen last)
         {
             base.OnResuming(last);
-            firstChange = true;
             updateComponentFromBeatmap(Beatmap.Value);
-        }
-
-        private class BeatmapCard : CompositeDrawable
-        {
-            public BeatmapCard(WorkingBeatmap beatmap)
-            {
-                AutoSizeAxes = Axes.Both;
-                InternalChildren = new Drawable[]
-                {
-                    new CircularContainer
-                    {
-                        RelativeSizeAxes = Axes.Both,
-                        Masking = true,
-                        Children = new Drawable[]
-                        {
-                            new BeatmapBackground(beatmap),
-                            new Box
-                            {
-                                RelativeSizeAxes = Axes.Both,
-                                Colour = Color4.Black.Opacity(0.5f)
-                            }
-                        }
-                    },
-                    new FillFlowContainer
-                    {
-                        AutoSizeAxes = Axes.Both,
-                        Anchor = Anchor.Centre,
-                        Origin = Anchor.Centre,
-                        Direction = FillDirection.Vertical,
-                        Spacing = new Vector2(0, 3),
-                        Margin = new MarginPadding { Horizontal = 20, Vertical = 5 },
-                        Children = new Drawable[]
-                        {
-                            new OsuSpriteText
-                            {
-                                Anchor = Anchor.TopCentre,
-                                Origin = Anchor.TopCentre,
-                                Font = OsuFont.GetFont(size: 22),
-                                Text = beatmap.Metadata.Title
-                            },
-                            new OsuSpriteText
-                            {
-                                Anchor = Anchor.TopCentre,
-                                Origin = Anchor.TopCentre,
-                                Font = OsuFont.GetFont(),
-                                Text = beatmap.Metadata.Artist
-                            }
-                        }
-                    }
-                };
-            }
         }
     }
 }
