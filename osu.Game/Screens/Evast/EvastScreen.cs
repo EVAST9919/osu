@@ -21,24 +21,9 @@ namespace osu.Game.Screens.Evast
 
         protected virtual bool ShowCardOnBeatmapChange => true;
 
-        protected float DimValue
-        {
-            set => dim.Alpha = 1 - value;
-        }
+        protected virtual float DimValue { get; } = 0.5f;
 
         private readonly Bindable<WorkingBeatmap> beatmap = new Bindable<WorkingBeatmap>();
-
-        private readonly Box dim;
-
-        public EvastScreen()
-        {
-            AddInternal(dim = new Box
-            {
-                RelativeSizeAxes = Axes.Both,
-                Colour = Color4.Black,
-                Alpha = 0.5f,
-            });
-        }
 
         [BackgroundDependencyLoader]
         private void load(Bindable<WorkingBeatmap> workingBeatmap)
@@ -62,6 +47,7 @@ namespace osu.Game.Screens.Evast
                 b.IgnoreUserSettings.Value = true;
                 b.Beatmap = beatmap;
                 b.BlurAmount.Value = blur;
+                b.Alpha = 1 - DimValue;
             });
 
             if (!ShowCardOnBeatmapChange)

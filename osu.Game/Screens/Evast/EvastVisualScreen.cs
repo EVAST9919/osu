@@ -12,10 +12,7 @@ namespace osu.Game.Screens.Evast
 
         public override bool CursorVisible => false;
 
-        public EvastVisualScreen()
-        {
-            DimValue = 0.25f;
-        }
+        protected override float DimValue => 0.75f;
 
         public bool OnPressed(GlobalAction action)
         {
