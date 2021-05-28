@@ -49,19 +49,19 @@ namespace osu.Game.Screens.Evast
         protected override void LoadComplete()
         {
             base.LoadComplete();
-            beatmap.BindValueChanged(onBeatmapChange);
+            Beatmap.BindValueChanged(b => updateComponentFromBeatmap(b.NewValue));
         }
 
         private bool firstChange = true;
         private BeatmapCard lastCard;
 
-        private void onBeatmapChange(ValueChangedEvent<WorkingBeatmap> beatmap)
+        private void updateComponentFromBeatmap(WorkingBeatmap beatmap)
         {
-            ApplyToBackground(backgroundModeBeatmap =>
+            ApplyToBackground(b =>
             {
-                backgroundModeBeatmap.Beatmap = beatmap.NewValue;
-                backgroundModeBeatmap.BlurAmount.Value = blur;
-                backgroundModeBeatmap.FadeTo(1, 250);
+                b.IgnoreUserSettings.Value = true;
+                b.Beatmap = beatmap;
+                b.BlurAmount.Value = blur;
             });
 
             if (!ShowCardOnBeatmapChange)
@@ -73,7 +73,7 @@ namespace osu.Game.Screens.Evast
                 return;
             }
 
-            var card = new BeatmapCard(beatmap.NewValue)
+            var card = new BeatmapCard(beatmap)
             {
                 Origin = Anchor.TopCentre,
                 RelativePositionAxes = Axes.X,
@@ -97,14 +97,14 @@ namespace osu.Game.Screens.Evast
         {
             base.OnEntering(last);
             firstChange = true;
-            beatmap.TriggerChange();
+            updateComponentFromBeatmap(Beatmap.Value);
         }
 
         public override void OnResuming(IScreen last)
         {
             base.OnResuming(last);
             firstChange = true;
-            beatmap.TriggerChange();
+            updateComponentFromBeatmap(Beatmap.Value);
         }
 
         private class BeatmapCard : CompositeDrawable

@@ -1,4 +1,6 @@
 ﻿using osu.Framework.Graphics;
+using osu.Game.Screens.Evast.Helpers;
+using osuTK;
 
 namespace osu.Game.Screens.Evast.MusicVisualizers
 {
@@ -6,77 +8,97 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
     {
         public MusicVisualizerVariationsTestScreen()
         {
-            AddRangeInternal(new Drawable[]
+            AddInternal(new Controller());
+        }
+
+        private class Controller : MusicAmplitudesProvider
+        {
+            public Controller()
             {
-                new MusicLinearVisualizer
+                RelativeSizeAxes = Axes.Both;
+                Children = new Drawable[]
                 {
-                    Anchor = Anchor.TopLeft,
-                    Origin = Anchor.TopLeft,
-                    Spacing = 3,
-                },
-                new MusicLinearVisualizer
-                {
-                    Anchor = Anchor.BottomRight,
-                    Origin = Anchor.BottomRight,
-                    Spacing = 3,
-                },
-                new MusicCircularVisualizer
-                {
-                    Anchor = Anchor.Centre,
-                    Origin = Anchor.Centre,
-                    DegreeValue = 120,
-                    X = -400,
-                    BarWidth = 2,
-                    BarsCount = 50,
-                },
-                new MusicCircularVisualizer
-                {
-                    Anchor = Anchor.Centre,
-                    Origin = Anchor.Centre,
-                    DegreeValue = 120,
-                    X = -400,
-                    Rotation = 120,
-                    BarWidth = 2,
-                    BarsCount = 50,
-                },
-                new MusicCircularVisualizer
-                {
-                    Anchor = Anchor.Centre,
-                    Origin = Anchor.Centre,
-                    DegreeValue = 120,
-                    Rotation = 240,
-                    X = -400,
-                    BarWidth = 2,
-                    BarsCount = 50,
-                },
-                new MusicCircularVisualizer
-                {
-                    Anchor = Anchor.Centre,
-                    Origin = Anchor.Centre,
-                    DegreeValue = 180,
-                    BarsCount = 50,
-                    BarWidth = 2,
-                },
-                new MusicCircularVisualizer
-                {
-                    Anchor = Anchor.Centre,
-                    Origin = Anchor.Centre,
-                    DegreeValue = 180,
-                    BarsCount = 50,
-                    BarWidth = 2,
-                    Rotation = 180,
-                },
-                new MusicCircularVisualizer
-                {
-                    Anchor = Anchor.Centre,
-                    Origin = Anchor.Centre,
-                    ValueMultiplier = 200,
-                    BarsCount = 200,
-                    CircleSize = 250,
-                    BarWidth = 1,
-                    X = 400,
-                }
-            });
+                    new LinearMusicVisualizerDrawable
+                    {
+                        BarWidth = { Value = 3 },
+                        BarCount = { Value = 500 },
+                        BarAnchor = { Value = BarAnchor.Top }
+                    },
+                    new LinearMusicVisualizerDrawable
+                    {
+                        BarWidth = { Value = 3 },
+                        BarCount = { Value = 500 },
+                        BarAnchor = { Value = BarAnchor.Bottom },
+                        Reversed = { Value = true }
+                    },
+                    new BasicMusicVisualizerDrawable
+                    {
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        DegreeValue = { Value = 120 },
+                        X = -400,
+                        BarWidth = { Value = 2 },
+                        BarCount = { Value = 50 },
+                        Size = new Vector2(250),
+                    },
+                    new BasicMusicVisualizerDrawable
+                    {
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        DegreeValue = { Value = 120 },
+                        X = -400,
+                        Rotation = 120,
+                        BarWidth = { Value = 2 },
+                        BarCount = { Value = 50 },
+                        Size = new Vector2(250),
+                    },
+                    new BasicMusicVisualizerDrawable
+                    {
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        DegreeValue = { Value = 120 },
+                        X = -400,
+                        Rotation = 240,
+                        BarWidth = { Value = 2 },
+                        BarCount = { Value = 50 },
+                        Size = new Vector2(250),
+                    },
+                    new BasicMusicVisualizerDrawable
+                    {
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        DegreeValue = { Value = 180 },
+                        BarWidth = { Value = 2 },
+                        BarCount = { Value = 50 },
+                        Size = new Vector2(250),
+                    },
+                    new BasicMusicVisualizerDrawable
+                    {
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        DegreeValue = { Value = 180 },
+                        BarWidth = { Value = 2 },
+                        BarCount = { Value = 50 },
+                        Rotation = 180,
+                        Size = new Vector2(250),
+                    },
+                    new BasicMusicVisualizerDrawable
+                    {
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        BarWidth = { Value = 2 },
+                        BarCount = { Value = 200 },
+                        Size = new Vector2(250),
+                        X = 400
+                    }
+                };
+            }
+
+            protected override void OnAmplitudesUpdate(float[] amplitudes)
+            {
+                foreach (var c in Children)
+                    ((MusicVisualizerDrawable)c).SetAmplitudes(amplitudes);
+            }
         }
     }
 }

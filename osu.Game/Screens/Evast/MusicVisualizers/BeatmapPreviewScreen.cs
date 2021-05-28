@@ -16,9 +16,16 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                 new ParallaxContainer
                 {
                     ParallaxAmount = -0.0025f,
-                    Child = new BeatmapLogo
+                    Children = new Drawable[]
                     {
-                        Anchor = Anchor.Centre,
+                        new MusicVisualizer
+                        {
+                            Anchor = Anchor.Centre
+                        },
+                        new BeatmapLogo
+                        {
+                            Anchor = Anchor.Centre,
+                        }
                     }
                 }
             });

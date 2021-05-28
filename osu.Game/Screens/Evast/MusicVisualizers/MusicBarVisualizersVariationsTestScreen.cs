@@ -1,5 +1,6 @@
 ﻿using osu.Framework.Graphics;
-using osu.Game.Screens.Evast.MusicVisualizers.Bars;
+using osu.Game.Screens.Evast.Helpers;
+using osuTK;
 
 namespace osu.Game.Screens.Evast.MusicVisualizers
 {
@@ -7,50 +8,50 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
     {
         public MusicBarVisualizersVariationsTestScreen()
         {
-            AddRangeInternal(new Drawable[]
+            AddInternal(new Controller());
+        }
+
+        private class Controller : MusicAmplitudesProvider
+        {
+            public Controller()
             {
-                new FallBarVisualizer()
+                RelativeSizeAxes = Axes.Both;
+                AddRange(new Drawable[]
                 {
-                    Anchor = Anchor.Centre,
-                    Origin = Anchor.Centre,
-                    BarsCount = 100,
-                    BarWidth = 5,
-                    CircleSize = 250,
-                    X = -400,
-                },
-                new SplittedBarVisualizer()
-                {
-                    Anchor = Anchor.Centre,
-                    Origin = Anchor.Centre,
-                    BarsCount = 100,
-                    BarWidth = 5,
-                    CircleSize = 250,
-                },
-                new CircularBarVisualizer()
-                {
-                    Anchor = Anchor.Centre,
-                    Origin = Anchor.Centre,
-                    BarsCount = 100,
-                    BarWidth = 5,
-                    CircleSize = 250,
-                    X = 400,
-                }
-            });
-        }
+                    new FallMusicVisualizerDrawable
+                    {
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        BarCount = { Value = 100 },
+                        BarWidth = { Value = 5 },
+                        Size = new Vector2(250),
+                        X = -400
+                    },
+                    new DotsMusicVisualizerDrawable
+                    {
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        BarCount = { Value = 100 },
+                        BarWidth = { Value = 5 },
+                        Size = new Vector2(250)
+                    },
+                    new RoundedMusicVisualizerDrawable
+                    {
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        BarCount = { Value = 100 },
+                        BarWidth = { Value = 5 },
+                        Size = new Vector2(250),
+                        X = 400
+                    },
+                });
+            }
 
-        private class CircularBarVisualizer : MusicCircularVisualizer
-        {
-            protected override BasicBar CreateBar() => new CircularBar();
-        }
-
-        private class SplittedBarVisualizer : MusicCircularVisualizer
-        {
-            protected override BasicBar CreateBar() => new SplittedBar();
-        }
-
-        private class FallBarVisualizer : MusicCircularVisualizer
-        {
-            protected override BasicBar CreateBar() => new FallBar();
+            protected override void OnAmplitudesUpdate(float[] amplitudes)
+            {
+                foreach (var c in Children)
+                    ((MusicVisualizerDrawable)c).SetAmplitudes(amplitudes);
+            }
         }
     }
 }

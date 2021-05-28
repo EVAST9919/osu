@@ -2,12 +2,14 @@
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Testing;
 using osu.Game.Graphics;
 using osu.Game.Graphics.Containers;
 using osu.Game.Graphics.Sprites;
+using osu.Game.Screens.Evast.Helpers;
 using osu.Game.Screens.Evast.MusicVisualizers;
-using osu.Game.Screens.Evast.MusicVisualizers.Bars;
 using osu.Game.Screens.Evast.Particles;
+using osuTK;
 using osuTK.Graphics;
 
 namespace osu.Game.Screens.Evast.NumbersGame
@@ -26,75 +28,7 @@ namespace osu.Game.Screens.Evast.NumbersGame
             AddRangeInternal(new Drawable[]
             {
                 new ParticlesContainer(),
-                new Container
-                {
-                    RelativeSizeAxes = Axes.Both,
-                    Children = new Drawable[]
-                    {
-                        new Container
-                        {
-                            Anchor = Anchor.Centre,
-                            Origin = Anchor.Centre,
-                            X = -70,
-                            RelativeSizeAxes = Axes.Both,
-                            Children = new Drawable[]
-                            {
-                                new CircularVisualizer
-                                {
-                                    IsReversed = true,
-                                    Anchor = Anchor.Centre,
-                                    Origin = Anchor.Centre,
-                                    DegreeValue = 45,
-                                    Rotation = 40,
-                                    BarWidth = 3,
-                                    BarsCount = music_visualizer_bars_count,
-                                    CircleSize = music_visualizer_radius,
-                                },
-                                new CircularVisualizer
-                                {
-                                    Anchor = Anchor.Centre,
-                                    Origin = Anchor.Centre,
-                                    DegreeValue = 45,
-                                    Rotation = 95,
-                                    BarWidth = 3,
-                                    BarsCount = music_visualizer_bars_count,
-                                    CircleSize = music_visualizer_radius,
-                                }
-                            }
-                        },
-                        new Container
-                        {
-                            Anchor = Anchor.Centre,
-                            Origin = Anchor.Centre,
-                            X = 70,
-                            RelativeSizeAxes = Axes.Both,
-                            Children = new Drawable[]
-                            {
-                                new CircularVisualizer
-                                {
-                                    IsReversed = true,
-                                    Anchor = Anchor.Centre,
-                                    Origin = Anchor.Centre,
-                                    DegreeValue = 45,
-                                    Rotation = 220,
-                                    BarWidth = 3,
-                                    BarsCount = music_visualizer_bars_count,
-                                    CircleSize = music_visualizer_radius,
-                                },
-                                new CircularVisualizer
-                                {
-                                    Anchor = Anchor.Centre,
-                                    Origin = Anchor.Centre,
-                                    DegreeValue = 45,
-                                    Rotation = 275,
-                                    BarWidth = 3,
-                                    BarsCount = music_visualizer_bars_count,
-                                    CircleSize = music_visualizer_radius,
-                                }
-                            }
-                        }
-                    }
-                },
+                new Controller(),
                 resetButton = new OsuClickableContainer
                 {
                     Anchor = Anchor.Centre,
@@ -166,9 +100,83 @@ namespace osu.Game.Screens.Evast.NumbersGame
             scoreText.Text = newScore.NewValue.ToString();
         }
 
-        private class CircularVisualizer : MusicCircularVisualizer
+        private class Controller : MusicAmplitudesProvider
         {
-            protected override BasicBar CreateBar() => new CircularBar();
+            public Controller()
+            {
+                RelativeSizeAxes = Axes.Both;
+                Children = new Drawable[]
+                {
+                    new Container
+                    {
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        X = -70,
+                        RelativeSizeAxes = Axes.Both,
+                        Children = new Drawable[]
+                        {
+                            new RoundedMusicVisualizerDrawable
+                            {
+                                Reversed = { Value = true },
+                                Anchor = Anchor.Centre,
+                                Origin = Anchor.Centre,
+                                BarCount = { Value = music_visualizer_bars_count },
+                                Size = new Vector2(music_visualizer_radius),
+                                DegreeValue = { Value = 45 },
+                                Rotation = 40,
+                                BarWidth = { Value = 3 }
+                            },
+                            new RoundedMusicVisualizerDrawable
+                            {
+                                Anchor = Anchor.Centre,
+                                Origin = Anchor.Centre,
+                                BarCount = { Value = music_visualizer_bars_count },
+                                Size = new Vector2(music_visualizer_radius),
+                                DegreeValue = { Value = 45 },
+                                Rotation = 95,
+                                BarWidth = { Value = 3 }
+                            }
+                        }
+                    },
+                    new Container
+                    {
+                        Anchor = Anchor.Centre,
+                        Origin = Anchor.Centre,
+                        X = 70,
+                        RelativeSizeAxes = Axes.Both,
+                        Children = new Drawable[]
+                        {
+                            new RoundedMusicVisualizerDrawable
+                            {
+                                Reversed = { Value = true },
+                                Anchor = Anchor.Centre,
+                                Origin = Anchor.Centre,
+                                DegreeValue = { Value = 45 },
+                                Rotation = 220,
+                                BarWidth = { Value = 3 },
+                                BarCount = { Value = music_visualizer_bars_count },
+                                Size = new Vector2(music_visualizer_radius),
+                            },
+                            new RoundedMusicVisualizerDrawable
+                            {
+                                Anchor = Anchor.Centre,
+                                Origin = Anchor.Centre,
+                                DegreeValue = { Value = 45 },
+                                Rotation = 275,
+                                BarWidth = { Value = 3 },
+                                BarCount = { Value = music_visualizer_bars_count },
+                                Size = new Vector2(music_visualizer_radius),
+                            }
+                        }
+                    }
+                };
+            }
+
+            protected override void OnAmplitudesUpdate(float[] amplitudes)
+            {
+                foreach (var c in this.ChildrenOfType<MusicVisualizerDrawable>())
+                    c.SetAmplitudes(amplitudes);
+            }
         }
     }
 }

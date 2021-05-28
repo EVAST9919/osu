@@ -1,26 +1,23 @@
 ﻿using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Game.Screens.Evast.Helpers;
 using osu.Game.Screens.Play.PlayerSettings;
+using osuTK;
 
 namespace osu.Game.Screens.Evast.MusicVisualizers
 {
     public class CircularVisualizerTestScreen : EvastTestScreen
     {
-        private MusicCircularVisualizer visualizer;
+        private BasicMusicVisualizerDrawable visualizer => controller.Visualizer;
+        private Controller controller;
         private Settings settings;
 
         protected override void AddTestObject(Container parent)
         {
             parent.Children = new Drawable[]
             {
-                visualizer = new MusicCircularVisualizer()
-                {
-                    Anchor = Anchor.Centre,
-                    Origin = Anchor.Centre,
-                    BarWidth = 2,
-                    CircleSize = 250,
-                },
+                controller = new Controller()
             };
         }
 
@@ -29,68 +26,65 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
             parent.Children = new Drawable[]
             {
                 settings = new Settings(
-                    visualizer.ValueMultiplier,
-                    visualizer.Smoothness,
-                    visualizer.BarWidth,
-                    visualizer.CircleSize,
-                    visualizer.BarsCount,
-                    visualizer.DegreeValue,
-                    visualizer.IsReversed)
+                    visualizer.HeightMultiplier.Value,
+                    visualizer.Decay.Value,
+                    visualizer.BarWidth.Value,
+                    visualizer.Size.X,
+                    visualizer.BarCount.Value,
+                    visualizer.DegreeValue.Value,
+                    visualizer.Reversed.Value)
             };
         }
 
         protected override void Connect()
         {
-            settings.MultiplierBindable.ValueChanged += newValue => visualizer.ValueMultiplier = newValue.NewValue;
-            settings.SmoothnessBindable.ValueChanged += newValue => visualizer.Smoothness = newValue.NewValue;
-            settings.WidthBindable.ValueChanged += newValue => visualizer.BarWidth = newValue.NewValue;
-            settings.ReverseBindable.ValueChanged += newValue => visualizer.IsReversed = newValue.NewValue;
-            settings.SizeBindable.ValueChanged += newValue => visualizer.CircleSize = newValue.NewValue;
-            settings.AmountBindable.ValueChanged += newValue => visualizer.BarsCount = newValue.NewValue;
-            settings.DegreeBindable.ValueChanged += newValue => visualizer.DegreeValue = newValue.NewValue;
+            settings.MultiplierBindable.ValueChanged += newValue => visualizer.HeightMultiplier.Value = newValue.NewValue;
+            settings.SmoothnessBindable.ValueChanged += newValue => visualizer.Decay.Value = newValue.NewValue;
+            settings.WidthBindable.ValueChanged += newValue => visualizer.BarWidth.Value = newValue.NewValue;
+            settings.ReverseBindable.ValueChanged += newValue => visualizer.Reversed.Value = newValue.NewValue;
+            settings.SizeBindable.ValueChanged += newValue => visualizer.Size = new Vector2(newValue.NewValue);
+            settings.AmountBindable.ValueChanged += newValue => visualizer.BarCount.Value = newValue.NewValue;
+            settings.DegreeBindable.ValueChanged += newValue => visualizer.DegreeValue.Value = newValue.NewValue;
         }
 
         private class Settings : PlayerSettingsGroup
         {
-            public readonly BindableFloat MultiplierBindable;
+            public readonly BindableInt MultiplierBindable;
             public readonly BindableInt SmoothnessBindable;
-            public readonly BindableFloat WidthBindable;
+            public readonly BindableDouble WidthBindable;
             public readonly BindableBool ReverseBindable;
             public readonly BindableFloat SizeBindable;
             public readonly BindableInt AmountBindable;
             public readonly BindableFloat DegreeBindable;
 
-            public Settings(float multiplier, int smoothnessValue, float width, float circleSize, int barsAmount, float degreeValue, bool reverse)
+            public Settings(int multiplier, int decay, double width, float circleSize, int count, float degreeValue, bool reverse)
                 : base("settings")
             {
                 Children = new Drawable[]
                 {
-                    new PlayerSliderBar<float>
+                    new PlayerSliderBar<int>
                     {
-                        LabelText = "Amplitude Multiplier",
-                        Current = MultiplierBindable = new BindableFloat(multiplier)
+                        LabelText = "Height Multiplier",
+                        Current = MultiplierBindable = new BindableInt(multiplier)
                         {
-                            Default = multiplier,
                             MinValue = 0,
                             MaxValue = 1000,
                         }
                     },
                     new PlayerSliderBar<int>
                     {
-                        LabelText = "Smoothness Value",
-                        Current = SmoothnessBindable = new BindableInt(smoothnessValue)
+                        LabelText = "Decay Value",
+                        Current = SmoothnessBindable = new BindableInt(decay)
                         {
-                            Default = smoothnessValue,
                             MinValue = 1,
                             MaxValue = 1000,
                         }
                     },
-                    new PlayerSliderBar<float>
+                    new PlayerSliderBar<double>
                     {
                         LabelText = "Bar Width",
-                        Current = WidthBindable = new BindableFloat(width)
+                        Current = WidthBindable = new BindableDouble(width)
                         {
-                            Default = width,
                             MinValue = 1,
                             MaxValue = 50,
                         }
@@ -100,19 +94,17 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                         LabelText = "Circle Size",
                         Current = SizeBindable = new BindableFloat(circleSize)
                         {
-                            Default = circleSize,
                             MinValue = 0,
                             MaxValue = 500,
                         }
                     },
                     new PlayerSliderBar<int>
                     {
-                        LabelText = "Bars Amount",
-                        Current = AmountBindable = new BindableInt(barsAmount)
+                        LabelText = "Bar Count",
+                        Current = AmountBindable = new BindableInt(count)
                         {
-                            Default = barsAmount,
                             MinValue = 1,
-                            MaxValue = 200,
+                            MaxValue = 3000,
                         }
                     },
                     new PlayerSliderBar<float>
@@ -120,7 +112,6 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                         LabelText = "Degree Value",
                         Current = DegreeBindable = new BindableFloat(degreeValue)
                         {
-                            Default = degreeValue,
                             MinValue = 0,
                             MaxValue = 360,
                         }
@@ -131,6 +122,27 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                         Current = ReverseBindable = new BindableBool(reverse) { Default = reverse }
                     }
                 };
+            }
+        }
+
+        private class Controller : MusicAmplitudesProvider
+        {
+            public readonly BasicMusicVisualizerDrawable Visualizer;
+
+            public Controller()
+            {
+                RelativeSizeAxes = Axes.Both;
+                Child = Visualizer = new BasicMusicVisualizerDrawable
+                {
+                    Anchor = Anchor.Centre,
+                    Origin = Anchor.Centre,
+                    BarWidth = { Value = 2 },
+                    Size = new Vector2(250)
+                };
+            }
+            protected override void OnAmplitudesUpdate(float[] amplitudes)
+            {
+                Visualizer.SetAmplitudes(amplitudes);
             }
         }
     }
