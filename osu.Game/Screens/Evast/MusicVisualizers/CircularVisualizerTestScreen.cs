@@ -1,6 +1,5 @@
 ﻿using osu.Framework.Bindables;
 using osu.Framework.Graphics;
-using osu.Framework.Graphics.Containers;
 using osu.Game.Screens.Evast.Helpers;
 using osu.Game.Screens.Play.PlayerSettings;
 using osuTK;
@@ -13,19 +12,11 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
         private Controller controller;
         private Settings settings;
 
-        protected override void AddTestObject(Container parent)
-        {
-            parent.Children = new Drawable[]
-            {
-                controller = new Controller()
-            };
-        }
+        protected override Drawable CreateTestObject() => controller = new Controller();
 
-        protected override void AddSettings(FillFlowContainer parent)
+        protected override Drawable[] CreateSettings() => new Drawable[]
         {
-            parent.Children = new Drawable[]
-            {
-                settings = new Settings(
+            settings = new Settings(
                     visualizer.HeightMultiplier.Value,
                     visualizer.Decay.Value,
                     visualizer.BarWidth.Value,
@@ -33,8 +24,7 @@ namespace osu.Game.Screens.Evast.MusicVisualizers
                     visualizer.BarCount.Value,
                     visualizer.DegreeValue.Value,
                     visualizer.Reversed.Value)
-            };
-        }
+        };
 
         protected override void Connect()
         {

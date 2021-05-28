@@ -1,5 +1,4 @@
 ﻿using osu.Framework.Graphics;
-using osu.Framework.Graphics.Containers;
 using osu.Game.Graphics.UserInterface;
 using osu.Game.Screens.Play.PlayerSettings;
 
@@ -11,23 +10,17 @@ namespace osu.Game.Screens.Evast.Pixels.Snake
         private SpeedSettings speedSettings;
         private GeneralSettings generalSettings;
 
-        protected override void AddTestObject(Container parent)
+        protected override Drawable CreateTestObject() => playfield = new SnakePlayfield
         {
-            parent.Child = playfield = new SnakePlayfield
-            {
-                Anchor = Anchor.Centre,
-                Origin = Anchor.Centre,
-            };
-        }
+            Anchor = Anchor.Centre,
+            Origin = Anchor.Centre,
+        };
 
-        protected override void AddSettings(FillFlowContainer parent)
+        protected override Drawable[] CreateSettings() => new Drawable[]
         {
-            parent.Children = new Drawable[]
-            {
-                generalSettings = new GeneralSettings(),
-                speedSettings = new SpeedSettings(playfield.UpdateDelay),
-            };
-        }
+            generalSettings = new GeneralSettings(),
+            speedSettings = new SpeedSettings(playfield.UpdateDelay)
+        };
 
         protected override void Connect()
         {

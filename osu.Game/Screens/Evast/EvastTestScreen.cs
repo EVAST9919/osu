@@ -8,36 +8,43 @@ namespace osu.Game.Screens.Evast
     {
         protected EvastTestScreen()
         {
-            Container objectParent;
-            FillFlowContainer settingParent;
-
-            AddRangeInternal(new Drawable[]
+            AddInternal(new GridContainer
             {
-                objectParent = new Container
+                RelativeSizeAxes = Axes.Both,
+                RowDimensions = new[]
                 {
-                    Anchor = Anchor.TopLeft,
-                    Origin = Anchor.TopLeft,
-                    RelativeSizeAxes = Axes.Both,
-                    Width = 0.7f
+                    new Dimension(),
                 },
-                settingParent = new FillFlowContainer
+                ColumnDimensions = new[]
                 {
-                    Anchor = Anchor.TopRight,
-                    Origin = Anchor.TopRight,
-                    AutoSizeAxes = Axes.Both,
-                    Direction = FillDirection.Vertical,
-                    Spacing = new Vector2(0, 20),
-                    Margin = new MarginPadding(20)
+                    new Dimension(),
+                    new Dimension(GridSizeMode.AutoSize)
                 },
+                Content = new[]
+                {
+                    new Drawable[]
+                    {
+                        CreateTestObject(),
+                        new FillFlowContainer
+                        {
+                            Anchor = Anchor.TopRight,
+                            Origin = Anchor.TopRight,
+                            AutoSizeAxes = Axes.Both,
+                            Direction = FillDirection.Vertical,
+                            Spacing = new Vector2(0, 20),
+                            Margin = new MarginPadding(20),
+                            Children = CreateSettings()
+                        }
+                    }
+                }
             });
 
-            AddTestObject(objectParent);
-            AddSettings(settingParent);
             Connect();
         }
 
-        protected abstract void AddTestObject(Container parent);
-        protected abstract void AddSettings(FillFlowContainer parent);
+        protected abstract Drawable CreateTestObject();
+        protected abstract Drawable[] CreateSettings();
+
         protected abstract void Connect();
     }
 }
