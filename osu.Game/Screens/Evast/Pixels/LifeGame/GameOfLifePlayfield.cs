@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.OpenGL.Vertices;
@@ -6,10 +7,13 @@ using osu.Framework.Graphics.Primitives;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.Textures;
+using osu.Framework.Input.Events;
 using osu.Framework.Layout;
 using osu.Framework.Utils;
+using osu.Game.Screens.Evast.Helpers;
 using osuTK;
 using osuTK.Graphics;
+using osuTK.Input;
 
 namespace osu.Game.Screens.Evast.Pixels.LifeGame
 {
@@ -218,6 +222,43 @@ namespace osu.Game.Screens.Evast.Pixels.LifeGame
         }
 
         private int getArrayIndex(int x, int y) => y * sizeY + x;
+
+        private int getArrayIndexAtAbsolutePosition(Vector2 position)
+        {
+            var cellCoords = new Vector2(MathExtensions.Map(position.X, 0, DrawWidth, 0, sizeX), MathExtensions.Map(position.Y, 0, DrawHeight, 0, sizeY));
+            return getArrayIndex((int)cellCoords.X, (int)cellCoords.Y);
+        }
+
+        protected override bool OnMouseMove(MouseMoveEvent e)
+        {
+            var state = e.CurrentState.Mouse;
+
+            if (state.Buttons.Contains(MouseButton.Left))
+            {
+                var index = getArrayIndexAtAbsolutePosition(e.MousePosition);
+
+                if (!cells[index].IsAlive)
+                {
+                    cells[index].IsAlive = true;
+                    layout.Invalidate();
+                    return true;
+                }
+            }
+
+            if (state.Buttons.Contains(MouseButton.Right))
+            {
+                var index = getArrayIndexAtAbsolutePosition(e.MousePosition);
+
+                if (cells[index].IsAlive)
+                {
+                    cells[index].IsAlive = false;
+                    layout.Invalidate();
+                    return true;
+                }
+            }
+
+            return true;
+        }
 
         private class GamePlayfield : Sprite
         {

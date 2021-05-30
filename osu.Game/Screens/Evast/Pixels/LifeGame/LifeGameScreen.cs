@@ -11,7 +11,7 @@ namespace osu.Game.Screens.Evast.Pixels.LifeGame
         {
             Add(new ContentAdjustmentContainer
             {
-                Child = playfield = new GameOfLifePlayfield(100, 100)
+                Child = playfield = new GameOfLifePlayfield(300, 300)
                 {
                     RelativeSizeAxes = Axes.Both
                 }
