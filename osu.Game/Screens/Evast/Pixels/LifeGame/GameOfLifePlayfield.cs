@@ -15,8 +15,8 @@ namespace osu.Game.Screens.Evast.Pixels.LifeGame
 {
     public class GameOfLifePlayfield : Container
     {
-        private readonly Cell[,] cells;
-        private readonly Cell[,] lastGenCells;
+        private readonly Cell[] cells;
+        private readonly Cell[] lastGenCells;
 
         public double UpdateDelay { set; get; } = 200;
 
@@ -31,16 +31,13 @@ namespace osu.Game.Screens.Evast.Pixels.LifeGame
             this.sizeX = sizeX;
             this.sizeY = sizeY;
 
-            cells = new Cell[sizeX, sizeY];
-            lastGenCells = new Cell[sizeX, sizeY];
+            cells = new Cell[sizeX * sizeY];
+            lastGenCells = new Cell[sizeX * sizeY];
 
-            for (int y = 0; y < sizeY; y++)
+            for (int i = 0; i < cells.Length; i++)
             {
-                for (int x = 0; x < sizeX; x++)
-                {
-                    cells[x, y] = new Cell();
-                    lastGenCells[x, y] = new Cell();
-                }
+                cells[i] = new Cell();
+                lastGenCells[i] = new Cell();
             }
 
             Children = new Drawable[]
@@ -89,21 +86,19 @@ namespace osu.Game.Screens.Evast.Pixels.LifeGame
         {
             ClearMap();
 
-            for (int y = 0; y < sizeY; y++)
-                for (int x = 0; x < sizeX; x++)
-                    cells[x, y].IsAlive = RNG.NextBool();
+            for (int i = 0; i < cells.Length; i++)
+                cells[i].IsAlive = RNG.NextBool();
 
             layout.Invalidate();
         }
 
         public void ClearMap()
         {
-            for (int y = 0; y < sizeY; y++)
-                for (int x = 0; x < sizeX; x++)
-                {
-                    lastGenCells[x, y].IsAlive = false;
-                    cells[x, y].IsAlive = false;
-                }
+            for (int i = 0; i < cells.Length; i++)
+            {
+                lastGenCells[i].IsAlive = false;
+                cells[i].IsAlive = false;
+            }
 
             layout.Invalidate();
         }
@@ -112,21 +107,21 @@ namespace osu.Game.Screens.Evast.Pixels.LifeGame
         {
             saveLastGeneration();
 
-            for (int y = 0; y < sizeY; y++)
+            for (int i = 0; i < cells.Length; i++)
             {
-                for (int x = 0; x < sizeX; x++)
+                int x = i < sizeX ? i : i % sizeX;
+                int y = i / sizeX;
+
+                int nearbyCellsAmount = countNeighbours(x, y);
+
+                if (!lastGenCells[i].IsAlive && nearbyCellsAmount == 3)
                 {
-                    int nearbyCellsAmount = countNeighbours(x, y);
-
-                    if (!lastGenCells[x, y].IsAlive && nearbyCellsAmount == 3)
-                    {
-                        cells[x, y].IsAlive = true;
-                        continue;
-                    }
-
-                    if (lastGenCells[x, y].IsAlive && !(nearbyCellsAmount == 2 || nearbyCellsAmount == 3))
-                        cells[x, y].IsAlive = false;
+                    cells[i].IsAlive = true;
+                    continue;
                 }
+
+                if (lastGenCells[i].IsAlive && !(nearbyCellsAmount == 2 || nearbyCellsAmount == 3))
+                    cells[i].IsAlive = false;
             }
 
             layout.Invalidate();
@@ -135,9 +130,8 @@ namespace osu.Game.Screens.Evast.Pixels.LifeGame
 
         private void saveLastGeneration()
         {
-            for (int y = 0; y < sizeY; y++)
-                for (int x = 0; x < sizeX; x++)
-                    lastGenCells[x, y].IsAlive = cells[x, y].IsAlive;
+            for (int i = 0; i < cells.Length; i++)
+                lastGenCells[i].IsAlive = cells[i].IsAlive;
         }
 
         private int countNeighbours(int x, int y)
@@ -153,12 +147,12 @@ namespace osu.Game.Screens.Evast.Pixels.LifeGame
             if (checkableY < 0)
                 checkableY = sizeY - 1;
 
-            if (lastGenCells[checkableX, checkableY].IsAlive)
+            if (lastGenCells[getArrayIndex(checkableX, checkableY)].IsAlive)
                 amount++;
 
             ////
 
-            if (lastGenCells[x, checkableY].IsAlive)
+            if (lastGenCells[getArrayIndex(x, checkableY)].IsAlive)
                 amount++;
 
             ////
@@ -168,7 +162,7 @@ namespace osu.Game.Screens.Evast.Pixels.LifeGame
             if (checkableX > sizeX - 1)
                 checkableX = 0;
 
-            if (lastGenCells[checkableX, checkableY].IsAlive)
+            if (lastGenCells[getArrayIndex(checkableX, checkableY)].IsAlive)
                 amount++;
 
             ////
@@ -178,7 +172,7 @@ namespace osu.Game.Screens.Evast.Pixels.LifeGame
             if (checkableX < 0)
                 checkableX = sizeX - 1;
 
-            if (lastGenCells[checkableX, y].IsAlive)
+            if (lastGenCells[getArrayIndex(checkableX, y)].IsAlive)
                 amount++;
 
             ////
@@ -188,7 +182,7 @@ namespace osu.Game.Screens.Evast.Pixels.LifeGame
             if (checkableX > sizeX - 1)
                 checkableX = 0;
 
-            if (lastGenCells[checkableX, y].IsAlive)
+            if (lastGenCells[getArrayIndex(checkableX, y)].IsAlive)
                 amount++;
 
             ////
@@ -201,12 +195,12 @@ namespace osu.Game.Screens.Evast.Pixels.LifeGame
             if (checkableY > sizeY - 1)
                 checkableY = 0;
 
-            if (lastGenCells[checkableX, checkableY].IsAlive)
+            if (lastGenCells[getArrayIndex(checkableX, checkableY)].IsAlive)
                 amount++;
 
             ////
 
-            if (lastGenCells[x, checkableY].IsAlive)
+            if (lastGenCells[getArrayIndex(x, checkableY)].IsAlive)
                 amount++;
 
             ////
@@ -216,18 +210,20 @@ namespace osu.Game.Screens.Evast.Pixels.LifeGame
             if (checkableX > sizeX - 1)
                 checkableX = 0;
 
-            if (lastGenCells[checkableX, checkableY].IsAlive)
+            if (lastGenCells[getArrayIndex(checkableX, checkableY)].IsAlive)
                 amount++;
             ////
 
             return amount;
         }
 
+        private int getArrayIndex(int x, int y) => y * sizeY + x;
+
         private class GamePlayfield : Sprite
         {
             protected override DrawNode CreateDrawNode() => new GamePlayfieldDrawNode(this);
 
-            private Cell[,] cells;
+            private Cell[] cells;
             private readonly int sizeX;
             private readonly int sizeY;
 
@@ -239,7 +235,7 @@ namespace osu.Game.Screens.Evast.Pixels.LifeGame
                 RelativeSizeAxes = Axes.Both;
             }
 
-            public void UpdateState(Cell[,] cells)
+            public void UpdateState(Cell[] cells)
             {
                 this.cells = cells;
             }
@@ -253,7 +249,7 @@ namespace osu.Game.Screens.Evast.Pixels.LifeGame
                 {
                 }
 
-                private Cell[,] cells;
+                private Cell[] cells;
                 private int sizeX;
                 private int sizeY;
                 private Vector2 drawSize;
@@ -275,25 +271,27 @@ namespace osu.Game.Screens.Evast.Pixels.LifeGame
 
                     var size = new Vector2(drawSize.X / sizeX, drawSize.Y / sizeY);
 
-                    for (int y = 0; y < sizeY; y++)
-                        for (int x = 0; x < sizeX; x++)
-                        {
-                            if (!cells[x, y].IsAlive)
-                                continue;
+                    for (int i = 0; i < cells.Length; i++)
+                    {
+                        if (!cells[i].IsAlive)
+                            continue;
 
-                            var position = new Vector2(x * size.X, y * size.Y);
+                        int x = i < sizeX ? i : i % sizeX;
+                        int y = i / sizeX;
 
-                            var rectangle = new RectangleF(position, size);
+                        var position = new Vector2(x * size.X, y * size.Y);
 
-                            var quad = new Quad(
-                                Vector2Extensions.Transform(rectangle.TopLeft, DrawInfo.Matrix),
-                                Vector2Extensions.Transform(rectangle.TopRight, DrawInfo.Matrix),
-                                Vector2Extensions.Transform(rectangle.BottomLeft, DrawInfo.Matrix),
-                                Vector2Extensions.Transform(rectangle.BottomRight, DrawInfo.Matrix)
-                            );
+                        var rectangle = new RectangleF(position, size);
 
-                            DrawQuad(Texture, quad, Color4.White, null, vertexAction);
-                        }
+                        var quad = new Quad(
+                            Vector2Extensions.Transform(rectangle.TopLeft, DrawInfo.Matrix),
+                            Vector2Extensions.Transform(rectangle.TopRight, DrawInfo.Matrix),
+                            Vector2Extensions.Transform(rectangle.BottomLeft, DrawInfo.Matrix),
+                            Vector2Extensions.Transform(rectangle.BottomRight, DrawInfo.Matrix)
+                        );
+
+                        DrawQuad(Texture, quad, Color4.White, null, vertexAction);
+                    }
                 }
             }
         }
