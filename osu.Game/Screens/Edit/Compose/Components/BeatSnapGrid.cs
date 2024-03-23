@@ -146,7 +146,7 @@ namespace osu.Game.Screens.Edit.Compose.Components
             foreach (var grid in grids)
             {
                 // required to update ScrollingHitObjectContainer's cache.
-                grid.UpdateSubTree();
+                grid.UpdateSubTree(this, null);
 
                 foreach (var line in grid.Objects.OfType<DrawableGridLine>())
                 {

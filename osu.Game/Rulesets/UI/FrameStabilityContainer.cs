@@ -9,6 +9,7 @@ using osu.Framework.Audio;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Primitives;
 using osu.Framework.Logging;
 using osu.Framework.Testing;
 using osu.Framework.Timing;
@@ -105,7 +106,7 @@ namespace osu.Game.Rulesets.UI
             Clock = this;
         }
 
-        public override bool UpdateSubTree()
+        public override bool UpdateSubTree(Drawable source, RectangleF? maskingBounds)
         {
             stopwatch.Restart();
 
@@ -118,8 +119,7 @@ namespace osu.Game.Rulesets.UI
                 if (state == PlaybackState.NotValid)
                     break;
 
-                base.UpdateSubTree();
-                UpdateSubTreeMasking(this, ScreenSpaceDrawQuad.AABBFloat);
+                base.UpdateSubTree(this, ScreenSpaceDrawQuad.AABBFloat);
             } while (state == PlaybackState.RequiresCatchUp && stopwatch.ElapsedMilliseconds < max_catchup_milliseconds);
 
             return true;

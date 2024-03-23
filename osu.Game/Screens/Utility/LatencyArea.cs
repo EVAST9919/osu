@@ -7,6 +7,7 @@ using osu.Framework.Bindables;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Cursor;
+using osu.Framework.Graphics.Primitives;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Input.Events;
 using osu.Game.Graphics.Cursor;
@@ -140,7 +141,7 @@ namespace osu.Game.Screens.Utility
 
         private double lastFrameTime;
 
-        public override bool UpdateSubTree()
+        public override bool UpdateSubTree(Drawable source, RectangleF? maskingBounds)
         {
             double elapsed = Clock.CurrentTime - lastFrameTime;
             if (TargetFrameRate.HasValue && elapsed < 1000.0 / TargetFrameRate)
@@ -148,7 +149,7 @@ namespace osu.Game.Screens.Utility
 
             lastFrameTime = Clock.CurrentTime;
 
-            return base.UpdateSubTree();
+            return base.UpdateSubTree(source, maskingBounds);
         }
     }
 }
