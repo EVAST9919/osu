@@ -23,6 +23,9 @@ namespace osu.Game.Rulesets.UI
 
         public IEnumerable<DrawableHitObject> AliveObjects => AliveEntries.Values.OrderBy(h => h.HitObject.StartTime);
 
+        // Alive hitobjects should never be masked away
+        protected override bool PropagateChildrenMasking => false;
+
         /// <summary>
         /// Invoked when a <see cref="DrawableHitObject"/> is judged.
         /// </summary>
