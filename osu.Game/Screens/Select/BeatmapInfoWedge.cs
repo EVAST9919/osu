@@ -104,6 +104,8 @@ namespace osu.Game.Screens.Select
 
         public override bool IsPresent => base.IsPresent || DisplayedContent == null; // Visibility is updated in the LoadComponentAsync callback
 
+        protected override bool PropagateChildrenMasking => false;
+
         private Container loadingInfo;
 
         private void updateDisplay()

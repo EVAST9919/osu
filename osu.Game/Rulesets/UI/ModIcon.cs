@@ -210,6 +210,8 @@ namespace osu.Game.Rulesets.UI
             extendedBackground.Colour = Selected.Value ? backgroundColour.Darken(2.4f) : backgroundColour.Darken(2.8f);
         }
 
+        protected override bool PropagateChildrenMasking => false;
+
         protected override void Dispose(bool isDisposing)
         {
             base.Dispose(isDisposing);

@@ -14,6 +14,8 @@ namespace osu.Game.Screens.Edit.Compose.Components.Timeline
     /// </summary>
     public partial class TimelineControlPointDisplay : TimelinePart<TimelineControlPointGroup>
     {
+        protected override bool PropagateChildrenMasking => false;
+
         [Resolved]
         private Timeline timeline { get; set; } = null!;
 

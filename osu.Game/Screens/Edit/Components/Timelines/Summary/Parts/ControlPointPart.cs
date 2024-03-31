@@ -15,6 +15,8 @@ namespace osu.Game.Screens.Edit.Components.Timelines.Summary.Parts
     /// </summary>
     public partial class ControlPointPart : TimelinePart<GroupVisualisation>
     {
+        protected override bool PropagateChildrenMasking => false;
+
         private readonly IBindableList<ControlPointGroup> controlPointGroups = new BindableList<ControlPointGroup>();
 
         protected override void LoadBeatmap(EditorBeatmap beatmap)

@@ -103,5 +103,7 @@ namespace osu.Game.Online.Leaderboards
                     return Color4Extensions.FromHex(@"CC3333");
             }
         }
+
+        protected override bool PropagateChildrenMasking => false;
     }
 }

@@ -107,5 +107,7 @@ namespace osu.Game.Rulesets.UI
             modIcon?.FadeColour(Active.Value ? activeForegroundColour : inactiveForegroundColour, 200, Easing.OutQuint);
             background.FadeColour(Active.Value ? activeBackgroundColour : inactiveBackgroundColour, 200, Easing.OutQuint);
         }
+
+        protected override bool PropagateChildrenMasking => false;
     }
 }

@@ -122,6 +122,8 @@ namespace osu.Game.Graphics.UserInterface
             }
         }
 
+        protected override bool PropagateChildrenMasking => false;
+
         public partial class DefaultStar : Star
         {
             private const double scaling_duration = 1000;

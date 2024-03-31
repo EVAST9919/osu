@@ -81,6 +81,8 @@ namespace osu.Game.Beatmaps.Drawables
             }
         }
 
+        protected override bool PropagateChildrenMasking => false;
+
         private partial class RulesetDifficultyGroup : FillFlowContainer
         {
             private readonly int rulesetId;

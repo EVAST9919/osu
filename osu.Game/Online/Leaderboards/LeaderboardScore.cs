@@ -368,6 +368,8 @@ namespace osu.Game.Online.Leaderboards
                     },
                 };
             }
+
+            protected override bool PropagateChildrenMasking => false;
         }
 
         private partial class RankLabel : Container, IHasTooltip

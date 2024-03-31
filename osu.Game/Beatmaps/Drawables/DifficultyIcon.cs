@@ -129,6 +129,8 @@ namespace osu.Game.Beatmaps.Drawables
             return new SpriteIcon { Icon = FontAwesome.Regular.QuestionCircle };
         }
 
+        protected override bool PropagateChildrenMasking => false;
+
         ITooltip<DifficultyIconTooltipContent> IHasCustomTooltip<DifficultyIconTooltipContent>.
             GetCustomTooltip() => new DifficultyIconTooltip();
 
