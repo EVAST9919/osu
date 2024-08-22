@@ -11,7 +11,6 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Primitives;
 using osu.Framework.Graphics.Rendering;
-using osu.Framework.Graphics.Rendering.Vertices;
 using osu.Framework.Graphics.Shaders;
 using osu.Framework.Graphics.Textures;
 using osu.Game.Beatmaps;
@@ -170,8 +169,6 @@ namespace osu.Game.Screens.Menu
 
             private readonly float[] audioData = new float[256];
 
-            private IVertexBatch<TexturedVertex2D>? vertexBatch;
-
             public VisualisationDrawNode(LogoVisualisation source)
                 : base(source)
             {
@@ -191,8 +188,6 @@ namespace osu.Game.Screens.Menu
             protected override void Draw(IRenderer renderer)
             {
                 base.Draw(renderer);
-
-                vertexBatch ??= renderer.CreateQuadBatch<TexturedVertex2D>(100, 10);
 
                 shader.Bind();
 
@@ -231,21 +226,12 @@ namespace osu.Game.Screens.Menu
                             texture,
                             rectangle,
                             colourInfo,
-                            null,
-                            vertexBatch.AddAction,
                             // barSize by itself will make it smooth more in the X axis than in the Y axis, this reverts that.
-                            Vector2.Divide(inflation, barSize.Yx));
+                            inflationPercentage: Vector2.Divide(inflation, barSize.Yx));
                     }
                 }
 
                 shader.Unbind();
-            }
-
-            protected override void Dispose(bool isDisposing)
-            {
-                base.Dispose(isDisposing);
-
-                vertexBatch?.Dispose();
             }
         }
     }
