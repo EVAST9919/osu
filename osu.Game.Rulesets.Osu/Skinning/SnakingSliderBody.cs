@@ -2,7 +2,6 @@
 // See the LICENCE file in the repository root for full licence text.
 
 using System;
-using System.Collections.Generic;
 using osu.Framework.Allocation;
 using osu.Framework.Bindables;
 using osu.Framework.Graphics;
@@ -19,8 +18,6 @@ namespace osu.Game.Rulesets.Osu.Skinning
     /// </summary>
     public abstract partial class SnakingSliderBody : SliderBody, ISliderProgress
     {
-        public readonly List<Vector2> CurrentCurve = new List<Vector2>();
-
         public readonly Bindable<bool> SnakingIn = new Bindable<bool>();
         public readonly Bindable<bool> SnakingOut = new Bindable<bool>();
 
@@ -105,8 +102,7 @@ namespace osu.Game.Rulesets.Osu.Skinning
                 return;
 
             // Generate the entire curve
-            drawableSlider.HitObject.Path.GetPathToProgress(CurrentCurve, 0, 1);
-            SetVertices(CurrentCurve);
+            SetVertices(drawableSlider.HitObject.Path.CalculatedPath);
 
             // Force the body to be the final path size to avoid excessive autosize computations
             Path.AutoSizeAxes = Axes.Both;
@@ -150,9 +146,8 @@ namespace osu.Game.Rulesets.Osu.Skinning
             SnakedStart = p0;
             SnakedEnd = p1;
 
-            drawableSlider.HitObject.Path.GetPathToProgress(CurrentCurve, p0, p1);
-
-            SetVertices(CurrentCurve);
+            Path.StartProgress = (float)p0;
+            Path.EndProgress = (float)p1;
 
             // The bounding box of the path expands as it snakes, which in turn shifts the position of the path.
             // Depending on the direction of expansion, it may appear as if the path is expanding towards the position of the slider

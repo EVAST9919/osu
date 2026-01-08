@@ -49,7 +49,8 @@ namespace osu.Game.Rulesets.Catch.Edit.Blueprints.Components
             vertices.Clear();
 
             var sliderVertices = new List<Vector2>();
-            hitObject.Path.GetPathToProgress(sliderVertices, 0, 1);
+            sliderVertices.Clear();
+            sliderVertices.AddRange(hitObject.Path.CalculatedPath);
 
             if (sliderVertices.Count == 0)
                 return;

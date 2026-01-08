@@ -46,14 +46,6 @@ namespace osu.Game.Rulesets.Objects
         private readonly Cached pathCache = new Cached();
 
         /// <summary>
-        /// Any additional length of the path which was optimised out during piecewise approximation, but should still be considered as part of <see cref="calculatedLength"/>.
-        /// </summary>
-        /// <remarks>
-        /// This is a hack for Catmull paths.
-        /// </remarks>
-        private double optimisedLength;
-
-        /// <summary>
         /// The final calculated length of the path.
         /// </summary>
         private double calculatedLength;
@@ -137,21 +129,15 @@ namespace osu.Game.Rulesets.Objects
             }
         }
 
-        private bool optimiseCatmull;
-
         /// <summary>
-        /// Whether to optimise Catmull path segments, usually resulting in removing bulbs around stacked knots.
+        /// Path vertices after lengthening/shortening to account for <see cref="ExpectedDistance"/>.
         /// </summary>
-        /// <remarks>
-        /// This changes the path shape and should therefore not be used.
-        /// </remarks>
-        public bool OptimiseCatmull
+        public IReadOnlyList<Vector2> CalculatedPath
         {
-            get => optimiseCatmull;
-            set
+            get
             {
-                optimiseCatmull = value;
-                invalidate();
+                ensureValid();
+                return calculatedPath;
             }
         }
 
@@ -276,7 +262,6 @@ namespace osu.Game.Rulesets.Objects
         {
             calculatedPath.Clear();
             segmentEnds.Clear();
-            optimisedLength = 0;
 
             if (ControlPoints.Count == 0)
                 return;
@@ -357,63 +342,44 @@ namespace osu.Game.Rulesets.Objects
                 }
 
                 case SplineType.Catmull:
-                {
-                    List<Vector2> subPath = PathApproximator.CatmullToPiecewiseLinear(subControlPoints);
-
-                    if (!OptimiseCatmull)
-                        return subPath;
-
-                    // At draw time, osu!stable optimises paths by only keeping piecewise segments that are 6px apart.
-                    // For the most part we don't care about this optimisation, and its additional heuristics are hard to reproduce in every implementation.
-                    //
-                    // However, it matters for Catmull paths which form "bulbs" around sequential knots with identical positions,
-                    // so we'll apply a very basic form of the optimisation here and return a length representing the optimised portion.
-                    // The returned length is important so that the optimisation doesn't cause the path to get extended to match the value of ExpectedDistance.
-
-                    List<Vector2> optimisedPath = new List<Vector2>(subPath.Count);
-
-                    Vector2? lastStart = null;
-                    double lengthRemovedSinceStart = 0;
-
-                    for (int i = 0; i < subPath.Count; i++)
-                    {
-                        if (lastStart == null)
-                        {
-                            optimisedPath.Add(subPath[i]);
-                            lastStart = subPath[i];
-                            continue;
-                        }
-
-                        Debug.Assert(i > 0);
-
-                        double distFromStart = Vector2.Distance(lastStart.Value, subPath[i]);
-                        lengthRemovedSinceStart += Vector2.Distance(subPath[i - 1], subPath[i]);
-
-                        // See PathApproximator.catmull_detail.
-                        const int catmull_detail = 50;
-                        const int catmull_segment_length = catmull_detail * 2;
-
-                        // Either 6px from the start, the last vertex at every knot, or the end of the path.
-                        if (distFromStart > 6 || (i + 1) % catmull_segment_length == 0 || i == subPath.Count - 1)
-                        {
-                            optimisedPath.Add(subPath[i]);
-                            optimisedLength += lengthRemovedSinceStart - distFromStart;
-
-                            lastStart = null;
-                            lengthRemovedSinceStart = 0;
-                        }
-                    }
-
-                    return optimisedPath;
-                }
+                    return PathApproximator.CatmullToPiecewiseLinear(subControlPoints);
             }
 
             return PathApproximator.BSplineToPiecewiseLinear(subControlPoints, type.Degree ?? subControlPoints.Length);
         }
 
+        public Vector2 DirectionAtProgress(double progress, bool forward)
+        {
+            ensureValid();
+
+            int step = forward ? 1 : -1;
+
+            if (calculatedPath.Count == 0)
+                return Vector2.UnitX * step;
+
+            int segmentIndex = Math.Clamp(indexOfDistance(progressToDistance(progress)), forward ? 0 : 1, calculatedPath.Count - (forward ? 2 : 1));
+
+            int i = segmentIndex + step;
+            Vector2 p0 = calculatedPath[segmentIndex];
+            Vector2 p1 = calculatedPath[i];
+
+            while (i < calculatedPath.Count && i >= 0)
+            {
+                p1 = calculatedPath[i];
+                Vector2 dir = p1 - p0;
+
+                if (dir.X * dir.X + dir.Y * dir.Y > 0.01f)
+                    return dir;
+
+                i += step;
+            }
+
+            return p1 - p0;
+        }
+
         private void calculateLength()
         {
-            calculatedLength = optimisedLength;
+            calculatedLength = 0;
             cumulativeLength.Clear();
             cumulativeLength.Add(0);
 
